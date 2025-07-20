@@ -7,6 +7,7 @@ import test3 from "../assets/test 3.jpg";
 import test4 from "../assets/test 4.jpg";
 import test5 from "../assets/test 5.jpg";
 import test6 from "../assets/test 6.jpg";
+import { productsAPI } from "../api/products";
 
 // Dummy data for demonstration; replace with API call
 const allProducts = [
@@ -37,11 +38,7 @@ export default function CategoryPage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    console.log('CategoryPage mounted with category:', categoryName);
-    // Replace with API call: fetch products by category
-    const filteredProducts = allProducts.filter(p => p.category === categoryName);
-    console.log('Filtered products:', filteredProducts);
-    setProducts(filteredProducts);
+    productsAPI.getProductsByCategory(categoryName).then(setProducts);
   }, [categoryName]);
 
   return (

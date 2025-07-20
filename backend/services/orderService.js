@@ -4,9 +4,8 @@ exports.createOrder = async (data) => {
   if (!data.items || data.items.length === 0) {
     throw new Error('Order must contain at least one item.');
   }
-  
   if (!data.orderNumber) {
-    data.orderNumber = 'ORD-' + Date.now(); //if two orders are placed at the same time, this is not accurate
+    data.orderNumber = 'ORD-' + Date.now();
   }
   return await orderRepo.create(data);
 };
@@ -17,4 +16,8 @@ exports.getOrderByNumber = async (orderNumber) => {
     throw new Error('Order not found.');
   }
   return order;
-}; 
+};
+
+exports.getAllOrders = () => orderRepo.findAll();
+exports.updateOrderStatus = (orderNumber, status) => orderRepo.updateStatus(orderNumber, status);
+exports.getOrdersByUser = (userId) => orderRepo.findByUser(userId); 

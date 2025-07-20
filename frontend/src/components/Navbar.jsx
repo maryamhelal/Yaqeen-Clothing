@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,6 +15,13 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/products/categories`)
+      .then(res => res.json())
+      .then(setCategories);
+  }, []);
 
   return (
     <>
@@ -42,6 +49,20 @@ export default function Navbar() {
                   {cat}
                 </NavLink>
               ))}
+              {user && (user.role === "admin" || user.role === "superadmin") && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    `text-sm font-medium transition-colors duration-200 ${
+                      isActive
+                        ? "text-primary-dark border-b-2 border-primary-dark"
+                        : "text-gray-700 hover:text-primary-dark"
+                    }`
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              )}
               {/* Sign In / User Icon */}
               {!user ? (
                 <button
@@ -92,6 +113,21 @@ export default function Navbar() {
                   {cat}
                 </NavLink>
               ))}
+              {user && (user.role === "admin" || user.role === "superadmin") && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    `block py-2 text-base font-medium transition-colors duration-200 ${
+                      isActive
+                        ? "text-primary-dark font-semibold"
+                        : "text-gray-700 hover:text-primary-dark"
+                    }`
+                  }
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Dashboard
+                </NavLink>
+              )}
               {/* Sign In / User Icon in mobile menu */}
               {!user ? (
                 <button

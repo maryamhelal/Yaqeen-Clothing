@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/products/categories`)
+      .then(res => res.json())
+      .then(setCategories);
+  }, []);
+
   return (
     <footer className="bg-gray-800 text-white py-8">
       <div className="container mx-auto px-6">
@@ -17,8 +24,9 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 hover:text-white">Home</Link></li>
-              <li><Link to="/category/dresses" className="text-gray-300 hover:text-white">Dresses</Link></li>
-              <li><Link to="/category/abayas" className="text-gray-300 hover:text-white">Abayas</Link></li>
+              {categories.map(cat => (
+                <li key={cat}><Link to={`/category/${cat.toLowerCase()}`} className="text-gray-300 hover:text-white">{cat}</Link></li>
+              ))}
               <li><Link to="/cart" className="text-gray-300 hover:text-white">Cart</Link></li>
             </ul>
           </div>

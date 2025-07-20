@@ -1,10 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
+  const { user, token } = useContext(AuthContext);
   const [form, setForm] = useState({ name: "", address: "", phone: "" });
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
@@ -15,10 +17,17 @@ export default function CheckoutPage() {
     if (cart.length === 0 && !submitted) {
       navigate("/", { replace: true });
     }
-    if (submitted && cart.length === 0) { //redirects 3alatool mehtag y show thank you el awal momken ne3melha page lwahdaha
+    if (submitted && cart.length === 0) {
       navigate("/", { replace: true });
     }
-  }, [cart, submitted, navigate]);
+    if (user) {
+      setForm({
+        name: user.name || "",
+        address: user.address || "",
+        phone: user.phone || ""
+      });
+    }
+  }, [cart, submitted, navigate, user]);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -26,18 +35,16 @@ export default function CheckoutPage() {
     e.preventDefault();
     try {
       const orderData = {
-        customer: {
+        items: cart,
+        totalPrice: subtotal,
+        shippingAddress: {
           name: form.name,
           address: form.address,
           phone: form.phone
         },
-        items: cart,
-        total: subtotal
+        orderer: user ? { userId: user.id, name: user.name, email: user.email } : { name: form.name, email: "", userId: null },
       };
-      
-      // Uncomment when backend is ready
-      // await ordersAPI.createOrder(orderData);
-      
+      await ordersAPI.createOrder(orderData, token);
       setSubmitted(true);
       clearCart();
     } catch (error) {
@@ -65,7 +72,6 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">Checkout</h1>
-        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div className="bg-white rounded-xl shadow-lg p-8">
@@ -113,7 +119,6 @@ export default function CheckoutPage() {
               </button>
             </form>
           </div>
-
           {/* Order Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 h-fit">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>

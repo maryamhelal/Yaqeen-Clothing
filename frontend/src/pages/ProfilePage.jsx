@@ -1,15 +1,46 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { ordersAPI } from "../api/orders";
+import { useRef } from "react";
 
 export default function ProfilePage() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [pwForm, setPwForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwError, setPwError] = useState('');
 
-  const orders = [
-    { id: 1, date: "2024-07-17", total: 3200, status: "Delivered" },
-    { id: 2, date: "2024-07-10", total: 1750, status: "Shipped" },
-  ];
+  const handlePwChange = e => setPwForm({ ...pwForm, [e.target.name]: e.target.value });
+  const handlePwSubmit = async e => {
+    e.preventDefault();
+    setPwMsg(''); setPwError('');
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError('New passwords do not match');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ oldPassword: pwForm.oldPassword, newPassword: pwForm.newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error changing password');
+      setPwMsg('Password changed successfully!');
+      setPwForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPwError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      ordersAPI.getUserOrders(user.id).then(setOrders);
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -56,6 +87,15 @@ export default function ProfilePage() {
             Address: <span className="font-normal">{user.address}</span>
           </div>
         </div>
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Change Password</h3>
+        <form onSubmit={handlePwSubmit} className="mb-8 space-y-4">
+          <input type="password" name="oldPassword" value={pwForm.oldPassword} onChange={handlePwChange} placeholder="Old Password" className="w-full border rounded-lg px-4 py-2" required />
+          <input type="password" name="newPassword" value={pwForm.newPassword} onChange={handlePwChange} placeholder="New Password" className="w-full border rounded-lg px-4 py-2" required />
+          <input type="password" name="confirmPassword" value={pwForm.confirmPassword} onChange={handlePwChange} placeholder="Confirm New Password" className="w-full border rounded-lg px-4 py-2" required />
+          {pwError && <div className="text-red-500 text-sm">{pwError}</div>}
+          {pwMsg && <div className="text-green-600 text-sm">{pwMsg}</div>}
+          <button type="submit" className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold">Change Password</button>
+        </form>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
         <div className="bg-primary/20 rounded-lg p-2">
           {orders.length === 0 ? (

@@ -21,19 +21,22 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, sizes, category, onSale } = req.body;
-    let imageUrl = '';
-    if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+    const { name, description, price, sizes, colors, category, collection, onSale } = req.body;
+    let images = [];
+    if (req.files) {
+      images = req.files.map(f => `/uploads/${f.filename}`);
     }
-    const parsedSizes = JSON.parse(sizes);
+    const parsedSizes = sizes ? JSON.parse(sizes) : [];
+    const parsedColors = colors ? JSON.parse(colors) : [];
     const product = await productService.createProduct({
       name,
       description,
       price,
-      imageUrl,
+      images,
+      colors: parsedColors,
       sizes: parsedSizes,
       category,
+      collection,
       onSale,
     });
     res.status(201).json(product);
@@ -44,11 +47,12 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, description, price, sizes, category, onSale } = req.body;
-    let updateData = { name, description, price, category, onSale };
+    const { name, description, price, sizes, colors, category, collection, onSale } = req.body;
+    let updateData = { name, description, price, category, collection, onSale };
     if (sizes) updateData.sizes = JSON.parse(sizes);
-    if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+    if (colors) updateData.colors = JSON.parse(colors);
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map(f => `/uploads/${f.filename}`);
     }
     const product = await productService.updateProduct(req.params.id, updateData);
     if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -63,6 +67,33 @@ exports.deleteProduct = async (req, res) => {
     const product = await productService.deleteProduct(req.params.id);
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json({ message: 'Product deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getProductsByCategory = async (req, res) => {
+  try {
+    const products = await productService.getProductsByCategory(req.params.category);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getProductsByCollection = async (req, res) => {
+  try {
+    const products = await productService.getProductsByCollection(req.params.collection);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await productService.getAllCategories();
+    res.json(categories);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,5 +1,4 @@
-// API service for orders - replace with actual backend endpoints
-const API_BASE_URL = 'http://localhost:8000/api'; // Adjust to your backend URL
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export const ordersAPI = {
   // Create new order
@@ -37,6 +36,19 @@ export const ordersAPI = {
       return await response.json();
     } catch (error) {
       console.error('Error fetching user orders:', error);
+      return [];
+    }
+  },
+
+  // Get all orders (admin)
+  getAllOrders: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
       return [];
     }
   }

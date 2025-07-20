@@ -21,3 +21,6 @@ exports.deleteProduct = async (id) => {
   }
   return product;
 }; 
+exports.getProductsByCategory = (category) => productRepo.findByCategory(category);
+exports.getProductsByCollection = (collection) => productRepo.findByCollection(collection); 
+exports.getAllCategories = () => require('../models/Product').getAllCategories(); 

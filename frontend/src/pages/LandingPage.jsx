@@ -1,18 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CategoryCard from "../components/CategoryCard";
 import test1 from "../assets/test 1.jpg";
 import test2 from "../assets/test 2.jpg";
 import test3 from "../assets/test 3.jpg";
 import test4 from "../assets/test 4.jpg";
 
-const categories = [
-  { name: "Dresses", image: test1 },
-  { name: "Skirts", image: test2 },
-  { name: "Abayas", image: test3 },
-  { name: "Blouses", image: test4 },
-];
+// const categories = [
+//   { name: "Dresses", image: test1 },
+//   { name: "Skirts", image: test2 },
+//   { name: "Abayas", image: test3 },
+//   { name: "Blouses", image: test4 },
+// ];
 
 export default function LandingPage() {
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/products/categories`)
+      .then(res => res.json())
+      .then(setCategories);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -32,7 +39,7 @@ export default function LandingPage() {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Shop by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {categories.map((cat) => (
-            <CategoryCard key={cat.name} name={cat.name} image={cat.image} />
+            <CategoryCard key={cat} name={cat} image={null} />
           ))}
         </div>
       </div>

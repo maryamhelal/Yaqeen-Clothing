@@ -2,6 +2,8 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
 export default function RegisterPage() {
   const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
@@ -16,23 +18,31 @@ export default function RegisterPage() {
 
   const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
-    const userData = {
-      name: formData.name,
-      email: formData.email,
-      address: formData.address,
-      password: formData.password
-    };
-
-    localStorage.setItem("userData", JSON.stringify(userData));
-    login(userData);
-    navigate("/");
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'user',
+          address: formData.address
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Registration failed');
+      login(data.user, data.token);
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
