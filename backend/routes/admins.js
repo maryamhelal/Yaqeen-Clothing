@@ -3,6 +3,7 @@ const router = express.Router();
 const { auth, requireRole } = require('../middleware/auth');
 const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
+const adminController = require('../controllers/adminController');
 
 // Get all admins
 router.get('/', auth, requireRole(['superadmin']), async (req, res) => {
@@ -34,5 +35,9 @@ router.delete('/:id', auth, requireRole(['superadmin']), async (req, res) => {
   await Admin.findByIdAndDelete(req.params.id);
   res.json({ message: 'Admin deleted' });
 });
+
+router.get('/categories-collections', adminController.getCategoriesAndCollections);
+router.post('/add-category', adminController.addCategory);
+router.post('/add-collection', adminController.addCollection);
 
 module.exports = router; 

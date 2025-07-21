@@ -30,9 +30,11 @@ export const ordersAPI = {
   },
 
   // Get user orders
-  getUserOrders: async (userId) => {
+  getUserOrders: async (token) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders?user=${userId}`);
+      const response = await fetch(`${API_BASE_URL}/orders/my/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return await response.json();
     } catch (error) {
       console.error('Error fetching user orders:', error);
@@ -43,7 +45,7 @@ export const ordersAPI = {
   // Get all orders (admin)
   getAllOrders: async (token) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`, {
+      const response = await fetch(`${API_BASE_URL}/orders/admin`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return await response.json();

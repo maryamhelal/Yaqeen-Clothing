@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 
-const colorSchema = new mongoose.Schema({
-  name: String,
-  hex: String,
-  images: [String], // URLs or paths
-});
-
-const sizeQuantitySchema = new mongoose.Schema({
+const sizeSchema = new mongoose.Schema({
   size: String,
   quantity: Number,
-});
+}, { _id: false });
+
+const colorSchema = new mongoose.Schema({
+  name: String,
+  sizes: [sizeSchema],
+}, { _id: false });
 
 const productSchema = new mongoose.Schema({
   name: String,
@@ -17,10 +16,11 @@ const productSchema = new mongoose.Schema({
   price: Number,
   images: [String],
   colors: [colorSchema],
-  sizes: [sizeQuantitySchema],
   category: String,
   collection: String,
   onSale: Boolean,
+  categories: [String], // for superadmin management
+  collections: [String], // for superadmin management
 });
 
 productSchema.statics.getAllCategories = async function() {

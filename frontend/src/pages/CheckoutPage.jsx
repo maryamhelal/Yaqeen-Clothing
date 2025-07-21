@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
   const { user, token } = useContext(AuthContext);
-  const [form, setForm] = useState({ name: "", address: "", phone: "" });
+  const [form, setForm] = useState({ name: "", address: "", phone: "", email: "" });
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +24,8 @@ export default function CheckoutPage() {
       setForm({
         name: user.name || "",
         address: user.address || "",
-        phone: user.phone || ""
+        phone: user.phone || "",
+        email: user.email || ""
       });
     }
   }, [cart, submitted, navigate, user]);
@@ -33,20 +34,30 @@ export default function CheckoutPage() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!user && !form.email) {
+      alert("Email is required for guest checkout.");
+      return;
+    }
     try {
       const orderData = {
-        items: cart,
+        items: cart.map(item => ({
+          ...item,
+          size: item.size || item.selectedSize,
+          color: item.color || item.selectedColor,
+        })),
         totalPrice: subtotal,
         shippingAddress: {
           name: form.name,
           address: form.address,
           phone: form.phone
         },
-        orderer: user ? { userId: user.id, name: user.name, email: user.email } : { name: form.name, email: "", userId: null },
+        orderer: user ? { userId: user.id, name: user.name, email: user.email } : { name: form.name, email: form.email, userId: null },
+        paymentMethod: "cash"
       };
-      await ordersAPI.createOrder(orderData, token);
+      const result = await ordersAPI.createOrder(orderData, token);
       setSubmitted(true);
       clearCart();
+      navigate("/thank-you", { state: { order: result.order } });
     } catch (error) {
       console.error('Error placing order:', error);
       alert('There was an error placing your order. Please try again.');
@@ -54,18 +65,7 @@ export default function CheckoutPage() {
   };
 
   if (submitted) {
-    return (
-      <div className="container mx-auto py-8 px-8 justify-center items-center">
-        <h2 className="text-2xl font-bold mb-6">Thank you for your order!</h2>
-        <p className="mb-6">We will contact you soon.</p>
-        <Link 
-              to="/" 
-              className="inline-block bg-primary-dark text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors"
-            >
-              Start Shopping
-        </Link>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -111,6 +111,21 @@ export default function CheckoutPage() {
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
+              {/* Add email field for guest checkout */}
+              {!user && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              )}
               <button
                 type="submit"
                 className="w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors"
@@ -123,20 +138,22 @@ export default function CheckoutPage() {
           <div className="bg-white rounded-xl shadow-lg p-8 h-fit">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
             <div className="space-y-4">
-              {cart.map(item => (
-                <div key={item.id} className="flex justify-between items-center">
+              {cart.map((item, idx) => (
+                <div key={item._id || idx} className="flex justify-between items-center">
                   <div className="flex items-center space-x-3">
                     <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-12 h-12 object-cover rounded-lg"
+                      src={item.images?.[0] || item.image} 
+                      alt={item.name}
+                      className="w-16 h-16 object-cover rounded-lg border"
                     />
                     <div>
-                      <p className="font-medium text-gray-800">{item.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      <div className="font-semibold text-gray-800">{item.name}</div>
+                      <div className="text-sm text-gray-500">Size: {item.size} | Color: {item.color}</div>
                     </div>
                   </div>
-                  <p className="font-semibold text-gray-800">{(item.price * item.quantity).toLocaleString()} EGP</p>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-800">{(item.price * item.quantity).toLocaleString()} EGP</p>
+                  </div>
                 </div>
               ))}
               <div className="border-t border-gray-200 pt-4 space-y-2">

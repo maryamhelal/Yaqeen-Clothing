@@ -4,9 +4,6 @@ exports.createOrder = async (data) => {
   if (!data.items || data.items.length === 0) {
     throw new Error('Order must contain at least one item.');
   }
-  if (!data.orderNumber) {
-    data.orderNumber = 'ORD-' + Date.now();
-  }
   return await orderRepo.create(data);
 };
 

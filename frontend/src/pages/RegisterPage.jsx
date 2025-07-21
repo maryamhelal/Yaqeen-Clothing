@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -20,6 +21,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!formData.email) {
+      setError("Email is required.");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -30,9 +35,9 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
+          phone: formData.phone,
           email: formData.email,
           password: formData.password,
-          role: 'user',
           address: formData.address
         })
       });
@@ -46,7 +51,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 p-8">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -56,6 +61,17 @@ export default function RegisterPage() {
               type="text"
               name="name"
               value={formData.name}
+              onChange={handleChange}
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
               required

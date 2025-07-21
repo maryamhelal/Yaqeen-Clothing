@@ -14,17 +14,30 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, selectedColor, selectedSize) => {
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
+      // Find existing cart item with same product, color, and size
+      const existing = prev.find(item => item.id === product.id && item.selectedColor === selectedColor && item.selectedSize === selectedSize);
+      // Find available quantity for this size
+      const colorObj = product.colors?.find(c => c.name === selectedColor) || {};
+      const sizeObj = colorObj.sizes?.find(s => s.size === selectedSize) || {};
+      const maxQty = sizeObj.quantity || 1;
       if (existing) {
+        const newQty = Math.min(existing.quantity + quantity, maxQty);
         return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+          item.id === product.id && item.selectedColor === selectedColor && item.selectedSize === selectedSize
+            ? { ...item, quantity: newQty }
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      // If adding new, clamp to maxQty
+      const itemToAdd = {
+        ...product,
+        quantity,
+        size: selectedSize || product.size,
+        color: selectedColor || product.color,
+      };
+      return [...prev, itemToAdd];
     });
   };
 

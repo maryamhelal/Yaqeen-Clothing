@@ -69,7 +69,9 @@ export default function AdminManagement() {
             <div className="flex-1"></div>
             <div className="flex space-x-2 mt-2">
               <button onClick={() => handleEdit(admin)} className="bg-yellow-400 px-3 py-1 rounded">Edit</button>
-              <button onClick={() => handleDelete(admin._id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+              {admin.role !== 'superadmin' && (
+                <button onClick={() => handleDelete(admin._id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+              )}
             </div>
           </div>
         ))}

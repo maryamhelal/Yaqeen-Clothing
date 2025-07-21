@@ -15,21 +15,26 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-2 md:p-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      <div className="flex flex-wrap gap-2 md:space-x-4 mb-8">
-        <button onClick={() => setTab("products")} className={`px-4 py-2 rounded-lg font-semibold ${tab === "products" ? "bg-primary-dark text-white" : "bg-white text-gray-800"}`}>Products</button>
-        <button onClick={() => setTab("orders")} className={`px-4 py-2 rounded-lg font-semibold ${tab === "orders" ? "bg-primary-dark text-white" : "bg-white text-gray-800"}`}>Orders</button>
-        {user.role === "superadmin" && (
-          <>
-            <button onClick={() => setTab("admins")} className={`px-4 py-2 rounded-lg font-semibold ${tab === "admins" ? "bg-primary-dark text-white" : "bg-white text-gray-800"}`}>Admins</button>
-            <button onClick={() => setTab("users")} className={`px-4 py-2 rounded-lg font-semibold ${tab === "users" ? "bg-primary-dark text-white" : "bg-white text-gray-800"}`}>Users</button>
-          </>
-        )}
+      <div className="sticky top-0 z-10 bg-gray-50 pb-2 pt-2 md:pt-0 md:pb-0">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8 text-center md:text-left">Admin Dashboard</h1>
+        <div className="flex overflow-x-auto gap-2 md:space-x-4 mb-4 md:mb-8 px-1 scrollbar-thin scrollbar-thumb-primary-dark scrollbar-track-gray-200">
+          <button onClick={() => setTab("products")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "products" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Products</button>
+          <button onClick={() => setTab("orders")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "orders" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Orders</button>
+          {user.role === "superadmin" && (
+            <>
+              <button onClick={() => setTab("admins")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "admins" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Admins</button>
+              <button onClick={() => setTab("users")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "users" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Users</button>
+            </>
+          )}
+        </div>
       </div>
-      {tab === "products" && <ProductManagement />}
-      {tab === "orders" && <OrderManagement />}
-      {tab === "admins" && user.role === "superadmin" && <AdminManagement />}
-      {tab === "users" && user.role === "superadmin" && <UserManagement />}
+      <div className="max-w-6xl mx-auto">
+        <div className="border-t border-gray-200 mb-4 md:mb-8"></div>
+        {tab === "products" && <ProductManagement />}
+        {tab === "orders" && <OrderManagement />}
+        {tab === "admins" && user.role === "superadmin" && <AdminManagement />}
+        {tab === "users" && user.role === "superadmin" && <UserManagement />}
+      </div>
     </div>
   );
 } 

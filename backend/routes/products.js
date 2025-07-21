@@ -13,13 +13,13 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
-const upload = multer({ storage });
+const upload = multer();
 
 router.get('/categories', productController.getCategories);
 router.get('/', productController.getProducts);
 router.get('/:id', productController.getProductById);
-router.post('/', auth, requireRole(['admin', 'superadmin']), upload.array('images', 5), productController.createProduct);
-router.put('/:id', auth, requireRole(['admin', 'superadmin']), upload.array('images', 5), productController.updateProduct);
+router.post('/', upload.none(), auth, requireRole(['admin', 'superadmin']), productController.createProduct);
+router.put('/:id', upload.none(), auth, requireRole(['admin', 'superadmin']), productController.updateProduct);
 router.delete('/:id', auth, requireRole(['admin', 'superadmin']), productController.deleteProduct);
 router.get('/category/:category', productController.getProductsByCategory);
 router.get('/collection/:collection', productController.getProductsByCollection);

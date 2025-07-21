@@ -21,20 +21,17 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, sizes, colors, category, collection, onSale } = req.body;
-    let images = [];
-    if (req.files) {
-      images = req.files.map(f => `/uploads/${f.filename}`);
-    }
-    const parsedSizes = sizes ? JSON.parse(sizes) : [];
-    const parsedColors = colors ? JSON.parse(colors) : [];
+    let { name, description, price, colors, category, collection, onSale, images } = req.body;
+    // Parse JSON strings if needed
+    if (typeof colors === 'string') colors = JSON.parse(colors);
+    if (typeof images === 'string') images = JSON.parse(images);
+    // Expect colors as an array of { name, sizes: [{ size, quantity }] }
     const product = await productService.createProduct({
       name,
       description,
       price,
       images,
-      colors: parsedColors,
-      sizes: parsedSizes,
+      colors,
       category,
       collection,
       onSale,
@@ -47,13 +44,11 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, description, price, sizes, colors, category, collection, onSale } = req.body;
-    let updateData = { name, description, price, category, collection, onSale };
-    if (sizes) updateData.sizes = JSON.parse(sizes);
-    if (colors) updateData.colors = JSON.parse(colors);
-    if (req.files && req.files.length > 0) {
-      updateData.images = req.files.map(f => `/uploads/${f.filename}`);
-    }
+    let { name, description, price, colors, category, collection, onSale, images } = req.body;
+    if (typeof colors === 'string') colors = JSON.parse(colors);
+    if (typeof images === 'string') images = JSON.parse(images);
+    const updateData = { name, description, price, colors, category, collection, onSale };
+    if (images) updateData.images = images;
     const product = await productService.updateProduct(req.params.id, updateData);
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json(product);

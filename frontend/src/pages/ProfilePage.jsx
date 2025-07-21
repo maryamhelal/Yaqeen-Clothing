@@ -5,7 +5,7 @@ import { ordersAPI } from "../api/orders";
 import { useRef } from "react";
 
 export default function ProfilePage() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [pwForm, setPwForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
@@ -37,10 +37,10 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    if (user) {
-      ordersAPI.getUserOrders(user.id).then(setOrders);
+    if (token) {
+      ordersAPI.getUserOrders(token).then(setOrders);
     }
-  }, [user]);
+  }, [token]);
 
   const handleLogout = () => {
     logout();
@@ -115,7 +115,7 @@ export default function ProfilePage() {
                   <tr key={order.id} className="border-b border-primary/30">
                     <td className="py-2 px-4">{order.id}</td>
                     <td className="py-2 px-4">{order.date}</td>
-                    <td className="py-2 px-4">{order.total.toLocaleString()} EGP</td>
+                    <td className="py-2 px-4">{(order.total || 0).toLocaleString()} EGP</td>
                     <td className="py-2 px-4">{order.status}</td>
                   </tr>
                 ))}

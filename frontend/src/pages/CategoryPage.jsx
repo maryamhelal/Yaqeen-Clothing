@@ -61,8 +61,8 @@ export default function CategoryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
+            {products.filter(Boolean).map((product, idx) => (
+              <ProductCard key={product.id || idx} {...product} />
             ))}
           </div>
         )}

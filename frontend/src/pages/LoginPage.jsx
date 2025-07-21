@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -12,7 +12,11 @@ export default function LoginPage() {
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [otpInputs, setOtpInputs] = useState(["", "", "", "", "", ""]);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const resendTimerRef = useRef(null);
+  const [resendError, setResendError] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
   const [newPw, setNewPw] = useState("");
   const [resetMsg, setResetMsg] = useState("");
   const [resetError, setResetError] = useState("");
@@ -39,9 +43,23 @@ export default function LoginPage() {
     }
   };
 
+  const handleOtpInput = (idx, val) => {
+    if (!/^[0-9]?$/.test(val)) return;
+    const newInputs = [...otpInputs];
+    newInputs[idx] = val;
+    setOtpInputs(newInputs);
+    if (val && idx < 5) {
+      document.getElementById(`otp-input-${idx + 1}`)?.focus();
+    }
+    if (!val && idx > 0) {
+      document.getElementById(`otp-input-${idx - 1}`)?.focus();
+    }
+  };
+  const otp = otpInputs.join("");
+
   const handleForgot = async e => {
     e.preventDefault();
-    setResetMsg(""); setResetError("");
+    setResetMsg(""); setResetError(""); setEmailWarning("");
     try {
       const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: "POST",
@@ -52,14 +70,44 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.error || "Error sending OTP");
       setOtpSent(true);
       setResetMsg("OTP sent to your email.");
+      setEmailWarning(data.emailWarning || "");
+      setResendCooldown(60);
+      resendTimerRef.current = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) { clearInterval(resendTimerRef.current); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (err) {
       setResetError(err.message);
     }
   };
-
+  const handleResendOtp = async () => {
+    setResendError(""); setEmailWarning("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error resending OTP");
+      setResetMsg("OTP resent to your email.");
+      setEmailWarning(data.emailWarning || "");
+      setResendCooldown(60);
+      resendTimerRef.current = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) { clearInterval(resendTimerRef.current); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setResendError(err.message);
+    }
+  };
   const handleReset = async e => {
     e.preventDefault();
-    setResetMsg(""); setResetError("");
+    setResetMsg(""); setResetError(""); setEmailWarning("");
     try {
       const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: "POST",
@@ -72,8 +120,9 @@ export default function LoginPage() {
       setShowForgot(false);
       setOtpSent(false);
       setForgotEmail("");
-      setOtp("");
+      setOtpInputs(["", "", "", "", "", ""]);
       setNewPw("");
+      setEmailWarning(data.emailWarning || "");
     } catch (err) {
       setResetError(err.message);
     }
@@ -129,15 +178,40 @@ export default function LoginPage() {
                   <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="Your email" className="w-full border rounded-lg px-4 py-2" required />
                   {resetError && <div className="text-red-500 text-sm">{resetError}</div>}
                   {resetMsg && <div className="text-green-600 text-sm">{resetMsg}</div>}
+                  {emailWarning && <div className="text-yellow-600 text-sm">{emailWarning}</div>}
                   <button type="submit" className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold">Send OTP</button>
                 </form>
               ) : (
                 <form onSubmit={handleReset} className="space-y-4">
-                  <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="Enter OTP" className="w-full border rounded-lg px-4 py-2" required />
+                  <div className="flex justify-center space-x-2 mb-2">
+                    {otpInputs.map((val, idx) => (
+                      <input
+                        key={idx}
+                        id={`otp-input-${idx}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={val}
+                        onChange={e => handleOtpInput(idx, e.target.value)}
+                        className="w-10 h-12 text-center border-2 border-primary rounded-lg text-xl font-mono focus:ring-2 focus:ring-primary-dark focus:border-primary-dark transition-all"
+                        autoFocus={idx === 0}
+                      />
+                    ))}
+                  </div>
                   <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="New Password" className="w-full border rounded-lg px-4 py-2" required />
                   {resetError && <div className="text-red-500 text-sm">{resetError}</div>}
                   {resetMsg && <div className="text-green-600 text-sm">{resetMsg}</div>}
+                  {emailWarning && <div className="text-yellow-600 text-sm">{emailWarning}</div>}
                   <button type="submit" className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold">Reset Password</button>
+                  <button
+                    type="button"
+                    className={`w-full mt-2 py-2 rounded-lg font-semibold border ${resendCooldown > 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-primary-light text-primary-dark hover:bg-primary-dark hover:text-white'}`}
+                    onClick={handleResendOtp}
+                    disabled={resendCooldown > 0}
+                  >
+                    {resendCooldown > 0 ? `Resend OTP (${resendCooldown}s)` : 'Resend OTP'}
+                  </button>
+                  {resendError && <div className="text-red-500 text-sm">{resendError}</div>}
                 </form>
               )}
             </div>

@@ -11,6 +11,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
+import ThankYouPage from "./pages/ThankYouPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard/*" element={<DashboardPage />} />
             <Route path="/product/:productId" element={<ProductDetailsPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
           </Routes>
         </main>
         <Footer />

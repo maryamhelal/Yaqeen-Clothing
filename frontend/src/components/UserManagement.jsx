@@ -26,7 +26,7 @@ export default function UserManagement() {
     <div>
       <h2 className="text-2xl font-bold mb-4">User Management</h2>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-xl shadow text-sm md:text-base">
+        <table className="min-w-full bg-white rounded-xl shadow text-sm md:text-base text-center">
           <thead>
             <tr>
               <th className="p-2">Name</th>
