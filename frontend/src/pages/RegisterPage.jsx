@@ -6,13 +6,35 @@ const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function RegisterPage() {
   const { login } = useContext(AuthContext);
+  const cityOptions = [
+    { label: "Cairo, Giza", value: "cairo_giza" },
+    { label: "Alexandria", value: "alexandria" },
+    { label: "Other Governorates", value: "other_governorates" },
+    { label: "Delta, Canal", value: "delta_canal" },
+    { label: "Aswan, Hurghada", value: "aswan_hurghada" },
+    { label: "Upper Egypt", value: "upper_egypt" },
+  ];
+  const areaOptions = {
+    cairo_giza: ["Nasr City", "Heliopolis", "Dokki", "Mohandessin", "Maadi", "6th of October", "Sheikh Zayed"],
+    alexandria: ["Sidi Gaber", "Stanley", "Smouha", "Gleem"],
+    other_governorates: ["Ismailia", "Port Said", "Suez"],
+    delta_canal: ["Mansoura", "Tanta", "Zagazig"],
+    aswan_hurghada: ["Aswan City", "Hurghada City"],
+    upper_egypt: ["Minya", "Sohag", "Qena", "Luxor"],
+  };
+  const [selectedCity, setSelectedCity] = useState(cityOptions[0].value);
+  const [selectedArea, setSelectedArea] = useState("");
+  const [residenceType, setResidenceType] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     password: "",
     confirmPassword: "",
-    address: ""
+    street: "",
+    landmarks: "",
+    floor: "",
+    apartment: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -30,6 +52,15 @@ export default function RegisterPage() {
       return;
     }
     try {
+      const addressObj = {
+        city: selectedCity,
+        area: selectedArea,
+        street: formData.street,
+        landmarks: formData.landmarks,
+        residenceType,
+        floor: residenceType === "apartment" ? formData.floor : undefined,
+        apartment: residenceType === "apartment" ? formData.apartment : undefined,
+      };
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,7 +69,7 @@ export default function RegisterPage() {
           phone: formData.phone,
           email: formData.email,
           password: formData.password,
-          address: formData.address
+          address: addressObj,
         })
       });
       const data = await response.json();
@@ -111,16 +142,100 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              rows="3"
-              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+            <label className="block text-sm font-medium text-gray-700 mb-2">City/Region</label>
+            <select
+              name="city"
+              value={selectedCity}
+              onChange={e => {
+                setSelectedCity(e.target.value);
+                setSelectedArea("");
+              }}
               required
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+            >
+              {cityOptions.map(city => (
+                <option key={city.value} value={city.value}>{city.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Area</label>
+            <select
+              name="area"
+              value={selectedArea}
+              onChange={e => setSelectedArea(e.target.value)}
+              required
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+            >
+              <option value="">Select area</option>
+              {(areaOptions[selectedCity] || []).map(area => (
+                <option key={area} value={area}>{area}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Street</label>
+            <input
+              name="street"
+              placeholder="Street name and number"
+              value={formData.street}
+              onChange={handleChange}
+              required
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Famous Landmarks / Notes</label>
+            <textarea
+              name="landmarks"
+              placeholder="Landmarks, notes, delivery instructions, etc."
+              value={formData.landmarks}
+              onChange={handleChange}
+              rows="2"
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Residence Type</label>
+            <select
+              name="residenceType"
+              value={residenceType}
+              onChange={e => setResidenceType(e.target.value)}
+              required
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+            >
+              <option value="">Select type</option>
+              <option value="apartment">Apartment</option>
+              <option value="private_house">Private House</option>
+              <option value="work">Work</option>
+            </select>
+          </div>
+          {residenceType === "apartment" && (
+            <div className="flex gap-4 mt-2">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Floor Number</label>
+                <input
+                  name="floor"
+                  type="number"
+                  min="0"
+                  value={formData.floor}
+                  onChange={handleChange}
+                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Apartment Number</label>
+                <input
+                  name="apartment"
+                  type="number"
+                  min="0"
+                  value={formData.apartment}
+                  onChange={handleChange}
+                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                />
+              </div>
+            </div>
+          )}
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"

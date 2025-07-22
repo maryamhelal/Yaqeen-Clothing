@@ -32,6 +32,7 @@ export default function UserManagement() {
               <th className="p-2">Name</th>
               <th className="p-2">Email</th>
               <th className="p-2">Phone</th>
+              <th className="p-2">Address</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
@@ -41,6 +42,25 @@ export default function UserManagement() {
                 <td className="p-2">{user.name}</td>
                 <td className="p-2">{user.email}</td>
                 <td className="p-2">{user.phone}</td>
+                <td className="p-2">
+                  {user.address && typeof user.address === 'object' ? (
+                    <>
+                      {user.address.city && <span>{user.address.city.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}, </span>}
+                      {user.address.area && <span>{user.address.area}, </span>}
+                      {user.address.street && <span>{user.address.street}, </span>}
+                      {user.address.landmarks && <span>{user.address.landmarks}, </span>}
+                      {user.address.residenceType && <span>{user.address.residenceType.replace(/_/g, ' ')}</span>}
+                      {user.address.residenceType === 'apartment' && (
+                        <>
+                          {user.address.floor && <span>, Floor: {user.address.floor}</span>}
+                          {user.address.apartment && <span>, Apt: {user.address.apartment}</span>}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    user.address
+                  )}
+                </td>
                 <td className="p-2">
                   <button onClick={() => handleDelete(user._id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
                 </td>

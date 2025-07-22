@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const addressSchema = new mongoose.Schema({
-  address: String,
-  city: String,
-  country: String,
-  phone: String,
+  address: {
+    city: String,
+    area: String,
+    street: String,
+    landmarks: String,
+    residenceType: String,
+    floor: String,
+    apartment: String,
+  }
 });
 
 const userSchema = new mongoose.Schema({

@@ -59,6 +59,7 @@ export default function AdminManagement() {
           <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="border p-2 rounded" required />
         </div>
         <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" className="border p-2 rounded w-full" required={!editing} />
+        {/* Add address field if needed in the form here */}
         <button type="submit" className="bg-primary-dark text-white px-6 py-2 rounded font-bold">{editing ? 'Update' : 'Add'} Admin</button>
       </form>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -66,6 +67,25 @@ export default function AdminManagement() {
           <div key={admin._id} className="bg-white p-4 rounded-xl shadow flex flex-col">
             <div className="font-bold text-lg mb-1">{admin.name}</div>
             <div className="text-gray-600 mb-1">{admin.email}</div>
+            <div className="text-gray-600 mb-1">
+              {admin.address && typeof admin.address === 'object' ? (
+                <>
+                  {admin.address.city && <span>{admin.address.city.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}, </span>}
+                  {admin.address.area && <span>{admin.address.area}, </span>}
+                  {admin.address.street && <span>{admin.address.street}, </span>}
+                  {admin.address.landmarks && <span>{admin.address.landmarks}, </span>}
+                  {admin.address.residenceType && <span>{admin.address.residenceType.replace(/_/g, ' ')}</span>}
+                  {admin.address.residenceType === 'apartment' && (
+                    <>
+                      {admin.address.floor && <span>, Floor: {admin.address.floor}</span>}
+                      {admin.address.apartment && <span>, Apt: {admin.address.apartment}</span>}
+                    </>
+                  )}
+                </>
+              ) : (
+                admin.address
+              )}
+            </div>
             <div className="flex-1"></div>
             <div className="flex space-x-2 mt-2">
               <button onClick={() => handleEdit(admin)} className="bg-yellow-400 px-3 py-1 rounded">Edit</button>

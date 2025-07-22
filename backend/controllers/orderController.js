@@ -49,9 +49,21 @@ exports.createOrder = async (req, res) => {
                 <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 18px; text-align: right;">Total: <span style='color: #4f46e5;'>${order.totalPrice} EGP</span></div>
                 <div style="margin-bottom: 18px;">
                   <h3 style="margin: 0 0 4px 0; font-size: 1.05rem; color: #4f46e5;">Shipping Address</h3>
-                  <div style="color: #333;">${order.shippingAddress?.name}</div>
-                  <div style="color: #333;">${order.shippingAddress?.address}</div>
-                  <div style="color: #333;">${order.shippingAddress?.phone}</div>
+                  <div style="color: #333;">${order.shippingAddress?.name || ''}</div>
+                  <div style="color: #333;">
+                    ${order.shippingAddress && typeof order.shippingAddress === 'object'
+                      ? [
+                          order.shippingAddress.city,
+                          order.shippingAddress.area,
+                          order.shippingAddress.street,
+                          order.shippingAddress.landmarks,
+                          order.shippingAddress.residenceType,
+                          order.shippingAddress.residenceType === 'apartment' ? `Floor: ${order.shippingAddress.floor}` : '',
+                          order.shippingAddress.residenceType === 'apartment' ? `Apt: ${order.shippingAddress.apartment}` : ''
+                        ].filter(Boolean).join(', ')
+                      : order.shippingAddress?.address || ''}
+                  </div>
+                  <div style="color: #333;">${order.shippingAddress?.phone || ''}</div>
                 </div>
                 <p style="font-size: 0.98rem; color: #555; margin-bottom: 0;">If you have any questions, <a href="mailto:${process.env.EMAIL_USER}" style="color: #6D28D9; text-decoration: underline;">contact us</a> anytime.</p>
                 <p style="font-size: 1.05rem; color: #4f46e5; margin-top: 18px; font-weight: 500;">We appreciate your trust in Yaqeen Clothing!</p>

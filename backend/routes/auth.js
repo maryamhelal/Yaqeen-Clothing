@@ -15,6 +15,7 @@ router.post('/register', async (req, res) => {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ error: 'Email already exists' });
     const hash = await bcrypt.hash(password, 10);
+    // Store structured address object in addresses array
     const user = await User.create({ name, email, password: hash, addresses: address ? [{ address }] : [], phone });
     const token = jwt.sign({ id: user._id, type: 'user' }, process.env.JWT_SECRET, { expiresIn: '7d' });
     let emailWarning = null;
@@ -28,6 +29,7 @@ router.post('/register', async (req, res) => {
       emailWarning = 'Registration succeeded, but failed to send welcome email.';
       console.error('Email error (register):', e);
     }
+    // Return the structured address in the response
     res.status(201).json({ message: 'User registered', user: { id: user._id, name: user.name, email: user.email, type: 'user', address, phone }, token, emailWarning });
   } catch (err) {
     res.status(500).json({ error: err.message });

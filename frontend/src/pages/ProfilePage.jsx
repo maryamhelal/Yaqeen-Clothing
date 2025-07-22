@@ -84,7 +84,26 @@ export default function ProfilePage() {
             Email: <span className="font-normal">{user.email}</span>
           </div>
           <div className="mb-2 text-lg font-semibold text-gray-700">
-            Address: <span className="font-normal">{user.address}</span>
+            Address:
+            <span className="font-normal">
+              {user.address && typeof user.address === 'object' ? (
+                <>
+                  {user.address.city && <span>{user.address.city.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}, </span>}
+                  {user.address.area && <span>{user.address.area}, </span>}
+                  {user.address.street && <span>{user.address.street}, </span>}
+                  {user.address.landmarks && <span>{user.address.landmarks}, </span>}
+                  {user.address.residenceType && <span>{user.address.residenceType.replace(/_/g, ' ')}</span>}
+                  {user.address.residenceType === 'apartment' && (
+                    <>
+                      {user.address.floor && <span>, Floor: {user.address.floor}</span>}
+                      {user.address.apartment && <span>, Apt: {user.address.apartment}</span>}
+                    </>
+                  )}
+                </>
+              ) : (
+                user.address
+              )}
+            </span>
           </div>
         </div>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">Change Password</h3>
