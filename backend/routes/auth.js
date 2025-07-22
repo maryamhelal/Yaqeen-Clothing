@@ -69,8 +69,29 @@ router.post('/forgot-password', async (req, res) => {
       await emailService.sendMail({
         to: user.email,
         subject: 'Your Password Reset OTP',
-        text: `Your OTP is: ${otp}`
-      });
+        text: `Your OTP is: ${otp}`, // fallback for plain text clients
+        html: `
+          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
+            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
+              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
+                <img src="https://cdn.corenexis.com/view/?img=d/jl21/L8BvkB.jpg" alt="Yaqeen Logo" style="height: 50px;"/>
+              </div>
+              <div style="padding: 24px;">
+                <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>
+                <p style="font-size: 16px;">You requested a password reset. Please use the OTP below:</p>
+                <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; margin: 16px 0; text-align: center; color: #6D28D9;">
+                  ${otp}
+                </div>
+                <p style="font-size: 14px; color: #555;">This OTP is valid for 15 minutes.</p>
+                <p style="font-size: 14px; color: #555;">If you did not request this, please ignore this email.</p>
+              </div>
+              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
+                &copy; 2025 Yaqeen Clothing. All rights reserved.
+              </div>
+            </div>
+          </div>
+        `
+      }); 
     } catch (e) {
       emailWarning = 'OTP generated, but failed to send email.';
       console.error('Email error (forgot-password):', e);
