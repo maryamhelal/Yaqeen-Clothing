@@ -76,7 +76,7 @@ router.post('/forgot-password', async (req, res) => {
           <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
             <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
               <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://cdn.corenexis.com/view/?img=d/jl21/L8BvkB.jpg" alt="Yaqeen Logo" style="height: 50px;"/>
+                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;"/>
               </div>
               <div style="padding: 24px;">
                 <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>
@@ -124,7 +124,7 @@ router.post('/reset-password', async (req, res) => {
           <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
             <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
               <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://cdn.corenexis.com/view/?img=d/jl21/L8BvkB.jpg" alt="Yaqeen Logo" style="height: 50px;" />
+                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
               </div>
               <div style="padding: 24px;">
                 <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>
@@ -173,7 +173,7 @@ router.post('/change-password', auth, async (req, res) => {
           <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
             <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
               <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://cdn.corenexis.com/view/?img=d/jl21/L8BvkB.jpg" alt="Yaqeen Logo" style="height: 50px;" />
+                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
               </div>
               <div style="padding: 24px;">
                 <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>
@@ -233,7 +233,7 @@ router.post('/resend-otp', async (req, res) => {
           <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
             <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
               <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://cdn.corenexis.com/view/?img=d/jl21/L8BvkB.jpg" alt="Yaqeen Logo" style="height: 50px;"/>
+                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;"/>
               </div>
               <div style="padding: 24px;">
                 <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>

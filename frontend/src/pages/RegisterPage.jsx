@@ -221,6 +221,7 @@ export default function RegisterPage() {
                   value={formData.floor}
                   onChange={handleChange}
                   className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                  required
                 />
               </div>
               <div className="flex-1">
@@ -232,6 +233,7 @@ export default function RegisterPage() {
                   value={formData.apartment}
                   onChange={handleChange}
                   className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                  required
                 />
               </div>
             </div>

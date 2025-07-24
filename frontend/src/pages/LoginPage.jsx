@@ -129,7 +129,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 py-8">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Sign In</h2>
         <form onSubmit={handleSubmit} className="space-y-6">

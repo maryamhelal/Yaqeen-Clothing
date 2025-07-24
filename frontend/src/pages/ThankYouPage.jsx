@@ -9,8 +9,7 @@ export default function ThankYouPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50">
         <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
-          <h2 className="text-2xl font-bold mb-6">Thank you!</h2>
-          <p className="mb-6">Your order has been placed. Please check your email for details.</p>
+          <p className="mb-6">You have not placed an order yet.</p>
           <Link to="/" className="inline-block bg-primary-dark text-white px-8 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors">Start Shopping</Link>
         </div>
       </div>
