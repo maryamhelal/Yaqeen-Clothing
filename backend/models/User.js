@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phone: String,
-  addresses: [addressSchema],
+  address: addressSchema,
   orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
   resetOTP: String,
   resetOTPExpires: Date,

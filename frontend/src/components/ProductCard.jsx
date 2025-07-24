@@ -16,16 +16,6 @@ export default function ProductCard(props) {
   const maxQty = hasSizes ? (availableSizes.find(s => s.size === selectedSize)?.quantity || 1) : 1;
   const navigate = useNavigate();
 
-  if (!product) return null;
-
-  const {
-    name = '',
-    price = 0,
-    colors = [],
-    images = [],
-    ...rest
-  } = product;
-
   // Update selectedSize if color changes
   useEffect(() => {
     if (availableSizes.length > 0 && !availableSizes.find(s => s.size === selectedSize)) {
@@ -37,7 +27,16 @@ export default function ProductCard(props) {
   // Clamp quantity to maxQty
   useEffect(() => {
     if (quantity > maxQty) setQuantity(maxQty);
-  }, [selectedSize, maxQty]);
+  }, [selectedSize, maxQty, quantity]);
+
+  if (!product) return null;
+
+  const {
+    name = '',
+    price = 0,
+    colors = [],
+    images = [],
+  } = product;
 
   const handleAddToCart = () => {
     if (!selectedColor || !selectedSize) return;
@@ -116,7 +115,7 @@ export default function ProductCard(props) {
           className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold hover:bg-primary-darker transition-colors"
           disabled={!hasColors || !hasSizes}
         >
-          {(!hasColors || !hasSizes) ? "Unavailable" : "Add to Cart"}
+          {(!hasColors || !hasSizes) ? "Sold out" : "Add to Cart"}
         </button>
         {!hasColors && <div className="text-red-500 text-sm mt-2">No colors available for this product.</div>}
         {hasColors && !hasSizes && <div className="text-red-500 text-sm mt-2">No sizes available for the selected color.</div>}

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
-import { useRef } from "react";
 
 export default function ProfilePage() {
   const { user, logout, token } = useContext(AuthContext);
@@ -65,7 +64,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-primary flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-primary flex items-center justify-center py-12 px-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">My Profile</h2>

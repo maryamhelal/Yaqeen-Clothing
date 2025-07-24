@@ -1,37 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import test1 from "../assets/test 1.jpg";
-import test2 from "../assets/test 2.jpg";
-import test3 from "../assets/test 3.jpg";
-import test4 from "../assets/test 4.jpg";
-import test5 from "../assets/test 5.jpg";
-import test6 from "../assets/test 6.jpg";
 import { productsAPI } from "../api/products";
-
-// Dummy data for demonstration; replace with API call
-const allProducts = [
-  // Dresses
-  { id: 1, name: "Printed Chiffon Dress - Blue", price: 1750, image: test1, category: "dresses" },
-  { id: 2, name: "Printed Chiffon Dress - Black", price: 1750, image: test2, category: "dresses" },
-  { id: 3, name: "Draped Dress", price: 2000, image: test3, category: "dresses" },
-  { id: 4, name: "Printed Chiffon Dress - Blue", price: 1750, image: test4, category: "dresses" },
-  { id: 5, name: "Printed Chiffon Dress - Black", price: 1750, image: test5, category: "dresses" },
-  { id: 6, name: "Draped Dress", price: 2000, image: test6, category: "dresses" },
-  
-  // Skirts
-  { id: 4, name: "Naomi Skirt - Beige", price: 1450, image: test1, category: "skirts" },
-  { id: 5, name: "Ward Skirt - Creamy", price: 1200, image: test2, category: "skirts" },
-  
-  // Abayas
-  { id: 6, name: "Piping Abaya - Black", price: 2600, image: test1, category: "abayas" },
-  { id: 7, name: "High-Low Abaya - Black", price: 2000, image: test2, category: "abayas" },
-  { id: 8, name: "Gradient Abaya - Beige", price: 2600, image: test3, category: "abayas" },
-
-  // Blouses
-  { id: 11, name: "Sophia Blouse - White", price: 1150, image: test4, category: "blouses" },
-  { id: 12, name: "Jory Blouse - Baby Blue", price: 1140, image: test5, category: "blouses" },
-];
 
 export default function CategoryPage() {
   const { categoryName } = useParams();

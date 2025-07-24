@@ -33,7 +33,7 @@ export function CartProvider({ children }) {
       // If adding new, clamp to maxQty
       const itemToAdd = {
         ...product,
-        quantity,
+        quantity: Math.min(quantity, maxQty),
         size: selectedSize || product.size,
         color: selectedColor || product.color,
       };
