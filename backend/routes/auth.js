@@ -23,7 +23,25 @@ router.post('/register', async (req, res) => {
       await emailService.sendMail({
         to: user.email,
         subject: 'Welcome to Yaqeen Clothing',
-        text: 'Thank you for signing up!'
+        text: `Hi ${user.name || 'there'},\n\nThank you for signing up!`,
+        html: `
+          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
+            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
+              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
+                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
+              </div>
+              <div style="padding: 24px;">
+                <h2 style="margin-top: 0;">Hi ${user.name || 'there'},</h2>
+                <p style="font-size: 16px;">Thank you for signing up to <b>Yaqeen Clothing</b>!</p>
+                <p style="font-size: 14px; color: #555;">We're excited to have you with us. You can now shop the latest collections and view your orders from your profile.</p>
+                <p style="font-size: 14px; color: #555;">If you have any questions, just reply to this email or contact us at <a href="mailto:${process.env.EMAIL_USER}" style="color: #6D28D9; text-decoration: underline;">${process.env.EMAIL_USER}</a>.</p>
+              </div>
+              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
+                &copy; 2025 Yaqeen Clothing. All rights reserved.
+              </div>
+            </div>
+          </div>
+        `
       });
     } catch (e) {
       emailWarning = 'Registration succeeded, but failed to send welcome email.';
@@ -50,7 +68,7 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id, type }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, type, role: user.role, phone: user.phone } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, type, role: user.role, address: user.address, phone: user.phone } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

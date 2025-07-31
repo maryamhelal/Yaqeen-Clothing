@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
@@ -36,7 +36,6 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   });
-  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -44,10 +43,7 @@ export default function CheckoutPage() {
   const totalWithShipping = subtotal + shippingPrice;
 
   useEffect(() => {
-    if (cart.length === 0 && !submitted) {
-      navigate("/", { replace: true });
-    }
-    if (submitted && cart.length === 0) {
+    if (cart.length === 0) {
       navigate("/", { replace: true });
     }
     if (user) {
@@ -58,7 +54,7 @@ export default function CheckoutPage() {
         email: user.email || ""
       });
     }
-  }, [cart, submitted, navigate, user]);
+  }, [cart, navigate, user]);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -91,17 +87,12 @@ export default function CheckoutPage() {
       };
       const result = await ordersAPI.createOrder(orderData);
       clearCart();
-      setSubmitted(true);
       navigate("/thank-you", { state: { order: result.order } });
     } catch (error) {
       console.error('Error placing order:', error);
       alert('There was an error placing your order. Please try again.');
     }
   };
-
-  if (submitted) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

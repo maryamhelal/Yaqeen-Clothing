@@ -72,8 +72,14 @@ export default function ProductCard(props) {
               <button
                 key={color.name}
                 className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.name ? "border-primary-dark" : "border-gray-300"}`}
-                style={{ backgroundColor: color.hex }}
+                        style={{
+                          backgroundColor: color.hex,
+                          borderColor: color.hex?.toLowerCase() === "#fff" || color.hex?.toLowerCase() === "#ffffff"
+                            ? "#ccc"
+                            : undefined
+                        }}
                 onClick={() => setSelectedColor(color.name)}
+                title={color.name}
               />
             ))}
           </div>
@@ -95,20 +101,25 @@ export default function ProductCard(props) {
         {/* Quantity */}
         <div className="mb-4 flex items-center space-x-3">
           <span className="font-semibold">Quantity:</span>
-          <input
-            type="number"
-            min={1}
-            max={maxQty}
-            value={quantity}
-            onChange={e => setQuantity(Math.max(1, Math.min(maxQty, Number(e.target.value))))}
-            className="w-16 border rounded-lg px-2 py-1"
-          />
-          <span className="text-xs text-gray-500">(Max: {maxQty})</span>
+          <button
+            type="button"
+            className="px-3 py-1"
+            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+            disabled={quantity <= 1}
+          >-</button>
+          <span className="w-8 text-center">{quantity}</span>
+          <button
+            type="button"
+            className="px-3 py-1"
+            onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+            disabled={quantity >= maxQty}
+          >+</button>
+          <span className="text-xs text-gray-500">(Max: {maxQty})</span> {/* To be removed */}
         </div>
         {/* Selected color/size info */}
         <div className="mb-2 text-sm text-gray-600">
-          {selectedColor && <span>Color: {selectedColor} </span>}
-          {selectedSize && <span>Size: {selectedSize}</span>}
+          {selectedColor && <span>Color: {selectedColor} </span>} {/* To be removed */}
+          {selectedSize && <span>Size: {selectedSize}</span>} {/* To be removed */}
         </div>
         <button
           onClick={handleAddToCart}
