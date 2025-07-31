@@ -1,30 +1,38 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const sizeSchema = new mongoose.Schema({
-  size: String,
-  quantity: Number,
-}, { _id: false });
+const sizeSchema = new mongoose.Schema(
+  {
+    size: String,
+    price: Number,
+    stock: Number,
+  },
+  { _id: false }
+);
 
-const colorSchema = new mongoose.Schema({
-  name: String,
-  sizes: [sizeSchema],
-}, { _id: false });
+const colorSchema = new mongoose.Schema(
+  {
+    name: String,
+    hex: String,
+    image: Buffer,
+    sizes: [sizeSchema],
+  },
+  { _id: false }
+);
 
 const productSchema = new mongoose.Schema({
   name: String,
   description: String,
-  price: Number,
-  images: [String],
+  images: [Buffer],
   colors: [colorSchema],
   category: String,
   collection: String,
-  onSale: Boolean,
+  onSale: { type: Number, default: 0 }, // percentage off
   categories: [String], // for superadmin management
   collections: [String], // for superadmin management
 });
 
-productSchema.statics.getAllCategories = async function() {
-  return this.distinct('category');
+productSchema.statics.getAllCategories = async function () {
+  return this.distinct("category");
 };
 
-module.exports = mongoose.model('Product', productSchema); 
+module.exports = mongoose.model("Product", productSchema);

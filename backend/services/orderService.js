@@ -1,20 +1,21 @@
-const orderRepo = require('../repos/orderRepo');
+const orderRepo = require("../repos/orderRepo");
 
 exports.createOrder = async (data) => {
   if (!data.items || data.items.length === 0) {
-    throw new Error('Order must contain at least one item.');
+    throw new Error("Order must contain at least one item.");
   }
   return await orderRepo.create(data);
 };
 
-exports.getOrderByNumber = async (orderNumber) => {
-  const order = await orderRepo.findByOrderNumber(orderNumber);
+exports.getOrderByNumber = async (orderId) => {
+  const order = await orderRepo.findByOrderId(orderId);
   if (!order) {
-    throw new Error('Order not found.');
+    throw new Error("Order not found.");
   }
   return order;
 };
 
 exports.getAllOrders = () => orderRepo.findAll();
-exports.updateOrderStatus = (orderNumber, status) => orderRepo.updateStatus(orderNumber, status);
-exports.getOrdersByUser = (userId) => orderRepo.findByUser(userId); 
+exports.updateOrderStatus = (orderId, status) =>
+  orderRepo.updateStatus(orderId, status);
+exports.getOrdersByUser = (userId) => orderRepo.findByUser(userId);
