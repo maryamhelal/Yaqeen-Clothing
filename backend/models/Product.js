@@ -23,8 +23,8 @@ const productSchema = new mongoose.Schema({
   description: String,
   images: [Buffer],
   colors: [colorSchema],
-  category: String,
-  collection: String,
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
+  collection: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
   onSale: { type: Number, default: 0 }, // percentage off
 });
 

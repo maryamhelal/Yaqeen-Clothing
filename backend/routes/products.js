@@ -16,7 +16,9 @@ const storage = multer.diskStorage({
 const upload = multer();
 
 router.get("/", productController.getAllProducts);
+
 router.get("/:id", productController.getProductById);
+
 router.post(
   "/",
   upload.none(),
@@ -24,6 +26,7 @@ router.post(
   requireRole(["admin", "superadmin"]),
   productController.createProduct
 );
+
 router.put(
   "/:id",
   upload.none(),
@@ -31,13 +34,16 @@ router.put(
   requireRole(["admin", "superadmin"]),
   productController.updateProduct
 );
+
 router.delete(
   "/:id",
   auth,
   requireRole(["admin", "superadmin"]),
   productController.deleteProduct
 );
+
 router.get("/category/:category", productController.getProductsByCategory);
+
 router.get(
   "/collection/:collection",
   productController.getProductsByCollection

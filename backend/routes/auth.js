@@ -7,8 +7,9 @@ const Admin = require("../models/Admin");
 const emailService = require("../services/emailService");
 const crypto = require("crypto");
 const { auth } = require("../middleware/auth");
+const { generateEmailTemplate } = require("../utils/emailTemplates");
+const { generateAndSaveOTP } = require("../utils/otp");
 
-// Register (user only)
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
@@ -30,33 +31,17 @@ router.post("/register", async (req, res) => {
       { expiresIn: "7d" }
     );
     let emailWarning = null;
+    const html = generateEmailTemplate({
+      title: `Hi ${user.name || "there"}`,
+      subtitle: "Thank you for signing up to Yaqeen Clothing",
+      body: "We're excited to have you with us. You can now shop the latest collections and view your orders from your profile.",
+    });
     try {
       await emailService.sendMail({
         to: user.email,
         subject: "Welcome to Yaqeen Clothing",
         text: `Hi ${user.name || "there"},\n\nThank you for signing up!`,
-        html: `
-          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
-              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
-              </div>
-              <div style="padding: 24px;">
-                <h2 style="margin-top: 0;">Hi ${user.name || "there"},</h2>
-                <p style="font-size: 16px;">Thank you for signing up to <b>Yaqeen Clothing</b>!</p>
-                <p style="font-size: 14px; color: #555;">We're excited to have you with us. You can now shop the latest collections and view your orders from your profile.</p>
-                <p style="font-size: 14px; color: #555;">If you have any questions, just reply to this email or contact us at <a href="mailto:${
-                  process.env.EMAIL_USER
-                }" style="color: #6D28D9; text-decoration: underline;">${
-          process.env.EMAIL_USER
-        }</a>.</p>
-              </div>
-              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
-                &copy; 2025 Yaqeen Clothing. All rights reserved.
-              </div>
-            </div>
-          </div>
-        `,
+        html,
       });
     } catch (e) {
       emailWarning =
@@ -82,7 +67,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login (user or admin)
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -115,43 +99,25 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Forgot password (request OTP)
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    user.resetOTP = otp;
-    user.resetOTPExpires = Date.now() + 15 * 60 * 1000;
-    await user.save();
+    const otp = generateAndSaveOTP(user);
     let emailWarning = null;
+    const html = generateEmailTemplate({
+      title: `Hi ${user.name || "there"}`,
+      subtitle: "You requested a password reset. Please use the OTP below:",
+      specialtext: otp,
+      body: "This OTP is valid for 15 minutes. \n If you did not request this, please ignore this email.",
+    });
     try {
       await emailService.sendMail({
         to: user.email,
         subject: "Your Password Reset OTP",
-        text: `Your OTP is: ${otp}`, // fallback for plain text clients
-        html: `
-          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
-              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;"/>
-              </div>
-              <div style="padding: 24px;">
-                <h2 style="margin-top: 0;">Hi ${user.name || "there"},</h2>
-                <p style="font-size: 16px;">You requested a password reset. Please use the OTP below:</p>
-                <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; margin: 16px 0; text-align: center; color: #6D28D9;">
-                  ${otp}
-                </div>
-                <p style="font-size: 14px; color: #555;">This OTP is valid for 15 minutes.</p>
-                <p style="font-size: 14px; color: #555;">If you did not request this, please ignore this email.</p>
-              </div>
-              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
-                &copy; 2025 Yaqeen Clothing. All rights reserved.
-              </div>
-            </div>
-          </div>
-        `,
+        text: `Your OTP is: ${otp}`,
+        html,
       });
     } catch (e) {
       emailWarning = "OTP generated, but failed to send email.";
@@ -163,7 +129,6 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// Reset password with OTP
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -178,6 +143,10 @@ router.post("/reset-password", async (req, res) => {
     user.resetOTPExpires = undefined;
     await user.save();
     let emailWarning = null;
+    const html = generateEmailTemplate({
+      title: `Hi ${user.name || "there"}`,
+      subtitle: "Your password has been successfully changed.",
+    });
     try {
       await emailService.sendMail({
         to: user.email,
@@ -187,31 +156,7 @@ router.post("/reset-password", async (req, res) => {
         }, your password was successfully changed. If this wasn't you, please contact us at ${
           process.env.EMAIL_USER
         }.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
-              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
-              </div>
-              <div style="padding: 24px;">
-                <h2 style="margin-top: 0;">Hi ${user.name || "there"},</h2>
-                <p style="font-size: 16px;">Your password has been successfully changed.</p>
-                <p style="font-size: 14px; color: #555;">
-                  If you did not change your password, please
-                  <a href="mailto:${
-                    process.env.EMAIL_USER
-                  }" style="color: #6D28D9; text-decoration: underline;">
-                    contact us
-                  </a>
-                  immediately.
-                </p>
-              </div>
-              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
-                &copy; 2025 Yaqeen Clothing. All rights reserved.
-              </div>
-            </div>
-          </div>
-        `,
+        html,
       });
     } catch (e) {
       emailWarning = "Password reset, but failed to send confirmation email.";
@@ -223,7 +168,6 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-// Change password (authenticated)
 router.post("/change-password", auth, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -234,6 +178,10 @@ router.post("/change-password", auth, async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
     let emailWarning = null;
+    const html = generateEmailTemplate({
+      title: `Hi ${user.name || "there"}`,
+      subtitle: "Your password has been successfully changed.",
+    });
     try {
       await emailService.sendMail({
         to: user.email,
@@ -243,31 +191,7 @@ router.post("/change-password", auth, async (req, res) => {
         }, your password was successfully changed. If this wasn't you, please contact us at ${
           process.env.EMAIL_USER
         }.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
-              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;" />
-              </div>
-              <div style="padding: 24px;">
-                <h2 style="margin-top: 0;">Hi ${user.name || "there"},</h2>
-                <p style="font-size: 16px;">Your password has been successfully changed.</p>
-                <p style="font-size: 14px; color: #555;">
-                  If you did not change your password, please
-                  <a href="mailto:${
-                    process.env.EMAIL_USER
-                  }" style="color: #6D28D9; text-decoration: underline;">
-                    contact us
-                  </a>
-                  immediately.
-                </p>
-              </div>
-              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
-                &copy; 2025 Yaqeen Clothing. All rights reserved.
-              </div>
-            </div>
-          </div>
-        `,
+        html,
       });
     } catch (e) {
       emailWarning = "Password changed, but failed to send confirmation email.";
@@ -279,7 +203,6 @@ router.post("/change-password", auth, async (req, res) => {
   }
 });
 
-// Resend OTP (with 60s cooldown)
 router.post("/resend-otp", async (req, res) => {
   try {
     const { email } = req.body;
@@ -297,37 +220,20 @@ router.post("/resend-otp", async (req, res) => {
       }
     }
     // Generate new OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    user.resetOTP = otp;
-    user.resetOTPExpires = now + 15 * 60 * 1000;
-    await user.save();
+    const otp = generateAndSaveOTP(user);
     let emailWarning = null;
+    const html = generateEmailTemplate({
+      title: `Hi ${user.name || "there"}`,
+      subtitle: "You requested a password reset. Please use the OTP below:",
+      specialtext: otp,
+      body: "This OTP is valid for 15 minutes. \n If you did not request this, please ignore this email.",
+    });
     try {
       await emailService.sendMail({
         to: user.email,
         subject: "Your Password Reset OTP",
         text: `Your OTP is: ${otp}`, // fallback for plain text clients
-        html: `
-          <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
-              <div style="background-color: #6D28D9; padding: 16px; text-align: center;">
-                <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" style="height: 80px;"/>
-              </div>
-              <div style="padding: 24px;">
-                <h2 style="margin-top: 0;">Hi ${user.name || "there"},</h2>
-                <p style="font-size: 16px;">You requested a password reset. Please use the OTP below:</p>
-                <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; margin: 16px 0; text-align: center; color: #6D28D9;">
-                  ${otp}
-                </div>
-                <p style="font-size: 14px; color: #555;">This OTP is valid for 15 minutes.</p>
-                <p style="font-size: 14px; color: #555;">If you did not request this, please ignore this email.</p>
-              </div>
-              <div style="background: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #888;">
-                &copy; 2025 Yaqeen Clothing. All rights reserved.
-              </div>
-            </div>
-          </div>
-        `,
+        html,
       });
     } catch (e) {
       emailWarning = "OTP generated, but failed to send email.";

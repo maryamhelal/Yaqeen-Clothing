@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from "react";
 import CategoryCard from "../components/CategoryCard";
-import test1 from "../assets/test 1.jpg";
-import test2 from "../assets/test 2.jpg";
-import test3 from "../assets/test 3.jpg";
-import test4 from "../assets/test 4.jpg";
-
-// const categories = [
-//   { name: "Dresses", image: test1 },
-//   { name: "Skirts", image: test2 },
-//   { name: "Abayas", image: test3 },
-//   { name: "Blouses", image: test4 },
-// ];
 
 export default function LandingPage() {
   const [categories, setCategories] = useState([]);

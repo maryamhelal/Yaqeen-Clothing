@@ -3,7 +3,6 @@ const router = express.Router();
 const orderController = require("../controllers/orderController");
 const { auth, requireRole } = require("../middleware/auth");
 
-// Optional auth middleware for guest checkout
 const optionalAuth = async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return next();
@@ -18,19 +17,23 @@ const optionalAuth = async (req, res, next) => {
 };
 
 router.post("/", optionalAuth, orderController.createOrder);
+
 router.get("/:orderId", auth, orderController.getOrderById);
+
 router.get(
   "/admin",
   auth,
   requireRole(["admin", "superadmin"]),
   orderController.getAllOrders
 );
+
 router.put(
   "/:orderId/status",
   auth,
   requireRole(["admin", "superadmin"]),
   orderController.updateOrderStatus
 );
+
 router.get("/my/orders", auth, orderController.getMyOrders);
 
 module.exports = router;
