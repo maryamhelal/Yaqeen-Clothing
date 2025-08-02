@@ -1,12 +1,24 @@
 const Admin = require("../models/Admin");
 
-// Get categories and collections (superadmin only)
-exports.getCategoriesAndCollections = async (req, res) => {
+// Get categories (superadmin only)
+exports.getCategories = async (req, res) => {
   try {
     const admin = await Admin.findOne({ role: "superadmin" });
     if (!admin) return res.status(404).json({ error: "Superadmin not found" });
     res.json({
       categories: admin.categories || [],
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get collections (superadmin only)
+exports.getCollections = async (req, res) => {
+  try {
+    const admin = await Admin.findOne({ role: "superadmin" });
+    if (!admin) return res.status(404).json({ error: "Superadmin not found" });
+    res.json({
       collections: admin.collections || [],
     });
   } catch (err) {

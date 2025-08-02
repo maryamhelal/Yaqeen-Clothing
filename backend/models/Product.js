@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const sizeSchema = new mongoose.Schema(
   {
     size: String,
-    price: Number,
     stock: Number,
   },
   { _id: false }
@@ -27,12 +26,6 @@ const productSchema = new mongoose.Schema({
   category: String,
   collection: String,
   onSale: { type: Number, default: 0 }, // percentage off
-  categories: [String], // for superadmin management
-  collections: [String], // for superadmin management
 });
-
-productSchema.statics.getAllCategories = async function () {
-  return this.distinct("category");
-};
 
 module.exports = mongoose.model("Product", productSchema);

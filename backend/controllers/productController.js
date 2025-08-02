@@ -1,3 +1,5 @@
+const productService = require("../services/productService");
+
 exports.createProduct = async (req, res) => {
   try {
     let {

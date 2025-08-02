@@ -43,11 +43,13 @@ router.delete("/:id", auth, requireRole(["superadmin"]), async (req, res) => {
   res.json({ message: "Admin deleted" });
 });
 
-router.get(
-  "/categories-collections",
-  adminController.getCategoriesAndCollections
-);
+router.get("/categories", adminController.getCategories);
+router.get("/collections", adminController.getCollections);
+
 router.post("/add-category", adminController.addCategory);
 router.post("/add-collection", adminController.addCollection);
+
+router.delete("/delete-category", adminController.deleteCategory);
+router.delete("/delete-collection", adminController.deleteCollection);
 
 module.exports = router;
