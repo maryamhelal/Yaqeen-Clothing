@@ -15,7 +15,15 @@ export default function RegisterPage() {
     { label: "Upper Egypt", value: "upper_egypt" },
   ];
   const areaOptions = {
-    cairo_giza: ["Nasr City", "Heliopolis", "Dokki", "Mohandessin", "Maadi", "6th of October", "Sheikh Zayed"],
+    cairo_giza: [
+      "Nasr City",
+      "Heliopolis",
+      "Dokki",
+      "Mohandessin",
+      "Maadi",
+      "6th of October",
+      "Sheikh Zayed",
+    ],
     alexandria: ["Sidi Gaber", "Stanley", "Smouha", "Gleem"],
     other_governorates: ["Ismailia", "Port Said", "Suez"],
     delta_canal: ["Mansoura", "Tanta", "Zagazig"],
@@ -37,20 +45,37 @@ export default function RegisterPage() {
     apartment: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
   const navigate = useNavigate();
 
-  const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email) {
-      setError("Email is required.");
+
+    if (!validateEmail) {
+      setError("Please enter a valid email (e.g. example@example.com).");
       return;
+    }
+    if (formData.password.length < 5) {
+      setError("Password must be at least 5 characters long.");
     }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
+    if (
+      residenceType === "apartment" &&
+      (!formData.floor || !formData.apartment)
+    ) {
+      setError("Please enter floor and apartment number.");
+      return;
+    }
+
+    setError("");
+
     try {
       const addressObj = {
         city: selectedCity,
@@ -59,35 +84,42 @@ export default function RegisterPage() {
         landmarks: formData.landmarks,
         residenceType,
         floor: residenceType === "apartment" ? formData.floor : undefined,
-        apartment: residenceType === "apartment" ? formData.apartment : undefined,
+        apartment:
+          residenceType === "apartment" ? formData.apartment : undefined,
       };
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
           password: formData.password,
           address: addressObj,
-        })
+        }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Registration failed');
+      if (!response.ok) throw new Error(data.error || "Registration failed");
       login(data.user, data.token);
-      navigate('/');
+      navigate("/");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 p-8">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Create Account
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
             <input
               type="text"
               name="name"
@@ -98,7 +130,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phone
+            </label>
             <input
               type="text"
               name="phone"
@@ -109,7 +143,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -120,7 +156,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -131,7 +169,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
+            </label>
             <input
               type="password"
               name="confirmPassword"
@@ -142,39 +182,49 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City/Region</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              City/Region
+            </label>
             <select
               name="city"
               value={selectedCity}
-              onChange={e => {
+              onChange={(e) => {
                 setSelectedCity(e.target.value);
                 setSelectedArea("");
               }}
               required
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             >
-              {cityOptions.map(city => (
-                <option key={city.value} value={city.value}>{city.label}</option>
+              {cityOptions.map((city) => (
+                <option key={city.value} value={city.value}>
+                  {city.label}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Area</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Area
+            </label>
             <select
               name="area"
               value={selectedArea}
-              onChange={e => setSelectedArea(e.target.value)}
+              onChange={(e) => setSelectedArea(e.target.value)}
               required
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             >
               <option value="">Select area</option>
-              {(areaOptions[selectedCity] || []).map(area => (
-                <option key={area} value={area}>{area}</option>
+              {(areaOptions[selectedCity] || []).map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Street</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Street
+            </label>
             <input
               name="street"
               placeholder="Street name and number"
@@ -185,7 +235,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Famous Landmarks / Notes</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Famous Landmarks / Notes
+            </label>
             <textarea
               name="landmarks"
               placeholder="Landmarks, notes, delivery instructions, etc."
@@ -196,11 +248,13 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Residence Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Residence Type
+            </label>
             <select
               name="residenceType"
               value={residenceType}
-              onChange={e => setResidenceType(e.target.value)}
+              onChange={(e) => setResidenceType(e.target.value)}
               required
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             >
@@ -213,7 +267,9 @@ export default function RegisterPage() {
           {residenceType === "apartment" && (
             <div className="flex gap-4 mt-2">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Floor Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Floor Number
+                </label>
                 <input
                   name="floor"
                   type="number"
@@ -225,7 +281,9 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Apartment Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Apartment Number
+                </label>
                 <input
                   name="apartment"
                   type="number"
@@ -241,9 +299,10 @@ export default function RegisterPage() {
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-primary-darker transition-colors"
           >
-            Create Account
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
         <div className="mt-6 text-center">
@@ -258,4 +317,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}

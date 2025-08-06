@@ -7,7 +7,7 @@ export const productsAPI = {
       const response = await fetch(`${API_BASE_URL}/products`);
       return await response.json();
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
       return [];
     }
   },
@@ -15,10 +15,25 @@ export const productsAPI = {
   // Get products by category
   getProductsByCategory: async (category) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products?category=${category}`);
+      const response = await fetch(
+        `${API_BASE_URL}/products/category/${category}`
+      );
       return await response.json();
     } catch (error) {
-      console.error('Error fetching products by category:', error);
+      console.error("Error fetching products by category:", error);
+      return [];
+    }
+  },
+
+  // Get by collection
+  getProductsByCollection: async (collection) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/products/collection/${collection}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching products by collection:", error);
       return [];
     }
   },
@@ -29,10 +44,11 @@ export const productsAPI = {
       const response = await fetch(`${API_BASE_URL}/products/${id}`);
       return await response.json();
     } catch (error) {
-      console.error('Error fetching product:', error);
+      console.error("Error fetching product:", error);
       return null;
     }
   },
+
   // Add product (admin)
   addProduct: async (productData, token) => {
     const formData = new FormData();
@@ -44,12 +60,13 @@ export const productsAPI = {
       }
     });
     const response = await fetch(`${API_BASE_URL}/products`, {
-      method: 'POST',
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
     return await response.json();
   },
+
   // Edit product (admin)
   editProduct: async (id, productData, token) => {
     const formData = new FormData();
@@ -61,23 +78,19 @@ export const productsAPI = {
       }
     });
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
     return await response.json();
   },
+
   // Delete product (admin)
   deleteProduct: async (id, token) => {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
     return await response.json();
   },
-  // Get by collection
-  getProductsByCollection: async (collection) => {
-    const response = await fetch(`${API_BASE_URL}/products/collection/${collection}`);
-    return await response.json();
-  }
-}; 
+};

@@ -17,7 +17,7 @@ const generateEmailTemplate = ({ title, subtitle, body, specialtext }) => {
             : ""
         }
         ${body ? `<p style="font-size: 14px;">${body}</p>` : ""}
-        <p style="font-size: 14px; color: #555;">If you feel this was a mistake, please reply to this email or contact us at <a href="mailto:${
+        <p style="font-size: 14px; color: #555;">If you feel this email was a mistake, please reply to this email or contact us at <a href="mailto:${
           process.env.EMAIL_USER
         }" style="color: #b388cc; text-decoration: underline;">${
     process.env.EMAIL_USER

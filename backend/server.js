@@ -14,12 +14,7 @@ require("./models/Admin");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Add request logger
-app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.originalUrl}`);
-  next();
-});
+app.disable("x-powered-by");
 
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);

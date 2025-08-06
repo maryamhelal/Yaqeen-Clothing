@@ -17,7 +17,6 @@ router.post("/register", async (req, res) => {
     if (existing)
       return res.status(400).json({ error: "Email already exists" });
     const hash = await bcrypt.hash(password, 10);
-    // Store structured address object in addresses array
     const user = await User.create({
       name,
       email,
