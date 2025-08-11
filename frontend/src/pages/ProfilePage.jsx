@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 
 export default function ProfilePage() {
-  const { user, logout, token } = useContext(AuthContext);
+  const { user, logout, token, changePassword, loading } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [pwForm, setPwForm] = useState({
@@ -17,10 +17,12 @@ export default function ProfilePage() {
 
   const handlePwChange = (e) =>
     setPwForm({ ...pwForm, [e.target.name]: e.target.value });
+    
   const handlePwSubmit = async (e) => {
     e.preventDefault();
     setPwMsg("");
     setPwError("");
+    
     if (pwForm.newPassword.length < 5) {
       setPwError("Password length must be at least 5 characters long");
       return;
@@ -29,26 +31,20 @@ export default function ProfilePage() {
       setPwError("New passwords do not match");
       return;
     }
+    
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/auth/change-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            oldPassword: pwForm.oldPassword,
-            newPassword: pwForm.newPassword,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error changing password");
+      const data = await changePassword({
+        oldPassword: pwForm.oldPassword,
+        newPassword: pwForm.newPassword,
+      });
+      
       setPwMsg("Password changed successfully!");
       setPwForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      
+      // Show email warning if any
+      if (data.emailWarning) {
+        setPwMsg(prev => prev + " " + data.emailWarning);
+      }
     } catch (err) {
       setPwError(err.message);
     }
@@ -56,7 +52,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (token) {
-      ordersAPI.getUserOrders(token).then(setOrders);
+      ordersAPI.getUserOrders(token).then(setOrders).catch(console.error);
     }
   }, [token]);
 
@@ -195,9 +191,12 @@ export default function ProfilePage() {
           {pwMsg && <div className="text-green-600 text-sm">{pwMsg}</div>}
           <button
             type="submit"
-            className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold"
+            disabled={loading}
+            className={`w-full bg-primary-dark text-white py-2 rounded-lg font-semibold transition-colors ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-darker'
+            }`}
           >
-            Change Password
+            {loading ? 'Changing Password...' : 'Change Password'}
           </button>
         </form>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>

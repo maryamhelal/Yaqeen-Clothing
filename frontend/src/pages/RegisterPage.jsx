@@ -1,11 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { useAuth } from "../context/AuthContext";
 
 export default function RegisterPage() {
-  const { login } = useContext(AuthContext);
+  const { register, loading, error, clearError } = useAuth();
   const cityOptions = [
     { label: "Cairo, Giza", value: "cairo_giza" },
     { label: "Alexandria", value: "alexandria" },
@@ -44,8 +42,7 @@ export default function RegisterPage() {
     floor: "",
     apartment: "",
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
   const navigate = useNavigate();
 
@@ -54,27 +51,28 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearError();
+    setLocalError("");
 
-    if (!validateEmail) {
-      setError("Please enter a valid email (e.g. example@example.com).");
+    if (!validateEmail(formData.email)) {
+      setLocalError("Please enter a valid email (e.g. example@example.com).");
       return;
     }
     if (formData.password.length < 5) {
-      setError("Password must be at least 5 characters long.");
+      setLocalError("Password must be at least 5 characters long.");
+      return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      setLocalError("Passwords do not match.");
       return;
     }
     if (
       residenceType === "apartment" &&
       (!formData.floor || !formData.apartment)
     ) {
-      setError("Please enter floor and apartment number.");
+      setLocalError("Please enter floor and apartment number.");
       return;
     }
-
-    setError("");
 
     try {
       const addressObj = {
@@ -87,25 +85,20 @@ export default function RegisterPage() {
         apartment:
           residenceType === "apartment" ? formData.apartment : undefined,
       };
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          password: formData.password,
-          address: addressObj,
-        }),
+      
+      const result = await register({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        address: addressObj,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Registration failed");
-      login(data.user, data.token);
-      navigate("/");
+      
+      if (result.success) {
+        navigate("/");
+      }
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      // Error is handled by the context
     }
   };
 
@@ -296,11 +289,15 @@ export default function RegisterPage() {
               </div>
             </div>
           )}
-          {error && <div className="text-red-500 text-sm">{error}</div>}
+          {(error || localError) && (
+            <div className="text-red-500 text-sm">{error || localError}</div>
+          )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-primary-darker transition-colors"
+            className={`w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-darker'
+            }`}
           >
             {loading ? "Registering..." : "Register"}
           </button>

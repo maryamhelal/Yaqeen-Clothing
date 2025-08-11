@@ -1,13 +1,13 @@
 import React, { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 import { useNavigate } from "react-router-dom";
 import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
-  const { user, token } = useContext(AuthContext);
+  const { user, token } = useAuth();
   const cityOptions = [
     { label: "Cairo, Giza", value: "cairo_giza", price: 70 },
     { label: "Alexandria", value: "alexandria", price: 75 },
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
         },
         orderer: user ? { userId: user.id, name: user.name, email: user.email } : { name: form.name, email: form.email, userId: null },
       };
-      const result = await ordersAPI.createOrder(orderData);
+      const result = await ordersAPI.createOrder(orderData, token);
       clearCart();
       navigate("/thank-you", { state: { order: result.order } });
     } catch (error) {

@@ -1,40 +1,75 @@
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 export const productsAPI = {
   // Get all products
-  getAllProducts: async () => {
+  getAllProducts: async (page = 1, limit = 10, category = '', collection = '') => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(category && { category }),
+        ...(collection && { collection }),
+      });
+
+      const response = await fetch(`${API_BASE_URL}/products?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch products');
+      }
+      
       return await response.json();
     } catch (error) {
       console.error("Error fetching products:", error);
-      return [];
+      throw error;
     }
   },
 
   // Get products by category
-  getProductsByCategory: async (category) => {
+  getProductsByCategory: async (category, page = 1, limit = 10) => {
     try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
       const response = await fetch(
-        `${API_BASE_URL}/products/category/${category}`
+        `${API_BASE_URL}/products/category/${encodeURIComponent(category)}?${params}`
       );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch products by category');
+      }
+      
       return await response.json();
     } catch (error) {
       console.error("Error fetching products by category:", error);
-      return [];
+      throw error;
     }
   },
 
-  // Get by collection
-  getProductsByCollection: async (collection) => {
+  // Get products by collection
+  getProductsByCollection: async (collection, page = 1, limit = 10) => {
     try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
       const response = await fetch(
-        `${API_BASE_URL}/products/collection/${collection}`
+        `${API_BASE_URL}/products/collection/${encodeURIComponent(collection)}?${params}`
       );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch products by collection');
+      }
+      
       return await response.json();
     } catch (error) {
       console.error("Error fetching products by collection:", error);
-      return [];
+      throw error;
     }
   },
 
@@ -42,55 +77,86 @@ export const productsAPI = {
   getProduct: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/products/${id}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Product not found');
+      }
+      
       return await response.json();
     } catch (error) {
       console.error("Error fetching product:", error);
-      return null;
+      throw error;
     }
   },
 
   // Add product (admin)
   addProduct: async (productData, token) => {
-    const formData = new FormData();
-    Object.entries(productData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
+    try {
+      const response = await fetch(`${API_BASE_URL}/products`, {
+        method: "POST",
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create product');
       }
-    });
-    const response = await fetch(`${API_BASE_URL}/products`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    return await response.json();
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error creating product:", error);
+      throw error;
+    }
   },
 
   // Edit product (admin)
   editProduct: async (id, productData, token) => {
-    const formData = new FormData();
-    Object.entries(productData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "PUT",
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update product');
       }
-    });
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    return await response.json();
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw error;
+    }
   },
 
   // Delete product (admin)
   deleteProduct: async (id, token) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return await response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "DELETE",
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete product');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      throw error;
+    }
   },
 };

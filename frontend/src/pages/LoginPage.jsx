@@ -1,45 +1,37 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const { login } = useContext(AuthContext);
+  const { login, forgotPassword, resetPassword, resendOTP, loading, error, clearError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpInputs, setOtpInputs] = useState(["", "", "", "", "", ""]);
   const [resendCooldown, setResendCooldown] = useState(0);
   const resendTimerRef = useRef(null);
-  const [resendError, setResendError] = useState("");
+  const [resetMsg, setResetMsg] = useState("");
   const [emailWarning, setEmailWarning] = useState("");
   const [newPw, setNewPw] = useState("");
-  const [resetMsg, setResetMsg] = useState("");
   const [resetError, setResetError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearError();
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Login failed');
-      login(data.user, data.token);
-      if (data.user.role === 'admin' || data.user.role === 'superadmin') {
-        navigate('/dashboard');
-      } else {
-        navigate('/');
+      const result = await login({ email, password });
+      if (result.success) {
+        if (result.user.type === 'admin' || result.user.role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
-      setError(err.message);
+      // Error is handled by the context
     }
   };
 
@@ -59,15 +51,11 @@ export default function LoginPage() {
 
   const handleForgot = async e => {
     e.preventDefault();
-    setResetMsg(""); setResetError(""); setEmailWarning("");
+    setResetMsg(""); 
+    setResetError(""); 
+    setEmailWarning("");
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error sending OTP");
+      const data = await forgotPassword(forgotEmail);
       setOtpSent(true);
       setResetMsg("OTP sent to your email.");
       setEmailWarning(data.emailWarning || "");
@@ -82,16 +70,12 @@ export default function LoginPage() {
       setResetError(err.message);
     }
   };
+
   const handleResendOtp = async () => {
-    setResendError(""); setEmailWarning("");
+    setResetError(""); 
+    setEmailWarning("");
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error resending OTP");
+      const data = await resendOTP(forgotEmail);
       setResetMsg("OTP resent to your email.");
       setEmailWarning(data.emailWarning || "");
       setResendCooldown(60);
@@ -102,20 +86,21 @@ export default function LoginPage() {
         });
       }, 1000);
     } catch (err) {
-      setResendError(err.message);
+      setResetError(err.message);
     }
   };
+
   const handleReset = async e => {
     e.preventDefault();
-    setResetMsg(""); setResetError(""); setEmailWarning("");
+    setResetMsg(""); 
+    setResetError(""); 
+    setEmailWarning("");
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: forgotEmail, otp, newPassword: newPw })
+      const data = await resetPassword({ 
+        email: forgotEmail, 
+        otp, 
+        newPassword: newPw 
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error resetting password");
       setResetMsg("Password reset successfully! You can now log in.");
       setShowForgot(false);
       setOtpSent(false);
@@ -156,9 +141,12 @@ export default function LoginPage() {
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"
-            className="w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-primary-darker transition-colors"
+            disabled={loading}
+            className={`w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-darker'
+            }`}
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
         <button
@@ -211,7 +199,7 @@ export default function LoginPage() {
                   >
                     {resendCooldown > 0 ? `Resend OTP (${resendCooldown}s)` : 'Resend OTP'}
                   </button>
-                  {resendError && <div className="text-red-500 text-sm">{resendError}</div>}
+                  {resetError && <div className="text-red-500 text-sm">{resetError}</div>}
                 </form>
               )}
             </div>

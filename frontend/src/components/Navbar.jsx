@@ -9,19 +9,28 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/yaqeen logo.jpg";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+import { tagsAPI } from "../api/tags";
 
 export default function Navbar() {
   const { cart } = useContext(CartContext);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tags/categories`)
-      .then((res) => res.json())
-      .then(setCategories);
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await tagsAPI.getCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      }
+    };
+    
+    fetchCategories();
   }, []);
 
   return (
@@ -53,21 +62,20 @@ export default function Navbar() {
                   {cat}
                 </NavLink>
               ))}
-              {user &&
-                (user.role === "admin" || user.role === "superadmin") && (
-                  <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                      `text-sm font-medium transition-colors duration-200 ${
-                        isActive
-                          ? "text-primary-dark border-b-2 border-primary-dark"
-                          : "text-gray-700 hover:text-primary-dark"
-                      }`
-                    }
-                  >
-                    Dashboard
-                  </NavLink>
-                )}
+              {user && (isAdmin() || isSuperAdmin()) && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    `text-sm font-medium transition-colors duration-200 ${
+                      isActive
+                        ? "text-primary-dark border-b-2 border-primary-dark"
+                        : "text-gray-700 hover:text-primary-dark"
+                    }`
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              )}
               {/* Sign In / User Icon */}
               {!user ? (
                 <button
@@ -150,7 +158,7 @@ export default function Navbar() {
                 {cat}
               </NavLink>
             ))}
-            {user && (user.role === "admin" || user.role === "superadmin") && (
+            {user && (isAdmin() || isSuperAdmin()) && (
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>

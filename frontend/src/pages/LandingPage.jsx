@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import CategoryCard from "../components/CategoryCard";
+import { tagsAPI } from "../api/tags";
 
 export default function LandingPage() {
   const [categories, setCategories] = useState([]);
@@ -10,10 +11,7 @@ export default function LandingPage() {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/tags/categories`
-        );
-        const data = await res.json();
+        const data = await tagsAPI.getCategories();
         setCategories(data);
         setEmpty(data.length === 0);
       } catch (err) {
