@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import CategoryPage from "./pages/CategoryPage";
+import CollectionPage from "./pages/CollectionPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import LoginPage from "./pages/LoginPage";
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/category/:categoryName" element={<CategoryPage />} />
+            <Route path="/collection/:collectionName" element={<CollectionPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/login" element={<LoginPage />} />

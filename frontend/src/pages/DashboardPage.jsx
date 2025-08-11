@@ -4,6 +4,7 @@ import ProductManagement from "../components/ProductManagement";
 import OrderManagement from "../components/OrderManagement";
 import AdminManagement from "../components/AdminManagement";
 import UserManagement from "../components/UserManagement";
+import TagsManagement from "../components/TagsManagement";
 
 export default function DashboardPage() {
   const { user, isAdmin, isSuperAdmin } = useAuth();
@@ -20,6 +21,7 @@ export default function DashboardPage() {
         <div className="flex overflow-x-auto gap-2 md:space-x-4 mb-4 md:mb-8 px-1 scrollbar-thin scrollbar-thumb-primary-dark scrollbar-track-gray-200">
           <button onClick={() => setTab("products")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "products" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Products</button>
           <button onClick={() => setTab("orders")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "orders" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Orders</button>
+          <button onClick={() => setTab("tags")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "tags" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Tags</button>
           {isSuperAdmin() && (
             <>
               <button onClick={() => setTab("admins")} className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${tab === "admins" ? "bg-primary-dark text-white" : "bg-white text-gray-800 border border-gray-200"}`}>Admins</button>
@@ -32,6 +34,7 @@ export default function DashboardPage() {
         <div className="border-t border-gray-200 mb-4 md:mb-8"></div>
         {tab === "products" && <ProductManagement />}
         {tab === "orders" && <OrderManagement />}
+        {tab === "tags" && <TagsManagement />}
         {tab === "admins" && isSuperAdmin() && <AdminManagement />}
         {tab === "users" && isSuperAdmin() && <UserManagement />}
       </div>

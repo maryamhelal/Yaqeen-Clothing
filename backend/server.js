@@ -19,6 +19,9 @@ app.use(cors());
 app.use(express.json());
 app.disable("x-powered-by");
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
   customCss: '.swagger-ui .topbar { display: none }',

@@ -2,14 +2,24 @@ const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5
 
 export const tagsAPI = {
   // Create new tag
-  createTag: async (tagData) => {
+  createTag: async (tagData, token) => {
     try {
+      const formData = new FormData();
+      formData.append('name', tagData.name);
+      formData.append('description', tagData.description || '');
+      formData.append('tag', tagData.tag);
+      formData.append('sale', tagData.sale || 0);
+      
+      if (tagData.image) {
+        formData.append('image', tagData.image);
+      }
+
       const response = await fetch(`${API_BASE_URL}/tags`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(tagData),
+        body: formData,
       });
       
       if (!response.ok) {
@@ -37,6 +47,38 @@ export const tagsAPI = {
       return await response.json();
     } catch (error) {
       console.error('Error fetching tag:', error);
+      throw error;
+    }
+  },
+
+  // Update tag
+  updateTag: async (oldName, tagData, token) => {
+    try {
+      const formData = new FormData();
+      formData.append('description', tagData.description || '');
+      formData.append('tag', tagData.tag);
+      formData.append('sale', tagData.sale || 0);
+      
+      if (tagData.image) {
+        formData.append('image', tagData.image);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/tags/name/${encodeURIComponent(oldName)}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update tag');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating tag:', error);
       throw error;
     }
   },
@@ -76,10 +118,13 @@ export const tagsAPI = {
   },
 
   // Delete tag by name
-  deleteTag: async (name) => {
+  deleteTag: async (name, token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/tags/name/${encodeURIComponent(name)}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       
       if (!response.ok) {
@@ -95,12 +140,13 @@ export const tagsAPI = {
   },
 
   // Add sale to tag
-  addTagSale: async (saleData) => {
+  addTagSale: async (saleData, token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/tags/add-sale`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(saleData),
       });

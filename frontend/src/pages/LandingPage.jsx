@@ -1,29 +1,40 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CategoryCard from "../components/CategoryCard";
 import { tagsAPI } from "../api/tags";
 
 export default function LandingPage() {
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [empty, setEmpty] = useState(true);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await tagsAPI.getCategories();
-        setCategories(data);
-        setEmpty(data.length === 0);
+        const [categoriesData, collectionsData] = await Promise.all([
+          tagsAPI.getCategories(),
+          tagsAPI.getCollections(),
+        ]);
+        setCategories(categoriesData);
+        setCollections(collectionsData);
+        setEmpty(categoriesData.length === 0 && collectionsData.length === 0);
       } catch (err) {
-        console.error("Error fetching categories:", err);
+        console.error("Error fetching data:", err);
         setEmpty(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
+
+  const handleCollectionClick = (collectionName) => {
+    navigate(`/collection/${collectionName.toLowerCase()}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,52 +66,62 @@ export default function LandingPage() {
           {!loading &&
             !empty &&
             categories.map((cat) => (
-              <CategoryCard key={cat} name={cat} image={null} />
+              <CategoryCard 
+                key={cat._id || cat.name} 
+                name={cat.name} 
+                image={cat.image} 
+              />
             ))}
         </div>
       </div>
 
-      {/* Featured Section -- TBD */}
+      {/* Collections Section */}
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Featured Collections
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                Summer Collection
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Light and breezy pieces perfect for warm weather
-              </p>
-              <button className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
-                Shop Now
-              </button>
+          {loading ? (
+            <div className="text-center text-gray-500">
+              <p>Loading collections...</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                Elegant Abayas
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Timeless designs that combine tradition with modern elegance
-              </p>
-              <button className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                Explore
-              </button>
+          ) : collections.length === 0 ? (
+            <div className="text-center text-gray-500">
+              <p className="text-lg">No collections available at the moment.</p>
             </div>
-            <div className="bg-gradient-to-br from-gray-100 to-pink-100 rounded-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                Accessories
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Complete your look with our carefully curated accessories
-              </p>
-              <button className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                Discover
-              </button>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {collections.map((collection) => (
+                <div 
+                  key={collection._id || collection.name}
+                  className="bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => handleCollectionClick(collection.name)}
+                >
+                  {collection.image && (
+                    <img 
+                      src={collection.image} 
+                      alt={collection.name}
+                      className="w-full h-48 object-cover rounded-lg mb-4"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    {collection.name}
+                  </h3>
+                  {collection.description && (
+                    <p className="text-gray-600 mb-4">
+                      {collection.description}
+                    </p>
+                  )}
+                  <button className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
+                    Explore
+                  </button>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

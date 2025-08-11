@@ -20,7 +20,7 @@ exports.deleteProduct = async (id) => {
   }
   return product;
 };
-exports.getProductsByCategory = (category) =>
-  productRepo.findByCategory(category);
-exports.getProductsByCollection = (collection) =>
-  productRepo.findByCollection(collection);
+exports.getProductsByCategory = async (category) =>
+  await productRepo.findByCategory(category);
+exports.getProductsByCollection = async (collection) =>
+  await productRepo.findByCollection(collection);

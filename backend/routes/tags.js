@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const tagController = require("../controllers/tagController");
+const { auth } = require("../middleware/auth");
+const upload = require("../middleware/upload");
 
 /**
  * @swagger
@@ -9,12 +11,30 @@ const tagController = require("../controllers/tagController");
  *     summary: Create a new tag
  *     description: Create a new category or collection tag
  *     tags: [Tags]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreateTagRequest'
+ *             type: object
+ *             required: [name, tag]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Summer Collection"
+ *               description:
+ *                 type: string
+ *                 example: "Our latest summer collection featuring trendy styles"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Image file for the tag"
+ *               tag:
+ *                 type: string
+ *                 enum: [category, collection]
+ *                 example: "collection"
  *     responses:
  *       201:
  *         description: Tag created successfully
@@ -24,10 +44,12 @@ const tagController = require("../controllers/tagController");
  *               $ref: '#/components/schemas/Tag'
  *       400:
  *         description: Bad request - validation error
+ *       401:
+ *         description: Unauthorized - authentication required
  *       500:
  *         description: Internal server error
  */
-router.post("/", tagController.createTag);
+router.post("/", auth, upload.single('image'), tagController.createTag);
 
 /**
  * @swagger
@@ -56,6 +78,58 @@ router.post("/", tagController.createTag);
  *         description: Internal server error
  */
 router.get("/name/:name", tagController.getTag);
+
+/**
+ * @swagger
+ * /api/tags/name/{name}:
+ *   put:
+ *     summary: Update tag by name
+ *     description: Update a specific tag by its name
+ *     tags: [Tags]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tag name
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *                 example: "Our latest summer collection featuring trendy styles"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Image file for the tag"
+ *               tag:
+ *                 type: string
+ *                 enum: [category, collection]
+ *                 example: "collection"
+ *     responses:
+ *       200:
+ *         description: Tag updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Tag'
+ *       400:
+ *         description: Bad request - validation error
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       404:
+ *         description: Tag not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/name/:name", auth, upload.single('image'), tagController.updateTag);
 
 /**
  * @swagger
@@ -106,6 +180,8 @@ router.get("/collections", tagController.getCollections);
  *     summary: Delete tag by name
  *     description: Delete a specific tag by its name
  *     tags: [Tags]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: name
@@ -124,12 +200,14 @@ router.get("/collections", tagController.getCollections);
  *                 message:
  *                   type: string
  *                   example: "Tag deleted successfully"
+ *       401:
+ *         description: Unauthorized - authentication required
  *       404:
  *         description: Tag not found
  *       500:
  *         description: Internal server error
  */
-router.delete("/name/:name", tagController.deleteTag);
+router.delete("/name/:name", auth, tagController.deleteTag);
 
 /**
  * @swagger
@@ -138,6 +216,8 @@ router.delete("/name/:name", tagController.deleteTag);
  *     summary: Add sale to tag
  *     description: Add sale information to a specific tag
  *     tags: [Tags]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -163,11 +243,13 @@ router.delete("/name/:name", tagController.deleteTag);
  *               $ref: '#/components/schemas/Tag'
  *       400:
  *         description: Bad request - validation error
+ *       401:
+ *         description: Unauthorized - authentication required
  *       404:
  *         description: Tag not found
  *       500:
  *         description: Internal server error
  */
-router.post("/add-sale", tagController.addTagSale);
+router.post("/add-sale", auth, tagController.addTagSale);
 
 module.exports = router;

@@ -49,8 +49,8 @@ export default function Navbar() {
             <div className="hidden md:flex space-x-8 items-center">
               {categories.map((cat) => (
                 <NavLink
-                  key={cat}
-                  to={`/category/${cat.toLowerCase()}`}
+                  key={cat._id || cat.name}
+                  to={`/category/${cat.name.toLowerCase()}`}
                   className={({ isActive }) =>
                     `text-sm font-medium transition-colors duration-200 ${
                       isActive
@@ -59,7 +59,7 @@ export default function Navbar() {
                     }`
                   }
                 >
-                  {cat}
+                  {cat.name}
                 </NavLink>
               ))}
               {user && (isAdmin() || isSuperAdmin()) && (
@@ -144,8 +144,8 @@ export default function Navbar() {
           <div className="flex flex-col px-4 py-6 space-y-4">
             {categories.map((cat) => (
               <NavLink
-                key={cat}
-                to={`/category/${cat.toLowerCase()}`}
+                key={cat._id || cat.name}
+                to={`/category/${cat.name.toLowerCase()}`}
                 className={({ isActive }) =>
                   `block py-2 text-base font-medium transition-colors duration-200 ${
                     isActive
@@ -155,7 +155,7 @@ export default function Navbar() {
                 }
                 onClick={() => setMenuOpen(false)}
               >
-                {cat}
+                {cat.name}
               </NavLink>
             ))}
             {user && (isAdmin() || isSuperAdmin()) && (

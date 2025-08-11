@@ -115,9 +115,12 @@ const options = {
           properties: {
             _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
             name: { type: 'string', example: 'Summer Collection' },
-            type: { type: 'string', enum: ['category', 'collection'], example: 'collection' },
-            isOnSale: { type: 'boolean', example: false },
-            salePercentage: { type: 'number', example: 20 }
+            description: { type: 'string', example: 'Our latest summer collection featuring trendy styles' },
+            image: { type: 'string', example: 'https://example.com/image.jpg' },
+            tag: { type: 'string', enum: ['category', 'collection'], example: 'collection' },
+            sale: { type: 'number', example: 20 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
           }
         },
         LoginRequest: {
@@ -227,10 +230,20 @@ const options = {
         },
         CreateTagRequest: {
           type: 'object',
-          required: ['name', 'type'],
+          required: ['name', 'tag'],
           properties: {
             name: { type: 'string', example: 'Summer Collection' },
-            type: { type: 'string', enum: ['category', 'collection'], example: 'collection' }
+            description: { type: 'string', example: 'Our latest summer collection featuring trendy styles' },
+            image: { type: 'string', example: 'https://example.com/image.jpg' },
+            tag: { type: 'string', enum: ['category', 'collection'], example: 'collection' }
+          }
+        },
+        UpdateTagRequest: {
+          type: 'object',
+          properties: {
+            description: { type: 'string', example: 'Our latest summer collection featuring trendy styles' },
+            image: { type: 'string', example: 'https://example.com/image.jpg' },
+            tag: { type: 'string', enum: ['category', 'collection'], example: 'collection' }
           }
         },
         CreateMessageRequest: {

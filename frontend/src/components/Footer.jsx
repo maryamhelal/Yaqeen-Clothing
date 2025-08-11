@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { tagsAPI } from "../api/tags";
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
+  
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tags/categories`)
-      .then((res) => res.json())
-      .then(setCategories);
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await tagsAPI.getCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      }
+    };
+    
+    fetchCategories();
   }, []);
 
   return (
@@ -29,12 +39,12 @@ export default function Footer() {
                 </Link>
               </li>
               {categories.map((cat) => (
-                <li key={cat}>
+                <li key={cat._id || cat.name}>
                   <Link
-                    to={`/category/${cat.toLowerCase()}`}
+                    to={`/category/${cat.name.toLowerCase()}`}
                     className="text-gray-300 hover:text-white"
                   >
-                    {cat}
+                    {cat.name}
                   </Link>
                 </li>
               ))}
