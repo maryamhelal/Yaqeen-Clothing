@@ -29,8 +29,11 @@ export const AuthProvider = ({ children }) => {
 
   const checkTokenValidity = async () => {
     try {
-      const isValid = await authAPI.verifyToken(token);
-      if (!isValid) {
+      const response = await authAPI.verifyToken(token);
+      if (response.valid && response.user) {
+        // Update user data if needed
+        setUser(response.user);
+      } else {
         logout();
       }
     } catch (error) {

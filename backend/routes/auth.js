@@ -549,4 +549,64 @@ router.post("/resend-otp", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/verify:
+ *   get:
+ *     summary: Verify token validity
+ *     description: Check if the provided token is valid and return user info
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             examples:
+ *               success:
+ *                 summary: Valid token
+ *                 value:
+ *                   valid: true
+ *                   user:
+ *                     id: "507f1f77bcf86cd799439011"
+ *                     name: "John Doe"
+ *                     email: "john@example.com"
+ *                     type: "user"
+ *                     role: "user"
+ *       401:
+ *         description: Token is invalid or expired
+ *         content:
+ *           application/json:
+ *             examples:
+ *               invalid:
+ *                 summary: Invalid token
+ *                 value:
+ *                   valid: false
+ *                   error: "Invalid or expired token"
+ */
+router.get("/verify", auth, async (req, res) => {
+  try {
+    // If we reach here, the token is valid (auth middleware passed)
+    const user = req.user;
+    res.json({
+      valid: true,
+      user: {
+        id: user.id || user._id,
+        name: user.name,
+        email: user.email,
+        type: user.type,
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+      }
+    });
+  } catch (error) {
+    res.status(401).json({
+      valid: false,
+      error: "Invalid or expired token"
+    });
+  }
+});
+
 module.exports = router;

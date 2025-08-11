@@ -36,7 +36,7 @@ export default function OrderManagement() {
             </tr>
           </thead>
           <tbody>
-            {orders.map(order => (
+            {orders.length > 0 && orders.map(order => (
               <tr key={order.orderNumber}>
                 <td className="p-2 font-bold">{order.orderNumber}</td>
                 <td className="p-2">{order.orderer?.name || "Guest"}</td>

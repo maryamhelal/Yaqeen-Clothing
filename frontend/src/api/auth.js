@@ -150,10 +150,14 @@ export const authAPI = {
         },
       });
       
-      return response.ok;
+      if (!response.ok) {
+        return { valid: false, error: 'Token invalid' };
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error verifying token:', error);
-      return false;
+      return { valid: false, error: 'Network error' };
     }
   },
 };
