@@ -10,7 +10,7 @@ router.get("/", auth, requireRole(["superadmin"]), async (req, res) => {
 });
 
 router.post("/", auth, requireRole(["superadmin"]), async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   const existing = await Admin.findOne({ email });
   if (existing) return res.status(400).json({ error: "Email exists" });
   const hash = await bcrypt.hash(password, 10);
@@ -18,7 +18,7 @@ router.post("/", auth, requireRole(["superadmin"]), async (req, res) => {
     name,
     email,
     password: hash,
-    role: role || "admin",
+    role: "admin",
   });
   res.status(201).json(admin);
 });
