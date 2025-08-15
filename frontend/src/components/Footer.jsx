@@ -4,18 +4,18 @@ import { tagsAPI } from "../api/tags";
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
-  
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const categoriesData = await tagsAPI.getCategories();
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
         setCategories([]);
       }
     };
-    
+
     fetchCategories();
   }, []);
 
@@ -41,7 +41,7 @@ export default function Footer() {
               {categories.map((cat) => (
                 <li key={cat._id || cat.name}>
                   <Link
-                    to={`/category/${cat.name.toLowerCase()}`}
+                    to={`/category/${cat.name}`}
                     className="text-gray-300 hover:text-white"
                   >
                     {cat.name}

@@ -33,13 +33,13 @@ export default function LandingPage() {
   }, []);
 
   const handleCollectionClick = (collectionName) => {
-    navigate(`/collection/${collectionName.toLowerCase()}`);
+    navigate(`/collection/${collectionName}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-pink-50 to-purple-50 py-16">
+      <div className="bg-gradient-to-r from-pink-50 to-purple-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
             Discover Your Style
@@ -52,31 +52,31 @@ export default function LandingPage() {
       </div>
 
       {/* Categories Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
           Shop by Category
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {loading && <p>Loading...</p>}
-          {empty && !loading && (
+          {loading ? (
+            <p>Loading categories...</p>
+          ) : empty ? (
             <div className="col-span-full text-center text-gray-500">
               <p className="text-lg">No categories available at the moment.</p>
             </div>
-          )}
-          {!loading &&
-            !empty &&
+          ) : (
             categories.map((cat) => (
-              <CategoryCard 
-                key={cat._id || cat.name} 
-                name={cat.name} 
-                image={cat.image} 
+              <CategoryCard
+                key={cat._id || cat.name}
+                name={cat.name}
+                image={cat.image}
               />
-            ))}
+            ))
+          )}
         </div>
       </div>
 
       {/* Collections Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Featured Collections
@@ -92,18 +92,18 @@ export default function LandingPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {collections.map((collection) => (
-                <div 
+                <div
                   key={collection._id || collection.name}
                   className="bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() => handleCollectionClick(collection.name)}
                 >
                   {collection.image && (
-                    <img 
-                      src={collection.image} 
+                    <img
+                      src={collection.image}
                       alt={collection.name}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
+                      className="w-full h-80 object-cover rounded-lg mb-4"
                       onError={(e) => {
-                        e.target.style.display = 'none';
+                        e.target.style.display = "none";
                       }}
                     />
                   )}

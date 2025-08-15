@@ -138,20 +138,20 @@ export default function ProductManagement() {
     try {
       // Create FormData for file upload
       const formData = new FormData();
-      
+
       // Add product data
-      formData.append('name', form.name);
-      formData.append('description', form.description);
-      formData.append('price', form.price);
-      formData.append('salePercentage', form.salePercentage);
-      formData.append('category', form.category);
-      formData.append('collection', form.collection);
-      formData.append('colors', JSON.stringify(form.colors));
-      
+      formData.append("name", form.name);
+      formData.append("description", form.description);
+      formData.append("price", form.price);
+      formData.append("salePercentage", form.salePercentage);
+      formData.append("category", form.category);
+      formData.append("collection", form.collection);
+      formData.append("colors", JSON.stringify(form.colors));
+
       // Add image files
       if (imageFiles.length > 0) {
         imageFiles.forEach((file, index) => {
-          formData.append('images', file);
+          formData.append("images", file);
         });
       }
 
@@ -162,7 +162,7 @@ export default function ProductManagement() {
         await productsAPI.addProduct(formData, token);
         setSuccess("Product created successfully!");
       }
-      
+
       setEditing(null);
       setForm({
         name: "",
@@ -654,22 +654,10 @@ export default function ProductManagement() {
                       )}
                     </div>
                   </td>
+                  <td className="p-2">{product.salePercentage || 0}</td>
                   <td className="p-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={product.salePercentage || 0}
-                      onChange={(e) =>
-                        handleUpdateSale(
-                          product._id,
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                      className="border p-1 rounded w-16"
-                    />
+                    {encodeURIComponent(product.category)}
                   </td>
-                  <td className="p-2">{product.category}</td>
                   <td className="p-2">{product.collection}</td>
                   <td className="p-2">
                     <button

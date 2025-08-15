@@ -8,7 +8,7 @@ import {
   faUser,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import logo from "../assets/yaqeen logo.jpg";
+import logo from "../assets/yaqeen logo.png";
 import { useAuth } from "../context/AuthContext";
 import { tagsAPI } from "../api/tags";
 
@@ -25,17 +25,17 @@ export default function Navbar() {
         const categoriesData = await tagsAPI.getCategories();
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
         setCategories([]);
       }
     };
-    
+
     fetchCategories();
   }, []);
 
   return (
     <>
-      <nav className="bg-white shadow-lg border-b border-gray-100 relative z-20">
+      <nav className="bg-white shadow-lg border-b border-gray-100 z-40 fixed top-0 left-0 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link
@@ -50,7 +50,7 @@ export default function Navbar() {
               {categories.map((cat) => (
                 <NavLink
                   key={cat._id || cat.name}
-                  to={`/category/${cat.name.toLowerCase()}`}
+                  to={`/category/${cat.name}`}
                   className={({ isActive }) =>
                     `text-sm font-medium transition-colors duration-200 ${
                       isActive
@@ -145,7 +145,7 @@ export default function Navbar() {
             {categories.map((cat) => (
               <NavLink
                 key={cat._id || cat.name}
-                to={`/category/${cat.name.toLowerCase()}`}
+                to={`/category/${cat.name}`}
                 className={({ isActive }) =>
                   `block py-2 text-base font-medium transition-colors duration-200 ${
                     isActive

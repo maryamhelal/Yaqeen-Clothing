@@ -1,8 +1,15 @@
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
+const API_BASE_URL = `${
+  process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"
+}/api`;
 
 export const productsAPI = {
   // Get all products
-  getAllProducts: async (page = 1, limit = 10, category = '', collection = '') => {
+  getAllProducts: async (
+    page = 1,
+    limit = 10,
+    category = "",
+    collection = ""
+  ) => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -12,12 +19,12 @@ export const productsAPI = {
       });
 
       const response = await fetch(`${API_BASE_URL}/products?${params}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch products');
+        throw new Error(errorData.error || "Failed to fetch products");
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -34,14 +41,20 @@ export const productsAPI = {
       });
 
       const response = await fetch(
-        `${API_BASE_URL}/products/category/${encodeURIComponent(category)}?${params}`
+        `${API_BASE_URL}/products/category/${encodeURIComponent(
+          category
+        )}?${params}`
       );
-      
+
+      console.log(response);
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch products by category');
+        throw new Error(
+          errorData.error || "Failed to fetch products by category"
+        );
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching products by category:", error);
@@ -58,14 +71,18 @@ export const productsAPI = {
       });
 
       const response = await fetch(
-        `${API_BASE_URL}/products/collection/${encodeURIComponent(collection)}?${params}`
+        `${API_BASE_URL}/products/collection/${encodeURIComponent(
+          collection
+        )}?${params}`
       );
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch products by collection');
+        throw new Error(
+          errorData.error || "Failed to fetch products by collection"
+        );
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching products by collection:", error);
@@ -77,12 +94,12 @@ export const productsAPI = {
   getProduct: async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/products/${id}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Product not found');
+        throw new Error(errorData.error || "Product not found");
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -93,22 +110,22 @@ export const productsAPI = {
   // Add product (admin)
   addProduct: async (productData, token) => {
     try {
-      const headers = { 
-        'Authorization': `Bearer ${token}`
+      const headers = {
+        Authorization: `Bearer ${token}`,
       };
-      
+
       // Don't set Content-Type for FormData, let the browser set it with boundary
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers,
         body: productData, // productData is now FormData
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create product');
+        throw new Error(errorData.error || "Failed to create product");
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error creating product:", error);
@@ -119,22 +136,22 @@ export const productsAPI = {
   // Edit product (admin)
   editProduct: async (id, productData, token) => {
     try {
-      const headers = { 
-        'Authorization': `Bearer ${token}`
+      const headers = {
+        Authorization: `Bearer ${token}`,
       };
-      
+
       // Don't set Content-Type for FormData, let the browser set it with boundary
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "PUT",
         headers,
         body: productData, // productData is now FormData
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update product');
+        throw new Error(errorData.error || "Failed to update product");
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error updating product:", error);
@@ -147,16 +164,16 @@ export const productsAPI = {
     try {
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "DELETE",
-        headers: { 
-          'Authorization': `Bearer ${token}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete product');
+        throw new Error(errorData.error || "Failed to delete product");
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error("Error deleting product:", error);
