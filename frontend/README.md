@@ -48,26 +48,6 @@ src/
 - Node.js (v18 or higher)
 - npm or yarn
 
-### Installation
-
-1. Clone the repository
-2. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-4. Start the development server:
-   ```bash
-   npm start
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
 ## Available Scripts
 
 - `npm start` - Runs the app in development mode
@@ -80,11 +60,13 @@ src/
 The frontend is prepared for backend integration with the following API endpoints:
 
 ### Products API
+
 - `GET /api/products` - Get all products
 - `GET /api/products?category={category}` - Get products by category
 - `GET /api/products/{id}` - Get single product
 
 ### Orders API
+
 - `POST /api/orders` - Create new order
 - `GET /api/orders/{id}` - Get order by ID
 - `GET /api/orders?user={userId}` - Get user orders
@@ -94,6 +76,7 @@ Update the `API_BASE_URL` in the API service files to match your backend URL.
 ## Features in Detail
 
 ### Shopping Cart
+
 - Add products with quantity selection
 - Update quantities in cart
 - Remove items from cart
@@ -101,6 +84,7 @@ Update the `API_BASE_URL` in the API service files to match your backend URL.
 - Persistent cart state during session
 
 ### Product Categories
+
 - Dresses
 - Skirts
 - Abayas
@@ -110,6 +94,7 @@ Update the `API_BASE_URL` in the API service files to match your backend URL.
 - Coats
 
 ### Responsive Design
+
 - Mobile-first approach
 - Grid layouts that adapt to screen size
 - Touch-friendly interface
@@ -118,17 +103,21 @@ Update the `API_BASE_URL` in the API service files to match your backend URL.
 ## Customization
 
 ### Styling
+
 The app uses Tailwind CSS for styling. You can customize:
+
 - Colors in `tailwind.config.js`
 - Component styles in individual files
 - Global styles in `src/index.css`
 
 ### Adding New Categories
+
 1. Add category name to the `categories` array in `Navbar.jsx`
 2. Add category name to the `categories` array in `LandingPage.jsx`
 3. Add products for the category in `CategoryPage.jsx`
 
 ### Adding New Products
+
 1. Add product data to the `allProducts` array in `CategoryPage.jsx`
 2. Ensure the `category` field matches the category name (lowercase)
 3. Add appropriate image URL or placeholder
@@ -154,4 +143,4 @@ The app uses Tailwind CSS for styling. You can customize:
 
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License.

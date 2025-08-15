@@ -96,6 +96,34 @@ router.get("/:id", productController.getProductById);
 
 /**
  * @swagger
+ * /api/products/name/{name}:
+ *   get:
+ *     summary: Get product by name
+ *     description: Retrieve a specific product by its name
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product Name
+ *     responses:
+ *       200:
+ *         description: Product retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/name/:name", productController.getProductByName);
+
+/**
+ * @swagger
  * /api/products:
  *   post:
  *     summary: Create a new product

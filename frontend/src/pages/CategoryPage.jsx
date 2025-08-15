@@ -19,7 +19,11 @@ export default function CategoryPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await productsAPI.getProductsByCategory(categoryName, currentPage, 12);
+      const result = await productsAPI.getProductsByCategory(
+        categoryName,
+        currentPage,
+        12
+      );
       setProducts(result.products || []);
       setTotalPages(result.totalPages || 1);
     } catch (err) {
@@ -36,11 +40,13 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 py-16">
       {/* Category Header */}
       <div className="bg-gradient-to-r from-pink-50 to-purple-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-800 capitalize mb-4">{categoryName}</h1>
+          <h1 className="text-4xl font-bold text-gray-800 capitalize mb-4">
+            {categoryName}
+          </h1>
           <p className="text-lg text-gray-600">
             Discover our beautiful collection of {categoryName.toLowerCase()}
           </p>
@@ -59,7 +65,9 @@ export default function CategoryPage() {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500 text-lg">No products found in this category.</div>
+            <div className="text-gray-500 text-lg">
+              No products found in this category.
+            </div>
           </div>
         ) : (
           <>
@@ -80,9 +88,11 @@ export default function CategoryPage() {
                   >
                     Previous
                   </button>
-                  
+
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    const page =
+                      Math.max(1, Math.min(totalPages - 4, currentPage - 2)) +
+                      i;
                     return (
                       <button
                         key={page}
@@ -97,7 +107,7 @@ export default function CategoryPage() {
                       </button>
                     );
                   })}
-                  
+
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
@@ -113,4 +123,4 @@ export default function CategoryPage() {
       </div>
     </div>
   );
-} 
+}

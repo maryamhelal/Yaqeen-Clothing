@@ -24,14 +24,20 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/category/:categoryName" element={<CategoryPage />} />
-            <Route path="/collection/:collectionName" element={<CollectionPage />} />
+            <Route
+              path="/collection/:collectionName"
+              element={<CollectionPage />}
+            />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard/*" element={<DashboardPage />} />
-            <Route path="/product/:productId" element={<ProductDetailsPage />} />
+            <Route
+              path="/product/:productName"
+              element={<ProductDetailsPage />}
+            />
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
           </Routes>

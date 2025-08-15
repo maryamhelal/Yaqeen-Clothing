@@ -85,7 +85,7 @@ export default function RegisterPage() {
         apartment:
           residenceType === "apartment" ? formData.apartment : undefined,
       };
-      
+
       const result = await register({
         name: formData.name,
         phone: formData.phone,
@@ -93,7 +93,7 @@ export default function RegisterPage() {
         password: formData.password,
         address: addressObj,
       });
-      
+
       if (result.success) {
         navigate("/");
       }
@@ -103,7 +103,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 px-8 py-20">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Create Account
@@ -296,7 +296,9 @@ export default function RegisterPage() {
             type="submit"
             disabled={loading}
             className={`w-full bg-primary-dark text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors ${
-              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-darker'
+              loading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-primary-darker"
             }`}
           >
             {loading ? "Registering..." : "Register"}

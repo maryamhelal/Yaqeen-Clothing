@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
@@ -6,19 +6,29 @@ export default function ProductCard(props) {
   const product = props.product || props;
   const { addToCart } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
-  const [isHovered, setIsHovered] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.name || null);
+  const [selectedColor, setSelectedColor] = useState(
+    product?.colors?.[0]?.name || null
+  );
   const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
-  const colorObj = hasColors ? product.colors.find(c => c.name === selectedColor) || product.colors[0] : null;
+  const colorObj = hasColors
+    ? product.colors.find((c) => c.name === selectedColor) || product.colors[0]
+    : null;
   const availableSizes = colorObj?.sizes || [];
   const hasSizes = availableSizes.length > 0;
-  const [selectedSize, setSelectedSize] = useState(hasSizes ? availableSizes[0].size : null);
-  const maxQty = hasSizes ? (availableSizes.find(s => s.size === selectedSize)?.quantity || 1) : 1;
+  const [selectedSize, setSelectedSize] = useState(
+    hasSizes ? availableSizes[0].size : null
+  );
+  const maxQty = hasSizes
+    ? availableSizes.find((s) => s.size === selectedSize)?.quantity || 1
+    : 1;
   const navigate = useNavigate();
 
   // Update selectedSize if color changes
   useEffect(() => {
-    if (availableSizes.length > 0 && !availableSizes.find(s => s.size === selectedSize)) {
+    if (
+      availableSizes.length > 0 &&
+      !availableSizes.find((s) => s.size === selectedSize)
+    ) {
       setSelectedSize(availableSizes[0].size);
       setQuantity(1);
     }
@@ -32,7 +42,7 @@ export default function ProductCard(props) {
   if (!product) return null;
 
   const {
-    name = '',
+    name = "",
     price = 0,
     salePercentage = 0,
     salePrice,
@@ -55,16 +65,20 @@ export default function ProductCard(props) {
     if (!selectedColor || !selectedSize) return;
     addToCart({
       ...product,
+      quantity,
       selectedColor,
       selectedSize,
       price: effectivePrice, // Use sale price if available
       images,
-    }, quantity);
+    });
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-shadow duration-300">
-      <div className="relative overflow-hidden">
+      <div
+        className="relative overflow-hidden cursor-pointer"
+        onClick={() => navigate(`/product/${product.name}`)}
+      >
         <img
           src={images?.[0] || product.image}
           alt={name}
@@ -78,10 +92,13 @@ export default function ProductCard(props) {
         )}
       </div>
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-primary-dark transition-colors">
+        <h3
+          className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-primary-dark transition-colors cursor-pointer"
+          onClick={() => navigate(`/product/${product.name}`)}
+        >
           {name}
         </h3>
-        
+
         {/* Price Display */}
         <div className="mb-4">
           {hasSale ? (
@@ -92,7 +109,7 @@ export default function ProductCard(props) {
               <div className="text-2xl font-bold text-red-600">
                 {effectivePrice?.toLocaleString()} EGP
               </div>
-              <div className="text-sm text-red-600 font-medium">
+              <div className="text-sm text-black-600 font-medium">
                 Save {Math.round(price - effectivePrice)?.toLocaleString()} EGP
               </div>
             </div>
@@ -106,16 +123,22 @@ export default function ProductCard(props) {
         {/* Colors */}
         {colors?.length > 0 && (
           <div className="flex space-x-2 mb-4">
-            {colors.map(color => (
+            {colors.map((color) => (
               <button
                 key={color.name}
-                className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.name ? "border-primary-dark" : "border-gray-300"}`}
-                        style={{
-                          backgroundColor: color.hex,
-                          borderColor: color.hex?.toLowerCase() === "#fff" || color.hex?.toLowerCase() === "#ffffff"
-                            ? "#ccc"
-                            : undefined
-                        }}
+                className={`w-8 h-8 rounded-full border-2 ${
+                  selectedColor === color.name
+                    ? "border-primary-dark"
+                    : "border-gray-300"
+                }`}
+                style={{
+                  backgroundColor: color.hex,
+                  borderColor:
+                    color.hex?.toLowerCase() === "#fff" ||
+                    color.hex?.toLowerCase() === "#ffffff"
+                      ? "#ccc"
+                      : undefined,
+                }}
                 onClick={() => setSelectedColor(color.name)}
                 title={color.name}
               />
@@ -125,10 +148,14 @@ export default function ProductCard(props) {
         {/* Sizes for selected color */}
         {availableSizes.length > 0 && (
           <div className="flex space-x-2 mb-4">
-            {availableSizes.map(sizeObj => (
+            {availableSizes.map((sizeObj) => (
               <button
                 key={sizeObj.size}
-                className={`px-3 py-1 rounded-lg border-2 ${selectedSize === sizeObj.size ? "border-primary-dark bg-primary-light" : "border-gray-300"}`}
+                className={`px-3 py-1 rounded-lg border-2 ${
+                  selectedSize === sizeObj.size
+                    ? "border-primary-dark bg-primary-light"
+                    : "border-gray-300"
+                }`}
                 onClick={() => setSelectedSize(sizeObj.size)}
               >
                 {sizeObj.size}
@@ -137,38 +164,49 @@ export default function ProductCard(props) {
           </div>
         )}
         {/* Quantity */}
-        <div className="mb-4 flex items-center space-x-3">
+        <div className="mb-4 flex items-center w-full space-between">
           <span className="font-semibold">Quantity:</span>
-          <button
-            type="button"
-            className="px-3 py-1"
-            onClick={() => setQuantity(q => Math.max(1, q - 1))}
-            disabled={quantity <= 1}
-          >-</button>
-          <span className="w-8 text-center">{quantity}</span>
-          <button
-            type="button"
-            className="px-3 py-1"
-            onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
-            disabled={quantity >= maxQty}
-          >+</button>
-          <span className="text-xs text-gray-500">(Max: {maxQty})</span>
+          <div className="border border-gray-300 rounded-lg space-between">
+            <button
+              type="button"
+              className="px-3 py-1"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+            >
+              -
+            </button>
+            <span className="w-8 text-center">{quantity}</span>
+            <button
+              type="button"
+              className="px-3 py-1"
+              onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+              disabled={quantity >= maxQty}
+            >
+              +
+            </button>
+          </div>
         </div>
         {/* Selected color/size info */}
         <div className="mb-2 text-sm text-gray-600">
-          {selectedColor && <span>Color: {selectedColor} </span>}
-          {selectedSize && <span>Size: {selectedSize}</span>}
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold hover:bg-primary-darker transition-colors"
+            disabled={!hasColors || !hasSizes}
+          >
+            {!hasColors || !hasSizes ? "Sold out" : "Add to Cart"}
+          </button>
+          {!hasColors && (
+            <div className="text-red-500 text-sm mt-2">
+              No colors available for this product.
+            </div>
+          )}
+          {hasColors && !hasSizes && (
+            <div className="text-red-500 text-sm mt-2">
+              No sizes available for the selected color.
+            </div>
+          )}
         </div>
-        <button
-          onClick={handleAddToCart}
-          className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold hover:bg-primary-darker transition-colors"
-          disabled={!hasColors || !hasSizes}
-        >
-          {(!hasColors || !hasSizes) ? "Sold out" : "Add to Cart"}
-        </button>
-        {!hasColors && <div className="text-red-500 text-sm mt-2">No colors available for this product.</div>}
-        {hasColors && !hasSizes && <div className="text-red-500 text-sm mt-2">No sizes available for the selected color.</div>}
       </div>
     </div>
   );
-} 
+}

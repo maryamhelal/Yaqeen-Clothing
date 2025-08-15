@@ -17,12 +17,12 @@ export default function ProfilePage() {
 
   const handlePwChange = (e) =>
     setPwForm({ ...pwForm, [e.target.name]: e.target.value });
-    
+
   const handlePwSubmit = async (e) => {
     e.preventDefault();
     setPwMsg("");
     setPwError("");
-    
+
     if (pwForm.newPassword.length < 5) {
       setPwError("Password length must be at least 5 characters long");
       return;
@@ -31,19 +31,19 @@ export default function ProfilePage() {
       setPwError("New passwords do not match");
       return;
     }
-    
+
     try {
       const data = await changePassword({
         oldPassword: pwForm.oldPassword,
         newPassword: pwForm.newPassword,
       });
-      
+
       setPwMsg("Password changed successfully!");
       setPwForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
-      
+
       // Show email warning if any
       if (data.emailWarning) {
-        setPwMsg(prev => prev + " " + data.emailWarning);
+        setPwMsg((prev) => prev + " " + data.emailWarning);
       }
     } catch (err) {
       setPwError(err.message);
@@ -52,9 +52,12 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (token) {
-      ordersAPI.getUserOrders(token).then(result => {
-        setOrders(result.orders || []);
-      }).catch(console.error);
+      ordersAPI
+        .getUserOrders(token)
+        .then((result) => {
+          setOrders(result.orders || []);
+        })
+        .catch(console.error);
     }
   }, [token]);
 
@@ -65,7 +68,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-[calc(100vh-160px)] bg-primary flex items-center justify-center py-2">
+      <div className="min-h-[calc(100vh-160px)] bg-primary flex items-center justify-center py-16">
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             No User Data
@@ -85,7 +88,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-primary flex items-center justify-center py-28 px-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">My Profile</h2>
@@ -195,10 +198,12 @@ export default function ProfilePage() {
             type="submit"
             disabled={loading}
             className={`w-full bg-primary-dark text-white py-2 rounded-lg font-semibold transition-colors ${
-              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-darker'
+              loading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-primary-darker"
             }`}
           >
-            {loading ? 'Changing Password...' : 'Change Password'}
+            {loading ? "Changing Password..." : "Change Password"}
           </button>
         </form>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
@@ -208,17 +213,20 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <div key={order._id} className="bg-white rounded-lg p-4 shadow-sm">
+                <div
+                  key={order._id}
+                  className="bg-white rounded-lg p-4 shadow-sm"
+                >
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h4 className="font-semibold text-gray-800">
                         Order #{order._id.slice(-8).toUpperCase()}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
+                        {new Date(order.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
                         })}
                       </p>
                     </div>
@@ -226,23 +234,33 @@ export default function ProfilePage() {
                       <div className="font-semibold text-gray-800">
                         {order.totalPrice?.toLocaleString()} EGP
                       </div>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
-                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'paid' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
+                          order.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : order.status === "paid"
+                            ? "bg-blue-100 text-blue-800"
+                            : order.status === "shipped"
+                            ? "bg-purple-100 text-purple-800"
+                            : order.status === "delivered"
+                            ? "bg-green-100 text-green-800"
+                            : order.status === "cancelled"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {order.status}
                       </span>
                     </div>
                   </div>
-                  
+
                   {/* Order Items */}
                   <div className="space-y-2">
                     {order.items?.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
+                      <div
+                        key={index}
+                        className="flex justify-between items-center text-sm"
+                      >
                         <div>
                           <span className="font-medium">{item.name}</span>
                           <span className="text-gray-600 ml-2">
@@ -255,15 +273,20 @@ export default function ProfilePage() {
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Shipping Address */}
                   {order.shippingAddress && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <h5 className="text-sm font-medium text-gray-700 mb-1">Shipping Address:</h5>
+                      <h5 className="text-sm font-medium text-gray-700 mb-1">
+                        Shipping Address:
+                      </h5>
                       <p className="text-sm text-gray-600">
-                        {order.shippingAddress.name && `${order.shippingAddress.name}, `}
-                        {order.shippingAddress.phone && `${order.shippingAddress.phone}, `}
-                        {order.shippingAddress.city && order.shippingAddress.area && 
+                        {order.shippingAddress.name &&
+                          `${order.shippingAddress.name}, `}
+                        {order.shippingAddress.phone &&
+                          `${order.shippingAddress.phone}, `}
+                        {order.shippingAddress.city &&
+                          order.shippingAddress.area &&
                           `${order.shippingAddress.area}, ${order.shippingAddress.city}`}
                       </p>
                     </div>

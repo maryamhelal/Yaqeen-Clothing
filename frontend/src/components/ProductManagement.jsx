@@ -654,10 +654,22 @@ export default function ProductManagement() {
                       )}
                     </div>
                   </td>
-                  <td className="p-2">{product.salePercentage || 0}</td>
                   <td className="p-2">
-                    {encodeURIComponent(product.category)}
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={product.salePercentage || 0}
+                      onChange={(e) =>
+                        handleUpdateSale(
+                          product._id,
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                      className="border p-1 rounded w-16"
+                    />
                   </td>
+                  <td className="p-2">{product.category}</td>
                   <td className="p-2">{product.collection}</td>
                   <td className="p-2">
                     <button

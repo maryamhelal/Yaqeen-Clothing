@@ -14,18 +14,27 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1, selectedColor, selectedSize) => {
-    setCart(prev => {
+  const addToCart = (product, quantity, selectedColor, selectedSize) => {
+    setCart((prev) => {
       // Find existing cart item with same product, color, and size
-      const existing = prev.find(item => item.id === product.id && item.selectedColor === selectedColor && item.selectedSize === selectedSize);
+      const existing = prev.find(
+        (item) =>
+          item.id === product.id &&
+          item.selectedColor === selectedColor &&
+          item.selectedSize === selectedSize
+      );
       // Find available quantity for this size
-      const colorObj = product.colors?.find(c => c.name === selectedColor) || {};
-      const sizeObj = colorObj.sizes?.find(s => s.size === selectedSize) || {};
+      const colorObj =
+        product.colors?.find((c) => c.name === selectedColor) || {};
+      const sizeObj =
+        colorObj.sizes?.find((s) => s.size === selectedSize) || {};
       const maxQty = sizeObj.quantity || 1;
       if (existing) {
         const newQty = Math.min(existing.quantity + quantity, maxQty);
-        return prev.map(item =>
-          item.id === product.id && item.selectedColor === selectedColor && item.selectedSize === selectedSize
+        return prev.map((item) =>
+          item.id === product.id &&
+          item.selectedColor === selectedColor &&
+          item.selectedSize === selectedSize
             ? { ...item, quantity: newQty }
             : item
         );
@@ -41,19 +50,20 @@ export function CartProvider({ children }) {
     });
   };
 
-  const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id));
+  const removeFromCart = (id) =>
+    setCart((prev) => prev.filter((item) => item.id !== id));
   const updateQuantity = (id, quantity) =>
-    setCart(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
+    setCart((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
 
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider
+      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}
+    >
       {children}
     </CartContext.Provider>
   );
-} 
+}

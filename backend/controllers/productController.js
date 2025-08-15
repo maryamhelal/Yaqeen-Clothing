@@ -2,15 +2,8 @@ const productService = require("../services/productService");
 
 exports.createProduct = async (req, res) => {
   try {
-    let {
-      name,
-      description,
-      price,
-      colors,
-      category,
-      collection,
-      images,
-    } = req.body;
+    let { name, description, price, colors, category, collection, images } =
+      req.body;
     if (typeof colors === "string") colors = JSON.parse(colors);
     if (typeof images === "string") images = JSON.parse(images);
 
@@ -40,7 +33,7 @@ exports.createProduct = async (req, res) => {
       images,
       colors,
       category,
-      collection
+      collection,
     });
     res.status(201).json(product);
   } catch (err) {
@@ -50,15 +43,8 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    let {
-      name,
-      description,
-      price,
-      colors,
-      category,
-      collection,
-      images,
-    } = req.body;
+    let { name, description, price, colors, category, collection, images } =
+      req.body;
     if (typeof colors === "string") colors = JSON.parse(colors);
     if (typeof images === "string") images = JSON.parse(images);
 
@@ -84,7 +70,7 @@ exports.updateProduct = async (req, res) => {
       price,
       colors,
       category,
-      collection
+      collection,
     };
     if (images) updateData.images = images;
     const product = await productService.updateProduct(
@@ -102,10 +88,15 @@ exports.getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const category = req.query.category || '';
-    const collection = req.query.collection || '';
-    
-    const result = await productService.getAllProducts(page, limit, category, collection);
+    const category = req.query.category || "";
+    const collection = req.query.collection || "";
+
+    const result = await productService.getAllProducts(
+      page,
+      limit,
+      category,
+      collection
+    );
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -114,7 +105,17 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProductById = async (req, res) => {
   try {
-    const product = await productService.getProduct(req.params.id);
+    const product = await productService.getProductById(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json(product);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.getProductByName = async (req, res) => {
+  try {
+    const product = await productService.getProductByName(req.params.name);
     if (!product) return res.status(404).json({ error: "Product not found" });
     res.json(product);
   } catch (err) {
@@ -136,7 +137,7 @@ exports.getProductsByCategory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    
+
     const result = await productService.getProductsByCategory(
       req.params.category,
       page,
@@ -152,7 +153,7 @@ exports.getProductsByCollection = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    
+
     const result = await productService.getProductsByCollection(
       req.params.collection,
       page,

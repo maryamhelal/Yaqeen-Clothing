@@ -90,6 +90,29 @@ export const productsAPI = {
     }
   },
 
+  // Get single product by name
+  getProductByName: async (name) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/name/${name}`);
+
+      if (!response.ok) {
+        let errorMessage = "Product not found";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.log(e);
+        }
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      throw error;
+    }
+  },
+
   // Get single product
   getProduct: async (id) => {
     try {

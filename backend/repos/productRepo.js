@@ -40,6 +40,8 @@ exports.findAllWithPagination = async (
 
 exports.findById = (id) => Product.findById(id);
 
+exports.findByName = (name) => Product.findOne({ name });
+
 exports.create = (data) => Product.create(data);
 
 exports.update = (id, data) =>

@@ -1,11 +1,23 @@
 const productRepo = require("../repos/productRepo");
 const fs = require("fs");
 
-exports.getAllProducts = async (page = 1, limit = 10, category = '', collection = '') => {
-  return await productRepo.findAllWithPagination(page, limit, category, collection);
+exports.getAllProducts = async (
+  page = 1,
+  limit = 10,
+  category = "",
+  collection = ""
+) => {
+  return await productRepo.findAllWithPagination(
+    page,
+    limit,
+    category,
+    collection
+  );
 };
 
 exports.getProductById = (id) => productRepo.findById(id);
+
+exports.getProductByName = (name) => productRepo.findByName(name);
 
 exports.createProduct = (data) => productRepo.create(data);
 
@@ -32,5 +44,9 @@ exports.getProductsByCategory = async (category, page = 1, limit = 10) => {
 };
 
 exports.getProductsByCollection = async (collection, page = 1, limit = 10) => {
-  return await productRepo.findByCollectionWithPagination(collection, page, limit);
+  return await productRepo.findByCollectionWithPagination(
+    collection,
+    page,
+    limit
+  );
 };

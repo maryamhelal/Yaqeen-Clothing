@@ -4,7 +4,7 @@ import { productsAPI } from "../api/products";
 import { CartContext } from "../context/CartContext";
 
 export default function ProductDetailsPage() {
-  const { productId } = useParams();
+  const { productName } = useParams();
   const { addToCart } = useContext(CartContext);
   const [product, setProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -12,19 +12,32 @@ export default function ProductDetailsPage() {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    productsAPI.getProduct(productId).then(setProduct);
-  }, [productId]);
+    productsAPI
+      .getProductByName(productName)
+      .then((data) => {
+        console.log("Fetched product:", data);
+        setProduct(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching product:", err);
+      });
+  }, [productName]);
 
   if (!product) return <div className="p-8 text-center">Loading...</div>;
 
-  const colorObj = product.colors?.find(c => c.name === selectedColor) || product.colors?.[0];
+  const colorObj =
+    product.colors?.find((c) => c.name === selectedColor) ||
+    product.colors?.[0];
   const images = colorObj?.images?.length ? colorObj.images : product.images;
 
   // Calculate effective price
   const getEffectivePrice = () => {
     const salePercentage = product.salePercentage || 0;
     if (salePercentage > 0) {
-      return product.salePrice || Math.round(product.price * (1 - salePercentage / 100));
+      return (
+        product.salePrice ||
+        Math.round(product.price * (1 - salePercentage / 100))
+      );
     }
     return product.price;
   };
@@ -33,11 +46,15 @@ export default function ProductDetailsPage() {
   const hasSale = product.salePercentage > 0;
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
+    <div className="max-w-5xl mx-auto py-24 px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
       {/* Images */}
       <div className="relative">
         <div className="mb-4">
-          <img src={images?.[0]} alt={product.name} className="w-full h-96 object-cover rounded-xl" />
+          <img
+            src={images?.[0]}
+            alt={product.name}
+            className="w-full h-96 object-cover rounded-xl"
+          />
           {/* Sale Badge */}
           {hasSale && (
             <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
@@ -47,14 +64,19 @@ export default function ProductDetailsPage() {
         </div>
         <div className="flex space-x-2">
           {images?.map((img, idx) => (
-            <img key={idx} src={img} alt="" className="w-20 h-20 object-cover rounded-lg border" />
+            <img
+              key={idx}
+              src={img}
+              alt=""
+              className="w-20 h-20 object-cover rounded-lg border"
+            />
           ))}
         </div>
       </div>
       {/* Details */}
       <div>
         <h2 className="text-3xl font-bold mb-2">{product.name}</h2>
-        
+
         {/* Price Display */}
         <div className="mb-4">
           {hasSale ? (
@@ -66,7 +88,9 @@ export default function ProductDetailsPage() {
                 {effectivePrice?.toLocaleString()} EGP
               </div>
               <div className="text-lg text-red-600 font-medium">
-                Save {Math.round(product.price - effectivePrice)?.toLocaleString()} EGP
+                Save{" "}
+                {Math.round(product.price - effectivePrice)?.toLocaleString()}{" "}
+                EGP
               </div>
             </div>
           ) : (
@@ -82,10 +106,14 @@ export default function ProductDetailsPage() {
           <div className="mb-4">
             <div className="font-semibold mb-2">Color:</div>
             <div className="flex space-x-2">
-              {product.colors.map(color => (
+              {product.colors.map((color) => (
                 <button
                   key={color.name}
-                  className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.name ? "border-primary-dark" : "border-gray-300"}`}
+                  className={`w-8 h-8 rounded-full border-2 ${
+                    selectedColor === color.name
+                      ? "border-primary-dark"
+                      : "border-gray-300"
+                  }`}
                   style={{ backgroundColor: color.hex }}
                   onClick={() => setSelectedColor(color.name)}
                 />
@@ -98,10 +126,14 @@ export default function ProductDetailsPage() {
           <div className="mb-4">
             <div className="font-semibold mb-2">Size:</div>
             <div className="flex space-x-2">
-              {product.sizes.map(sizeObj => (
+              {product.sizes.map((sizeObj) => (
                 <button
                   key={sizeObj.size}
-                  className={`px-3 py-1 rounded-lg border-2 ${selectedSize === sizeObj.size ? "border-primary-dark bg-primary-light" : "border-gray-300"}`}
+                  className={`px-3 py-1 rounded-lg border-2 ${
+                    selectedSize === sizeObj.size
+                      ? "border-primary-dark bg-primary-light"
+                      : "border-gray-300"
+                  }`}
                   onClick={() => setSelectedSize(sizeObj.size)}
                 >
                   {sizeObj.size}
@@ -122,7 +154,7 @@ export default function ProductDetailsPage() {
                 </tr>
               </thead>
               <tbody>
-                {product.sizes.map(sizeObj => (
+                {product.sizes.map((sizeObj) => (
                   <tr key={sizeObj.size}>
                     <td className="py-2 px-4 border-b">{sizeObj.size}</td>
                     <td className="py-2 px-4 border-b">{sizeObj.quantity}</td>
@@ -135,16 +167,29 @@ export default function ProductDetailsPage() {
         {/* Quantity */}
         <div className="mb-4 flex items-center space-x-3">
           <span className="font-semibold">Quantity:</span>
-          <input type="number" min="1" value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value)))} className="w-16 border rounded-lg px-2 py-1" />
+          <input
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+            className="w-16 border rounded-lg px-2 py-1"
+          />
         </div>
         {/* Add to Cart */}
         <button
           className="w-full bg-primary-dark text-white py-3 rounded-lg font-bold hover:bg-primary-darker transition-colors"
-          onClick={() => addToCart({...product, price: effectivePrice}, quantity, selectedColor, selectedSize)}
+          onClick={() =>
+            addToCart(
+              { ...product, price: effectivePrice },
+              quantity,
+              selectedColor,
+              selectedSize
+            )
+          }
         >
           Add to Cart
         </button>
       </div>
     </div>
   );
-} 
+}

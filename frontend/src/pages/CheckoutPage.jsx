@@ -17,7 +17,15 @@ export default function CheckoutPage() {
     { label: "Upper Egypt", value: "upper_egypt", price: 115 },
   ];
   const areaOptions = {
-    cairo_giza: ["Nasr City", "Heliopolis", "Dokki", "Mohandessin", "Maadi", "6th of October", "Sheikh Zayed"],
+    cairo_giza: [
+      "Nasr City",
+      "Heliopolis",
+      "Dokki",
+      "Mohandessin",
+      "Maadi",
+      "6th of October",
+      "Sheikh Zayed",
+    ],
     alexandria: ["Sidi Gaber", "Stanley", "Smouha", "Gleem"],
     other_governorates: ["Ismailia", "Port Said", "Suez"],
     delta_canal: ["Mansoura", "Tanta", "Zagazig"],
@@ -38,8 +46,12 @@ export default function CheckoutPage() {
   });
   const navigate = useNavigate();
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingPrice = cityOptions.find(c => c.value === selectedCity)?.price || 0;
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const shippingPrice =
+    cityOptions.find((c) => c.value === selectedCity)?.price || 0;
   const totalWithShipping = subtotal + shippingPrice;
 
   useEffect(() => {
@@ -51,14 +63,15 @@ export default function CheckoutPage() {
         name: user.name || "",
         address: user.address || "",
         phone: user.phone || "",
-        email: user.email || ""
+        email: user.email || "",
       });
     }
   }, [cart, navigate, user]);
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user && !form.email) {
       alert("Email is required for guest checkout.");
@@ -66,7 +79,7 @@ export default function CheckoutPage() {
     }
     try {
       const orderData = {
-        items: cart.map(item => ({
+        items: cart.map((item) => ({
           ...item,
           size: item.size || item.selectedSize,
           color: item.color || item.selectedColor,
@@ -83,28 +96,36 @@ export default function CheckoutPage() {
           apartment: residenceType === "apartment" ? form.apartment : undefined,
           phone: form.phone,
         },
-        orderer: user ? { userId: user.id, name: user.name, email: user.email } : { name: form.name, email: form.email, userId: null },
+        orderer: user
+          ? { userId: user.id, name: user.name, email: user.email }
+          : { name: form.name, email: form.email, userId: null },
       };
       const result = await ordersAPI.createOrder(orderData, token);
       clearCart();
       navigate("/thank-you", { state: { order: result.order } });
     } catch (error) {
-      console.error('Error placing order:', error);
-      alert('There was an error placing your order. Please try again.');
+      console.error("Error placing order:", error);
+      alert("There was an error placing your order. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">Checkout</h1>
+        <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
+          Checkout
+        </h1>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Shipping Information</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Shipping Information
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
                 <input
                   name="name"
                   placeholder="Enter your full name"
@@ -115,10 +136,12 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Shipping City/Region</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Shipping City/Region
+                </label>
                 <CitySelectTable
                   value={selectedCity}
-                  onChange={val => {
+                  onChange={(val) => {
                     setSelectedCity(val);
                     setSelectedArea("");
                   }}
@@ -126,22 +149,28 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Area</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                  Area
+                </label>
                 <select
                   name="area"
                   value={selectedArea}
-                  onChange={e => setSelectedArea(e.target.value)}
+                  onChange={(e) => setSelectedArea(e.target.value)}
                   required
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   <option value="">Select area</option>
-                  {(areaOptions[selectedCity] || []).map(area => (
-                    <option key={area} value={area}>{area}</option>
+                  {(areaOptions[selectedCity] || []).map((area) => (
+                    <option key={area} value={area}>
+                      {area}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Street</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                  Street
+                </label>
                 <input
                   name="street"
                   placeholder="Street name and number"
@@ -152,7 +181,9 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Famous Landmarks / Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                  Famous Landmarks / Notes
+                </label>
                 <textarea
                   name="landmarks"
                   placeholder="Landmarks, notes, delivery instructions, etc."
@@ -163,11 +194,13 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">Residence Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                  Residence Type
+                </label>
                 <select
                   name="residenceType"
                   value={residenceType}
-                  onChange={e => setResidenceType(e.target.value)}
+                  onChange={(e) => setResidenceType(e.target.value)}
                   required
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
@@ -180,7 +213,9 @@ export default function CheckoutPage() {
               {residenceType === "apartment" && (
                 <div className="flex gap-4 mt-2">
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Floor Number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Floor Number
+                    </label>
                     <input
                       name="floor"
                       type="number"
@@ -191,7 +226,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Apartment Number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Apartment Number
+                    </label>
                     <input
                       name="apartment"
                       type="number"
@@ -206,7 +243,9 @@ export default function CheckoutPage() {
               {/* Add email field for guest checkout */}
               {!user && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <input
                     name="email"
                     type="email"
@@ -228,23 +267,34 @@ export default function CheckoutPage() {
           </div>
           {/* Order Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 h-fit">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Order Summary
+            </h2>
             <div className="space-y-4">
               {cart.map((item, idx) => (
-                <div key={item._id || idx} className="flex justify-between items-center">
+                <div
+                  key={item._id || idx}
+                  className="flex justify-between items-center"
+                >
                   <div className="flex items-center space-x-3">
-                    <img 
-                      src={item.images?.[0] || item.image} 
+                    <img
+                      src={item.images?.[0] || item.image}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-lg border"
                     />
                     <div>
-                      <div className="font-semibold text-gray-800">{item.name}</div>
-                      <div className="text-sm text-gray-500">Size: {item.size} | Color: {item.color}</div>
+                      <div className="font-semibold text-gray-800">
+                        {item.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Size: {item.size} | Color: {item.color}
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-800">{(item.price * item.quantity).toLocaleString()} EGP</p>
+                    <p className="font-semibold text-gray-800">
+                      {(item.price * item.quantity).toLocaleString()} EGP
+                    </p>
                   </div>
                 </div>
               ))}
@@ -268,4 +318,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-} 
+}

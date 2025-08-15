@@ -19,12 +19,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 md:p-8">
+    <div className="min-h-screen bg-gray-50 px-2 py-20 md:px-8 py-20">
       <div className="sticky top-0 z-10 bg-gray-50 pb-2 pt-2 md:pt-0 md:pb-0">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8 text-center md:text-left">
           Admin Dashboard
         </h1>
-        <div className="flex overflow-x-auto gap-2 md:space-x-4 mb-4 md:mb-8 px-1 scrollbar-thin scrollbar-thumb-primary-dark scrollbar-track-gray-200">
+        <div className="flex overflow-x-auto gap-2 md:space-x-4 mb-4 md:mb-8 px-1 pt-8 scrollbar-thin scrollbar-thumb-primary-dark scrollbar-track-gray-200">
           <button
             onClick={() => setTab("products")}
             className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${

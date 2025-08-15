@@ -18,6 +18,10 @@ export default function Navbar() {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const cartItemCount = cart.reduce(
+    (total, item) => total + (item.quantity || 0),
+    0
+  );
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -35,7 +39,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white shadow-lg border-b border-gray-100 z-40 fixed top-0 left-0 w-full">
+      <nav className="bg-white shadow-lg border-b border-gray-100 z-20 fixed top-0 left-0 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link
@@ -212,8 +216,8 @@ export default function Navbar() {
           className="w-6 h-6 text-primary-dark group-hover:text-white transition-colors"
         />
         {cart.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-primary-dark text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
-            {cart.length}
+          <span className="absolute -top-1 -right-1 bg-primary-dark text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
+            {cartItemCount}
           </span>
         )}
       </Link>
