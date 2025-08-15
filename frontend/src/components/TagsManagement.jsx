@@ -7,7 +7,7 @@ export default function TagsManagement() {
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("categories");
+  const [activeTab, setActiveTab] = useState("category");
   const [formData, setFormData] = useState({
     name: "",
     tag: "category", // Will be set based on activeTab
@@ -44,14 +44,14 @@ export default function TagsManagement() {
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files) {
-      setFormData(prev => ({ ...prev, [name]: files[0] }));
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
       setImagePreview(URL.createObjectURL(files[0]));
     } else if (name === "sale") {
       // Handle sale field - convert to number or empty string
       const saleValue = value === "" ? "" : parseInt(value) || 0;
-      setFormData(prev => ({ ...prev, [name]: saleValue }));
+      setFormData((prev) => ({ ...prev, [name]: saleValue }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -67,14 +67,14 @@ export default function TagsManagement() {
 
     try {
       setLoading(true);
-      
+
       // Set the tag type based on active tab
       const tagData = {
         ...formData,
-        tag: activeTab === "categories" ? "category" : "collection",
-        sale: formData.sale === "" ? 0 : parseInt(formData.sale) || 0
+        tag: activeTab === "category" ? "category" : "collection",
+        sale: formData.sale === "" ? 0 : parseInt(formData.sale) || 0,
       };
-      
+
       if (editingTag) {
         // Update existing tag
         await tagsAPI.updateTag(editingTag.name, tagData, token);
@@ -84,9 +84,15 @@ export default function TagsManagement() {
         await tagsAPI.createTag(tagData, token);
         setSuccess("Tag created successfully");
       }
-      
+
       // Reset form and refresh tags
-      setFormData({ name: "", tag: "category", description: "", sale: "", image: null });
+      setFormData({
+        name: "",
+        tag: "category",
+        description: "",
+        sale: "",
+        image: null,
+      });
       setEditingTag(null);
       setImagePreview(null);
       await fetchTags();
@@ -128,20 +134,26 @@ export default function TagsManagement() {
 
   const handleCancelEdit = () => {
     setEditingTag(null);
-    setFormData({ name: "", tag: "category", description: "", sale: "", image: null });
+    setFormData({
+      name: "",
+      tag: "category",
+      description: "",
+      sale: "",
+      image: null,
+    });
     setImagePreview(null);
     setError("");
   };
 
-  const currentTags = activeTab === "categories" ? categories : collections;
-  
+  const currentTags = activeTab === "category" ? categories : collections;
+
   return (
     <div className="space-y-6">
       <div className="flex space-x-4 border-b border-gray-200">
         <button
-          onClick={() => setActiveTab("categories")}
+          onClick={() => setActiveTab("category")}
           className={`py-2 px-4 font-medium ${
-            activeTab === "categories"
+            activeTab === "category"
               ? "border-b-2 border-primary-dark text-primary-dark"
               : "text-gray-500 hover:text-gray-700"
           }`}
@@ -149,9 +161,9 @@ export default function TagsManagement() {
           Categories
         </button>
         <button
-          onClick={() => setActiveTab("collections")}
+          onClick={() => setActiveTab("collection")}
           className={`py-2 px-4 font-medium ${
-            activeTab === "collections"
+            activeTab === "collection"
               ? "border-b-2 border-primary-dark text-primary-dark"
               : "text-gray-500 hover:text-gray-700"
           }`}
@@ -163,9 +175,9 @@ export default function TagsManagement() {
       {/* Form */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold mb-4">
-          {editingTag ? "Edit Tag" : `Add New ${activeTab.slice(0, -1)}`}
+          {editingTag ? "Edit Tag" : `Add new ${activeTab}`}
         </h3>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -177,7 +189,7 @@ export default function TagsManagement() {
               value={formData.name}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder={`Enter ${activeTab.slice(0, -1)} name`}
+              placeholder={`Enter ${activeTab} name`}
               required
             />
           </div>
@@ -219,7 +231,7 @@ export default function TagsManagement() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Image
             </label>
-            
+
             {/* Current Image Display */}
             {editingTag && editingTag.image && !imagePreview && (
               <div className="mb-4">
@@ -229,12 +241,12 @@ export default function TagsManagement() {
                   alt={editingTag.name}
                   className="w-24 h-24 object-cover rounded-lg border"
                   onError={(e) => {
-                    e.target.style.display = 'none';
+                    e.target.style.display = "none";
                   }}
                 />
               </div>
             )}
-            
+
             {/* File Input */}
             <input
               type="file"
@@ -243,14 +255,14 @@ export default function TagsManagement() {
               accept="image/*"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
             />
-            
+
             {/* File Selection Info */}
             {formData.image && (
               <p className="text-sm text-gray-500 mt-1">
                 Selected: {formData.image.name}
               </p>
             )}
-            
+
             {/* Image Preview */}
             {imagePreview && (
               <div className="mt-2">
@@ -262,13 +274,13 @@ export default function TagsManagement() {
                 />
               </div>
             )}
-            
+
             {/* Clear Image Button */}
             {(formData.image || imagePreview) && (
               <button
                 type="button"
                 onClick={() => {
-                  setFormData(prev => ({ ...prev, image: null }));
+                  setFormData((prev) => ({ ...prev, image: null }));
                   setImagePreview(null);
                 }}
                 className="mt-2 text-sm text-red-600 hover:text-red-700"
@@ -289,7 +301,7 @@ export default function TagsManagement() {
             >
               {loading ? "Saving..." : editingTag ? "Update Tag" : "Create Tag"}
             </button>
-            
+
             {editingTag && (
               <button
                 type="button"
@@ -307,10 +319,11 @@ export default function TagsManagement() {
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold">
-            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} ({currentTags.length})
+            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} (
+            {currentTags.length})
           </h3>
         </div>
-        
+
         {loading ? (
           <div className="p-6 text-center text-gray-500">Loading...</div>
         ) : currentTags.length === 0 ? (
@@ -320,7 +333,10 @@ export default function TagsManagement() {
         ) : (
           <div className="divide-y divide-gray-200">
             {currentTags.map((tag) => (
-              <div key={tag._id || tag.name} className="p-6 flex items-center justify-between">
+              <div
+                key={tag._id || tag.name}
+                className="p-6 flex items-center justify-between"
+              >
                 <div className="flex items-center space-x-4">
                   {tag.image && (
                     <img
@@ -328,7 +344,7 @@ export default function TagsManagement() {
                       alt={tag.name}
                       className="w-12 h-12 object-cover rounded-lg"
                       onError={(e) => {
-                        e.target.style.display = 'none';
+                        e.target.style.display = "none";
                       }}
                     />
                   )}
@@ -339,17 +355,19 @@ export default function TagsManagement() {
                     )}
                     <div className="flex items-center space-x-4 mt-1">
                       <p className="text-xs text-gray-400 capitalize">
-                        Type: {tag.tag || tag.type || "category"}
+                        Type: {tag.tag}
                       </p>
-                      {tag.sale && tag.sale > 0 && (
+                    </div>
+                    <div className="flex items-center space-x-4 mt-1">
+                      {tag.sale && tag.sale > 0 ? (
                         <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
                           {tag.sale}% OFF
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(tag)}
