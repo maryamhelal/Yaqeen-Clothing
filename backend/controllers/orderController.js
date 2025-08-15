@@ -173,8 +173,12 @@ exports.getOrderById = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await orderService.getAllOrders();
-    res.json(orders);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status || '';
+    
+    const result = await orderService.getAllOrders(page, limit, status);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -194,8 +198,11 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getMyOrders = async (req, res) => {
   try {
-    const orders = await orderService.getOrdersByUser(req.user._id);
-    res.json(orders);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const result = await orderService.getOrdersByUser(req.user._id, page, limit);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

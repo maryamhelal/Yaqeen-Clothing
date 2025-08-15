@@ -1,10 +1,10 @@
 const messageRepo = require("../repos/messageRepo");
-const nodemailer = require("nodemailer");
+const emailService = require("./emailService");
 
 exports.createMessage = async (data) => {
   const message = await messageRepo.createMessage(data);
 
-  await sendMail({
+  await emailService.sendMail({
     to: process.env.ADMIN_EMAIL,
     subject: `New Message from ${message.name}`,
     html: `

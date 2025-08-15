@@ -26,6 +26,6 @@ const productSchema = new mongoose.Schema({
   category: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
   collection: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
   onSale: { type: Number, default: 0 }, // percentage off
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

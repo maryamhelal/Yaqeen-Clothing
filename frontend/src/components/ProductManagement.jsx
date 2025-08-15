@@ -20,7 +20,11 @@ export default function ProductManagement() {
   const [newCollection, setNewCollection] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => { productsAPI.getAllProducts().then(setProducts); }, []);
+  useEffect(() => { 
+    productsAPI.getAllProducts().then(result => {
+      setProducts(result.products || []);
+    }); 
+  }, []);
   useEffect(() => {
     if (user?.role === "superadmin") {
       fetch(`${API_BASE_URL}/api/admins/categories-collections`)
@@ -135,7 +139,9 @@ export default function ProductManagement() {
     setEditing(null);
     setForm({ name: "", description: "", price: "", images: [], colors: [], category: "", collection: "", onSale: false });
     setImageFiles([]);
-    productsAPI.getAllProducts().then(setProducts);
+    productsAPI.getAllProducts().then(result => {
+      setProducts(result.products || []);
+    });
   };
 
   const handleEdit = product => {
@@ -144,7 +150,9 @@ export default function ProductManagement() {
   };
   const handleDelete = async id => {
     await productsAPI.deleteProduct(id, token);
-    productsAPI.getAllProducts().then(setProducts);
+    productsAPI.getAllProducts().then(result => {
+      setProducts(result.products || []);
+    });
   };
 
   return (

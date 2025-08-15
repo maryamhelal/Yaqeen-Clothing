@@ -1,9 +1,14 @@
 const productRepo = require("../repos/productRepo");
 const fs = require("fs");
 
-exports.getAllProducts = () => productRepo.findAll();
+exports.getAllProducts = async (page = 1, limit = 10, category = '', collection = '') => {
+  return await productRepo.findAllWithPagination(page, limit, category, collection);
+};
+
 exports.getProductById = (id) => productRepo.findById(id);
+
 exports.createProduct = (data) => productRepo.create(data);
+
 exports.updateProduct = async (id, data) => {
   const existing = await productRepo.findById(id);
   if (existing && data.imageUrl) {
@@ -12,6 +17,7 @@ exports.updateProduct = async (id, data) => {
   }
   return productRepo.update(id, data);
 };
+
 exports.deleteProduct = async (id) => {
   const product = await productRepo.remove(id);
   if (product && product.imageUrl) {
@@ -20,7 +26,11 @@ exports.deleteProduct = async (id) => {
   }
   return product;
 };
-exports.getProductsByCategory = async (category) =>
-  await productRepo.findByCategory(category);
-exports.getProductsByCollection = async (collection) =>
-  await productRepo.findByCollection(collection);
+
+exports.getProductsByCategory = async (category, page = 1, limit = 10) => {
+  return await productRepo.findByCategoryWithPagination(category, page, limit);
+};
+
+exports.getProductsByCollection = async (collection, page = 1, limit = 10) => {
+  return await productRepo.findByCollectionWithPagination(collection, page, limit);
+};

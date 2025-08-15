@@ -104,8 +104,13 @@ exports.updateProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await productService.getAllProducts();
-    res.json(products);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const category = req.query.category || '';
+    const collection = req.query.collection || '';
+    
+    const result = await productService.getAllProducts(page, limit, category, collection);
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -133,10 +138,15 @@ exports.deleteProduct = async (req, res) => {
 
 exports.getProductsByCategory = async (req, res) => {
   try {
-    const products = await productService.getProductsByCategory(
-      req.params.category
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const result = await productService.getProductsByCategory(
+      req.params.category,
+      page,
+      limit
     );
-    res.json(products);
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -144,10 +154,15 @@ exports.getProductsByCategory = async (req, res) => {
 
 exports.getProductsByCollection = async (req, res) => {
   try {
-    const products = await productService.getProductsByCollection(
-      req.params.collection
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const result = await productService.getProductsByCollection(
+      req.params.collection,
+      page,
+      limit
     );
-    res.json(products);
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

@@ -7,15 +7,34 @@ exports.createOrder = async (data) => {
   return await orderRepo.create(data);
 };
 
-exports.getOrderByNumber = async (orderId) => {
-  const order = await orderRepo.findByOrderId(orderId);
+exports.getOrderById = async (orderId) => {
+  const order = await orderRepo.findById(orderId);
   if (!order) {
     throw new Error("Order not found.");
   }
   return order;
 };
 
-exports.getAllOrders = () => orderRepo.findAll();
-exports.updateOrderStatus = (orderId, status) =>
-  orderRepo.updateStatus(orderId, status);
-exports.getOrdersByUser = (userId) => orderRepo.findByUser(userId);
+exports.getOrderByNumber = async (orderNumber) => {
+  const order = await orderRepo.findByOrderNumber(orderNumber);
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+  return order;
+};
+
+exports.getAllOrders = async (page = 1, limit = 10, status = '') => {
+  return await orderRepo.findAllWithPagination(page, limit, status);
+};
+
+exports.updateOrderStatus = async (orderId, status) => {
+  const order = await orderRepo.updateStatus(orderId, status);
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+  return order;
+};
+
+exports.getOrdersByUser = async (userId, page = 1, limit = 10) => {
+  return await orderRepo.findByUserWithPagination(userId, page, limit);
+};
