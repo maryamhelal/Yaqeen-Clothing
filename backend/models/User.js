@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     address: addressSchema,
     orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
+    emailPreferences: {
+      promotionalEmails: { type: Boolean, default: true },
+      orderUpdates: { type: Boolean, default: true },
+      unsubscribeToken: { type: String, unique: true, sparse: true },
+      lastEmailSent: { type: Date },
+    },
   },
   { timestamps: true }
 );

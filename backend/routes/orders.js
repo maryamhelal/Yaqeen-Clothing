@@ -45,38 +45,6 @@ router.post("/", optionalAuth, orderController.createOrder);
 
 /**
  * @swagger
- * /api/orders/{orderId}:
- *   get:
- *     summary: Get order by ID
- *     description: Retrieve a specific order by its ID (authentication required)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: orderId
- *         required: true
- *         schema:
- *           type: string
- *         description: Order ID
- *     responses:
- *       200:
- *         description: Order retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Order'
- *       401:
- *         description: Unauthorized - authentication required
- *       404:
- *         description: Order not found
- *       500:
- *         description: Internal server error
- */
-router.get("/:orderId", auth, orderController.getOrderById);
-
-/**
- * @swagger
  * /api/orders/admin:
  *   get:
  *     summary: Get all orders (Admin)
@@ -132,6 +100,38 @@ router.get(
   requireRole(["admin", "superadmin"]),
   orderController.getAllOrders
 );
+
+/**
+ * @swagger
+ * /api/orders/{orderId}:
+ *   get:
+ *     summary: Get order by ID
+ *     description: Retrieve a specific order by its ID (authentication required)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       404:
+ *         description: Order not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:orderId", auth, orderController.getOrderById);
 
 /**
  * @swagger

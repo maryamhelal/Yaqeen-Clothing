@@ -34,9 +34,22 @@ export default function ProductCard(props) {
   const {
     name = '',
     price = 0,
+    salePercentage = 0,
+    salePrice,
     colors = [],
     images = [],
   } = product;
+
+  // Calculate effective price
+  const getEffectivePrice = () => {
+    if (salePercentage > 0) {
+      return salePrice || Math.round(price * (1 - salePercentage / 100));
+    }
+    return price;
+  };
+
+  const effectivePrice = getEffectivePrice();
+  const hasSale = salePercentage > 0;
 
   const handleAddToCart = () => {
     if (!selectedColor || !selectedSize) return;
@@ -44,7 +57,7 @@ export default function ProductCard(props) {
       ...product,
       selectedColor,
       selectedSize,
-      price,
+      price: effectivePrice, // Use sale price if available
       images,
     }, quantity);
   };
@@ -57,14 +70,39 @@ export default function ProductCard(props) {
           alt={name}
           className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {/* Sale Badge */}
+        {hasSale && (
+          <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+            {salePercentage}% OFF
+          </div>
+        )}
       </div>
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-primary-dark transition-colors">
           {name}
         </h3>
-        <div className="text-xl font-bold text-primary-dark mb-4">
-          {price?.toLocaleString()} EGP
+        
+        {/* Price Display */}
+        <div className="mb-4">
+          {hasSale ? (
+            <div className="space-y-1">
+              <div className="text-lg line-through text-gray-500">
+                {price?.toLocaleString()} EGP
+              </div>
+              <div className="text-2xl font-bold text-red-600">
+                {effectivePrice?.toLocaleString()} EGP
+              </div>
+              <div className="text-sm text-red-600 font-medium">
+                Save {Math.round(price - effectivePrice)?.toLocaleString()} EGP
+              </div>
+            </div>
+          ) : (
+            <div className="text-xl font-bold text-primary-dark">
+              {price?.toLocaleString()} EGP
+            </div>
+          )}
         </div>
+
         {/* Colors */}
         {colors?.length > 0 && (
           <div className="flex space-x-2 mb-4">
@@ -114,12 +152,12 @@ export default function ProductCard(props) {
             onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
             disabled={quantity >= maxQty}
           >+</button>
-          <span className="text-xs text-gray-500">(Max: {maxQty})</span> {/* To be removed */}
+          <span className="text-xs text-gray-500">(Max: {maxQty})</span>
         </div>
         {/* Selected color/size info */}
         <div className="mb-2 text-sm text-gray-600">
-          {selectedColor && <span>Color: {selectedColor} </span>} {/* To be removed */}
-          {selectedSize && <span>Size: {selectedSize}</span>} {/* To be removed */}
+          {selectedColor && <span>Color: {selectedColor} </span>}
+          {selectedSize && <span>Size: {selectedSize}</span>}
         </div>
         <button
           onClick={handleAddToCart}

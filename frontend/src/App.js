@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ThankYouPage from "./pages/ThankYouPage";
+import UnsubscribePage from "./pages/UnsubscribePage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/dashboard/*" element={<DashboardPage />} />
             <Route path="/product/:productId" element={<ProductDetailsPage />} />
             <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
           </Routes>
         </main>
         <Footer />

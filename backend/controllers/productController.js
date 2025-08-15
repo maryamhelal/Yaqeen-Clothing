@@ -9,7 +9,6 @@ exports.createProduct = async (req, res) => {
       colors,
       category,
       collection,
-      onSale,
       images,
     } = req.body;
     if (typeof colors === "string") colors = JSON.parse(colors);
@@ -41,8 +40,7 @@ exports.createProduct = async (req, res) => {
       images,
       colors,
       category,
-      collection,
-      onSale,
+      collection
     });
     res.status(201).json(product);
   } catch (err) {
@@ -59,7 +57,6 @@ exports.updateProduct = async (req, res) => {
       colors,
       category,
       collection,
-      onSale,
       images,
     } = req.body;
     if (typeof colors === "string") colors = JSON.parse(colors);
@@ -87,8 +84,7 @@ exports.updateProduct = async (req, res) => {
       price,
       colors,
       category,
-      collection,
-      onSale,
+      collection
     };
     if (images) updateData.images = images;
     const product = await productService.updateProduct(
@@ -177,16 +173,3 @@ exports.getProductsBySearch = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-
-function getEffectiveSale(product, categorySales = {}, collectionSales = {}) {
-  if (product.onSale > 0) {
-    return product.onSale;
-  }
-  if (product.collection && collectionSales[product.collection] > 0) {
-    return collectionSales[product.collection];
-  }
-  if (product.category && categorySales[product.category] > 0) {
-    return categorySales[product.category];
-  }
-  return 0;
-}

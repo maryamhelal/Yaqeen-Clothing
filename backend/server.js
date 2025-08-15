@@ -12,6 +12,8 @@ const adminRoutes = require("./routes/admins");
 const userRoutes = require("./routes/users");
 const tagRoutes = require("./routes/tags");
 const messageRoutes = require("./routes/messages");
+const saleRoutes = require("./routes/sales");
+const unsubscribeRoutes = require("./routes/unsubscribe");
 require("./models/Admin");
 
 const app = express();
@@ -43,6 +45,8 @@ app.use("/api/admins", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/sales", saleRoutes);
+app.use("/api/unsubscribe", unsubscribeRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -66,10 +70,21 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() =>
+  .then(async () => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
-    })
-  )
+    });
+  })
   .catch((err) => console.error(err));
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});

@@ -20,12 +20,30 @@ export default function ProductDetailsPage() {
   const colorObj = product.colors?.find(c => c.name === selectedColor) || product.colors?.[0];
   const images = colorObj?.images?.length ? colorObj.images : product.images;
 
+  // Calculate effective price
+  const getEffectivePrice = () => {
+    const salePercentage = product.salePercentage || 0;
+    if (salePercentage > 0) {
+      return product.salePrice || Math.round(product.price * (1 - salePercentage / 100));
+    }
+    return product.price;
+  };
+
+  const effectivePrice = getEffectivePrice();
+  const hasSale = product.salePercentage > 0;
+
   return (
     <div className="max-w-5xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
       {/* Images */}
-      <div>
+      <div className="relative">
         <div className="mb-4">
           <img src={images?.[0]} alt={product.name} className="w-full h-96 object-cover rounded-xl" />
+          {/* Sale Badge */}
+          {hasSale && (
+            <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
+              {product.salePercentage}% OFF
+            </div>
+          )}
         </div>
         <div className="flex space-x-2">
           {images?.map((img, idx) => (
@@ -36,7 +54,28 @@ export default function ProductDetailsPage() {
       {/* Details */}
       <div>
         <h2 className="text-3xl font-bold mb-2">{product.name}</h2>
-        <div className="text-xl text-primary-dark font-semibold mb-4">{product.price?.toLocaleString()} EGP</div>
+        
+        {/* Price Display */}
+        <div className="mb-4">
+          {hasSale ? (
+            <div className="space-y-2">
+              <div className="text-2xl line-through text-gray-500">
+                {product.price?.toLocaleString()} EGP
+              </div>
+              <div className="text-3xl font-bold text-red-600">
+                {effectivePrice?.toLocaleString()} EGP
+              </div>
+              <div className="text-lg text-red-600 font-medium">
+                Save {Math.round(product.price - effectivePrice)?.toLocaleString()} EGP
+              </div>
+            </div>
+          ) : (
+            <div className="text-2xl text-primary-dark font-semibold">
+              {product.price?.toLocaleString()} EGP
+            </div>
+          )}
+        </div>
+
         <p className="mb-4 text-gray-700">{product.description}</p>
         {/* Colors */}
         {product.colors?.length > 0 && (
@@ -101,7 +140,7 @@ export default function ProductDetailsPage() {
         {/* Add to Cart */}
         <button
           className="w-full bg-primary-dark text-white py-3 rounded-lg font-bold hover:bg-primary-darker transition-colors"
-          onClick={() => addToCart(product, quantity, selectedColor, selectedSize)}
+          onClick={() => addToCart({...product, price: effectivePrice}, quantity, selectedColor, selectedSize)}
         >
           Add to Cart
         </button>
