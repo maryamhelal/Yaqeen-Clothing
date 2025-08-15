@@ -1,32 +1,33 @@
 import React, { useState, useEffect, useContext } from "react";
 import { productsAPI } from "../api/products";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { tagsAPI } from "../api/tags";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function ProductManagement() {
-  const { token, user } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ 
-    name: "", 
-    description: "", 
-    price: "", 
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    price: "",
     salePercentage: 0,
-    images: [], 
-    colors: [], 
-    category: "", 
-    collection: "" 
+    images: [],
+    colors: [],
+    category: "",
+    collection: "",
   });
   const [imageFiles, setImageFiles] = useState([]);
-  const [colorInput, setColorInput] = useState({ name: "", hex: "#000000", sizes: [] });
+  const [colorInput, setColorInput] = useState({
+    name: "",
+    hex: "#000000",
+    sizes: [],
+  });
   const [sizeInput, setSizeInput] = useState({ size: "", quantity: 0 });
-  const [selectedColorIdx, setSelectedColorIdx] = useState(null);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
-  const [newCategory, setNewCategory] = useState("");
-  const [newCollection, setNewCollection] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -35,45 +36,57 @@ export default function ProductManagement() {
   const [saleEmailData, setSaleEmailData] = useState({
     productIds: [],
     salePercentage: 0,
-    saleType: 'product'
+    saleType: "product",
   });
 
-  useEffect(() => { 
-    productsAPI.getAllProducts().then(result => {
+  useEffect(() => {
+    productsAPI.getAllProducts().then((result) => {
       setProducts(result.products || []);
-    }); 
+    });
   }, []);
 
   useEffect(() => {
-    if (user?.role === "superadmin") {
-      fetch(`${API_BASE_URL}/api/admins/categories-collections`)
-        .then(res => res.json())
-        .then(data => {
-          setCategories(data.categories || []);
-          setCollections(data.collections || []);
-        });
-    }
-  }, [user]);
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await tagsAPI.getCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      }
+    };
 
-  const handleFormChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleImageChange = e => setImageFiles([...e.target.files]);
+    const fetchCollections = async () => {
+      try {
+        const categoriesData = await tagsAPI.getCollections();
+        setCollections(categoriesData);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+        setCollections([]);
+      }
+    };
+
+    fetchCategories();
+    fetchCollections();
+  }, []);
+
+  const handleFormChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleImageChange = (e) => setImageFiles([...e.target.files]);
 
   // --- Color/Size Management ---
   const handleAddSizeToColor = () => {
     if (!sizeInput.size || sizeInput.quantity <= 0) return;
-    setColorInput({ ...colorInput, sizes: [...(colorInput.sizes || []), { ...sizeInput }] });
+    setColorInput({
+      ...colorInput,
+      sizes: [...(colorInput.sizes || []), { ...sizeInput }],
+    });
     setSizeInput({ size: "", quantity: 0 });
   };
-  const handleEditSizeInColor = (idx, newSize) => {
+  const handleDeleteSizeInColor = (idx) => {
     setColorInput({
       ...colorInput,
-      sizes: colorInput.sizes.map((s, i) => i === idx ? newSize : s)
-    });
-  };
-  const handleDeleteSizeInColor = idx => {
-    setColorInput({
-      ...colorInput,
-      sizes: colorInput.sizes.filter((_, i) => i !== idx)
+      sizes: colorInput.sizes.filter((_, i) => i !== idx),
     });
   };
   const handleAddColor = () => {
@@ -85,46 +98,16 @@ export default function ProductManagement() {
     setColorInput({ name: "", hex: "#000000", sizes: [] });
     setError("");
   };
-  const handleEditColor = idx => {
+  const handleEditColor = (idx) => {
     setColorInput(form.colors[idx]);
     setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) });
   };
-  const handleDeleteColor = idx => {
+  const handleDeleteColor = (idx) => {
     setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) });
   };
 
-  // --- Category/Collection Management ---
-  const handleAddCategory = async () => {
-    if (!newCategory) return;
-    await fetch(`${API_BASE_URL}/api/admins/add-category`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category: newCategory })
-    });
-    setCategories([...categories, newCategory]);
-    setNewCategory("");
-  };
-  const handleDeleteCategory = idx => {
-    setCategories(categories.filter((_, i) => i !== idx));
-    // Optionally, call backend to remove
-  };
-  const handleAddCollection = async () => {
-    if (!newCollection) return;
-    await fetch(`${API_BASE_URL}/api/admins/add-collection`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ collection: newCollection })
-    });
-    setCollections([...collections, newCollection]);
-    setNewCollection("");
-  };
-  const handleDeleteCollection = idx => {
-    setCollections(collections.filter((_, i) => i !== idx));
-    // Optionally, call backend to remove
-  };
-
   // --- Form Submission ---
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -144,41 +127,76 @@ export default function ProductManagement() {
       }
       for (const size of color.sizes) {
         if (!size.size || size.quantity <= 0) {
-          setError(`Each size for color '${color.name}' must have a name and quantity > 0.`);
+          setError(
+            `Each size for color '${color.name}' must have a name and quantity > 0.`
+          );
           return;
         }
       }
     }
-    const productData = { ...form };
-    if (imageFiles.length) productData.images = imageFiles;
-    if (editing) {
-      await productsAPI.editProduct(editing, productData, token);
-      setSuccess("Product updated successfully!");
-    } else {
-      await productsAPI.addProduct(productData, token);
-      setSuccess("Product created successfully!");
+
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      
+      // Add product data
+      formData.append('name', form.name);
+      formData.append('description', form.description);
+      formData.append('price', form.price);
+      formData.append('salePercentage', form.salePercentage);
+      formData.append('category', form.category);
+      formData.append('collection', form.collection);
+      formData.append('colors', JSON.stringify(form.colors));
+      
+      // Add image files
+      if (imageFiles.length > 0) {
+        imageFiles.forEach((file, index) => {
+          formData.append('images', file);
+        });
+      }
+
+      if (editing) {
+        await productsAPI.editProduct(editing, formData, token);
+        setSuccess("Product updated successfully!");
+      } else {
+        await productsAPI.addProduct(formData, token);
+        setSuccess("Product created successfully!");
+      }
+      
+      setEditing(null);
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        salePercentage: 0,
+        images: [],
+        colors: [],
+        category: "",
+        collection: "",
+      });
+      setImageFiles([]);
+      productsAPI.getAllProducts().then((result) => {
+        setProducts(result.products || []);
+      });
+    } catch (error) {
+      console.error("Error processing images:", error);
+      setError("Error processing images. Please try again.");
     }
-    setEditing(null);
-    setForm({ name: "", description: "", price: "", salePercentage: 0, images: [], colors: [], category: "", collection: "" });
-    setImageFiles([]);
-    productsAPI.getAllProducts().then(result => {
-      setProducts(result.products || []);
+  };
+
+  const handleEdit = (product) => {
+    setEditing(product._id);
+    setForm({
+      ...product,
+      salePercentage: product.salePercentage || 0,
+      images: [],
+      colors: product.colors || [],
     });
   };
 
-  const handleEdit = product => {
-    setEditing(product._id);
-    setForm({ 
-      ...product, 
-      salePercentage: product.salePercentage || 0,
-      images: [], 
-      colors: product.colors || [] 
-    });
-  };
-  
-  const handleDelete = async id => {
+  const handleDelete = async (id) => {
     await productsAPI.deleteProduct(id, token);
-    productsAPI.getAllProducts().then(result => {
+    productsAPI.getAllProducts().then((result) => {
       setProducts(result.products || []);
     });
   };
@@ -186,31 +204,34 @@ export default function ProductManagement() {
   // --- Sale Management ---
   const handleUpdateSale = async (productId, salePercentage) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/sales/product/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ salePercentage })
-      });
-      
+      const response = await fetch(
+        `${API_BASE_URL}/api/sales/product/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ salePercentage }),
+        }
+      );
+
       const result = await response.json();
-      
+
       if (response.ok) {
         setSuccess(result.message);
         if (result.warnings) {
-          setError(`Warning: ${result.warnings.join(', ')}`);
+          setError(`Warning: ${result.warnings.join(", ")}`);
         }
         // Refresh products
-        productsAPI.getAllProducts().then(result => {
+        productsAPI.getAllProducts().then((result) => {
           setProducts(result.products || []);
         });
       } else {
-        setError(result.error || 'Failed to update sale');
+        setError(result.error || "Failed to update sale");
       }
     } catch (err) {
-      setError('Failed to update sale');
+      setError("Failed to update sale");
       console.error(err);
     }
   };
@@ -220,7 +241,7 @@ export default function ProductManagement() {
       setError("Please select products to update");
       return;
     }
-    
+
     if (bulkSalePercentage < 0 || bulkSalePercentage > 100) {
       setError("Sale percentage must be between 0 and 100");
       return;
@@ -228,32 +249,32 @@ export default function ProductManagement() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/sales/bulk`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           productIds: selectedProducts,
-          salePercentage: bulkSalePercentage
-        })
+          salePercentage: bulkSalePercentage,
+        }),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         setSuccess(result.message);
         setSelectedProducts([]);
         setBulkSalePercentage(0);
         // Refresh products
-        productsAPI.getAllProducts().then(result => {
+        productsAPI.getAllProducts().then((result) => {
           setProducts(result.products || []);
         });
       } else {
-        setError(result.error || 'Failed to update bulk sale');
+        setError(result.error || "Failed to update bulk sale");
       }
     } catch (err) {
-      setError('Failed to update bulk sale');
+      setError("Failed to update bulk sale");
       console.error(err);
     }
   };
@@ -263,41 +284,48 @@ export default function ProductManagement() {
       setError("Please select products for the sale email");
       return;
     }
-    
-    if (saleEmailData.salePercentage < 0 || saleEmailData.salePercentage > 100) {
+
+    if (
+      saleEmailData.salePercentage < 0 ||
+      saleEmailData.salePercentage > 100
+    ) {
       setError("Sale percentage must be between 0 and 100");
       return;
     }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/sales/email`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(saleEmailData)
+        body: JSON.stringify(saleEmailData),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         setSuccess(result.message);
         setShowSaleEmailModal(false);
-        setSaleEmailData({ productIds: [], salePercentage: 0, saleType: 'product' });
+        setSaleEmailData({
+          productIds: [],
+          salePercentage: 0,
+          saleType: "product",
+        });
       } else {
-        setError(result.error || 'Failed to send sale email');
+        setError(result.error || "Failed to send sale email");
       }
     } catch (err) {
-      setError('Failed to send sale email');
+      setError("Failed to send sale email");
       console.error(err);
     }
   };
 
   const toggleProductSelection = (productId) => {
-    setSelectedProducts(prev => 
-      prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
         : [...prev, productId]
     );
   };
@@ -313,14 +341,221 @@ export default function ProductManagement() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Product Management</h2>
-      
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
-      {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{success}</div>}
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {success}
+        </div>
+      )}
+
+      {/* Product Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-4 rounded-xl shadow mb-8 space-y-4"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleFormChange}
+            placeholder="Name"
+            className="border p-2 rounded"
+            required
+          />
+          <input
+            name="price"
+            value={form.price}
+            onChange={handleFormChange}
+            placeholder="Price"
+            type="number"
+            className="border p-2 rounded"
+            required
+          />
+          <input
+            name="salePercentage"
+            value={form.salePercentage}
+            onChange={handleFormChange}
+            placeholder="Sale %"
+            type="number"
+            min="0"
+            max="100"
+            className="border p-2 rounded"
+          />
+          {/* Category dropdown */}
+          <div className="flex items-center space-x-2">
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleFormChange}
+              className="border p-2 rounded w-full"
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat, i) => (
+                <option key={i} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Collection dropdown */}
+          <div className="flex items-center space-x-2">
+            <select
+              name="collection"
+              value={form.collection}
+              onChange={handleFormChange}
+              className="border p-2 rounded w-full"
+            >
+              <option value="">Select Collection</option>
+              {collections.map((coll, i) => (
+                <option key={i} value={coll._id}>
+                  {coll.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleFormChange}
+          placeholder="Description"
+          className="border p-2 rounded w-full"
+        />
+        <input
+          type="file"
+          multiple
+          onChange={handleImageChange}
+          className="border p-2 rounded w-full"
+        />
+        {/* Colors and sizes */}
+        <div className="mb-2">
+          <div className="flex space-x-2 mb-2">
+            <input
+              placeholder="Color Name"
+              value={colorInput.name}
+              onChange={(e) =>
+                setColorInput({ ...colorInput, name: e.target.value })
+              }
+              className="border p-2 rounded"
+            />
+            <input
+              type="color"
+              value={colorInput.hex}
+              onChange={(e) =>
+                setColorInput({ ...colorInput, hex: e.target.value })
+              }
+              className="border p-2 rounded w-12 h-12"
+            />
+            <button
+              type="button"
+              onClick={handleAddColor}
+              className="bg-primary-dark text-white px-4 py-2 rounded"
+            >
+              Add Color
+            </button>
+          </div>
+          {/* Add sizes to the color being created */}
+          <div className="flex space-x-2 mb-2">
+            <input
+              placeholder="Size"
+              value={sizeInput.size}
+              onChange={(e) =>
+                setSizeInput({ ...sizeInput, size: e.target.value })
+              }
+              className="border p-2 rounded"
+            />
+            <input
+              placeholder="Quantity"
+              type="number"
+              value={sizeInput.quantity}
+              onChange={(e) =>
+                setSizeInput({
+                  ...sizeInput,
+                  quantity: parseInt(e.target.value) || 0,
+                })
+              }
+              className="border p-2 rounded"
+            />
+            <button
+              type="button"
+              onClick={handleAddSizeToColor}
+              className="bg-primary-dark text-white px-4 py-2 rounded"
+            >
+              Add Size
+            </button>
+          </div>
+          {/* Display sizes for the color being created */}
+          {colorInput.sizes && colorInput.sizes.length > 0 && (
+            <div className="mb-2">
+              <p>Sizes for {colorInput.name}:</p>
+              {colorInput.sizes.map((size, idx) => (
+                <div key={idx} className="flex items-center space-x-2">
+                  <span>
+                    {size.size} - {size.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSizeInColor(idx)}
+                    className="text-red-500"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Display added colors */}
+        {form.colors && form.colors.length > 0 && (
+          <div className="mb-4">
+            <p>Added Colors:</p>
+            {form.colors.map((color, idx) => (
+              <div key={idx} className="flex items-center space-x-2 mb-2">
+                <div
+                  style={{
+                    backgroundColor: color.hex,
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                  }}
+                ></div>
+                <span>{color.name}</span>
+                <span>({color.sizes.length} sizes)</span>
+                <button
+                  type="button"
+                  onClick={() => handleEditColor(idx)}
+                  className="text-blue-500"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteColor(idx)}
+                  className="text-red-500"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          type="submit"
+          className="bg-primary-dark text-white px-4 py-2 rounded"
+        >
+          {editing ? "Update Product" : "Add Product"}
+        </button>
+      </form>
 
       {/* Sale Management Section */}
       <div className="bg-white p-4 rounded-xl shadow mb-8">
         <h3 className="text-lg font-semibold mb-4">Sale Management</h3>
-        
+
         {/* Bulk Sale Update */}
         <div className="mb-6 p-4 border rounded-lg">
           <h4 className="font-medium mb-3">Bulk Sale Update</h4>
@@ -330,7 +565,9 @@ export default function ProductManagement() {
               min="0"
               max="100"
               value={bulkSalePercentage}
-              onChange={(e) => setBulkSalePercentage(parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                setBulkSalePercentage(parseInt(e.target.value) || 0)
+              }
               placeholder="Sale %"
               className="border p-2 rounded w-24"
             />
@@ -354,91 +591,6 @@ export default function ProductManagement() {
         </div>
       </div>
 
-      {/* Product Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-4 rounded-xl shadow mb-8 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <input name="name" value={form.name} onChange={handleFormChange} placeholder="Name" className="border p-2 rounded" required />
-          <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" className="border p-2 rounded" required />
-          <input name="salePercentage" value={form.salePercentage} onChange={handleFormChange} placeholder="Sale %" type="number" min="0" max="100" className="border p-2 rounded" />
-          {/* Category dropdown for superadmin */}
-          {user?.role === "superadmin" ? (
-            <div className="flex items-center space-x-2">
-              <select name="category" value={form.category} onChange={handleFormChange} className="border p-2 rounded w-full">
-                <option value="">Select Category</option>
-                {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
-              </select>
-              <input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Add Category" className="border p-2 rounded" />
-              <button type="button" onClick={handleAddCategory} className="bg-primary-dark text-white px-2 py-1 rounded">+</button>
-              {categories.map((cat, i) => (
-                <button key={i} type="button" onClick={() => handleDeleteCategory(i)} className="ml-1 text-xs text-red-500">x</button>
-              ))}
-            </div>
-          ) : (
-            <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" className="border p-2 rounded" />
-          )}
-          {/* Collection dropdown for superadmin */}
-          {user?.role === "superadmin" ? (
-            <div className="flex items-center space-x-2">
-              <select name="collection" value={form.collection} onChange={handleFormChange} className="border p-2 rounded w-full">
-                <option value="">Select Collection</option>
-                {collections.map((col, i) => <option key={i} value={col}>{col}</option>)}
-              </select>
-              <input value={newCollection} onChange={e => setNewCollection(e.target.value)} placeholder="Add Collection" className="border p-2 rounded" />
-              <button type="button" onClick={handleAddCollection} className="bg-primary-dark text-white px-2 py-1 rounded">+</button>
-              {collections.map((col, i) => (
-                <button key={i} type="button" onClick={() => handleDeleteCollection(i)} className="ml-1 text-xs text-red-500">x</button>
-              ))}
-            </div>
-          ) : (
-            <input name="collection" value={form.collection} onChange={handleFormChange} placeholder="Collection" className="border p-2 rounded" />
-          )}
-        </div>
-        <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Description" className="border p-2 rounded w-full" />
-        <input type="file" multiple onChange={handleImageChange} className="border p-2 rounded w-full" />
-        {/* Colors and sizes */}
-        <div className="mb-2">
-          <div className="flex space-x-2 mb-2">
-            <input placeholder="Color Name" value={colorInput.name} onChange={e => setColorInput({ ...colorInput, name: e.target.value })} className="border p-2 rounded" />
-            <input type="color" value={colorInput.hex} onChange={e => setColorInput({ ...colorInput, hex: e.target.value })} className="border p-2 rounded w-12 h-12" />
-            <button type="button" onClick={handleAddColor} className="bg-primary-dark text-white px-4 py-2 rounded">Add Color</button>
-          </div>
-          {/* Add sizes to the color being created */}
-          <div className="flex space-x-2 mb-2">
-            <input placeholder="Size" value={sizeInput.size} onChange={e => setSizeInput({ ...sizeInput, size: e.target.value })} className="border p-2 rounded" />
-            <input placeholder="Quantity" type="number" value={sizeInput.quantity} onChange={e => setSizeInput({ ...sizeInput, quantity: parseInt(e.target.value) || 0 })} className="border p-2 rounded" />
-            <button type="button" onClick={handleAddSizeToColor} className="bg-primary-dark text-white px-4 py-2 rounded">Add Size</button>
-          </div>
-          {/* Display sizes for the color being created */}
-          {colorInput.sizes && colorInput.sizes.length > 0 && (
-            <div className="mb-2">
-              <p>Sizes for {colorInput.name}:</p>
-              {colorInput.sizes.map((size, idx) => (
-                <div key={idx} className="flex items-center space-x-2">
-                  <span>{size.size} - {size.quantity}</span>
-                  <button type="button" onClick={() => handleDeleteSizeInColor(idx)} className="text-red-500">x</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Display added colors */}
-        {form.colors && form.colors.length > 0 && (
-          <div className="mb-4">
-            <p>Added Colors:</p>
-            {form.colors.map((color, idx) => (
-              <div key={idx} className="flex items-center space-x-2 mb-2">
-                <div style={{ backgroundColor: color.hex, width: 20, height: 20, borderRadius: '50%' }}></div>
-                <span>{color.name}</span>
-                <span>({color.sizes.length} sizes)</span>
-                <button type="button" onClick={() => handleEditColor(idx)} className="text-blue-500">Edit</button>
-                <button type="button" onClick={() => handleDeleteColor(idx)} className="text-red-500">Delete</button>
-              </div>
-            ))}
-          </div>
-        )}
-        <button type="submit" className="bg-primary-dark text-white px-4 py-2 rounded">{editing ? "Update Product" : "Add Product"}</button>
-      </form>
-
       {/* Products List */}
       <div className="bg-white p-4 rounded-xl shadow">
         <h3 className="text-lg font-semibold mb-4">Products</h3>
@@ -449,10 +601,13 @@ export default function ProductManagement() {
                 <th className="p-2 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedProducts.length === products.length && products.length > 0}
+                    checked={
+                      selectedProducts.length === products.length &&
+                      products.length > 0
+                    }
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedProducts(products.map(p => p._id));
+                        setSelectedProducts(products.map((p) => p._id));
                       } else {
                         setSelectedProducts([]);
                       }
@@ -468,7 +623,7 @@ export default function ProductManagement() {
               </tr>
             </thead>
             <tbody>
-              {products.map(product => (
+              {products.map((product) => (
                 <tr key={product._id} className="border-b">
                   <td className="p-2">
                     <input
@@ -480,7 +635,13 @@ export default function ProductManagement() {
                   <td className="p-2">{product.name}</td>
                   <td className="p-2">
                     <div>
-                      <span className={product.salePercentage > 0 ? "line-through text-gray-500" : ""}>
+                      <span
+                        className={
+                          product.salePercentage > 0
+                            ? "line-through text-gray-500"
+                            : ""
+                        }
+                      >
                         {product.price} EGP
                       </span>
                       {product.salePercentage > 0 && (
@@ -499,15 +660,30 @@ export default function ProductManagement() {
                       min="0"
                       max="100"
                       value={product.salePercentage || 0}
-                      onChange={(e) => handleUpdateSale(product._id, parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleUpdateSale(
+                          product._id,
+                          parseInt(e.target.value) || 0
+                        )
+                      }
                       className="border p-1 rounded w-16"
                     />
                   </td>
                   <td className="p-2">{product.category}</td>
                   <td className="p-2">{product.collection}</td>
                   <td className="p-2">
-                    <button onClick={() => handleEdit(product)} className="text-blue-500 mr-2">Edit</button>
-                    <button onClick={() => handleDelete(product._id)} className="text-red-500">Delete</button>
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="text-blue-500 mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="text-red-500"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -523,27 +699,35 @@ export default function ProductManagement() {
             <h3 className="text-lg font-semibold mb-4">Send Sale Email</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Sale Percentage</label>
+                <label className="block text-sm font-medium mb-1">
+                  Sale Percentage
+                </label>
                 <input
                   type="number"
                   min="0"
                   max="100"
                   value={saleEmailData.salePercentage}
-                  onChange={(e) => setSaleEmailData({
-                    ...saleEmailData,
-                    salePercentage: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSaleEmailData({
+                      ...saleEmailData,
+                      salePercentage: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="border p-2 rounded w-full"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Sale Type</label>
+                <label className="block text-sm font-medium mb-1">
+                  Sale Type
+                </label>
                 <select
                   value={saleEmailData.saleType}
-                  onChange={(e) => setSaleEmailData({
-                    ...saleEmailData,
-                    saleType: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setSaleEmailData({
+                      ...saleEmailData,
+                      saleType: e.target.value,
+                    })
+                  }
                   className="border p-2 rounded w-full"
                 >
                   <option value="product">Product Sale</option>
@@ -556,7 +740,8 @@ export default function ProductManagement() {
                   Selected Products ({selectedProducts.length})
                 </label>
                 <p className="text-sm text-gray-600">
-                  {selectedProducts.length} products will be included in the sale email
+                  {selectedProducts.length} products will be included in the
+                  sale email
                 </p>
               </div>
               <div className="flex space-x-3">
@@ -579,4 +764,4 @@ export default function ProductManagement() {
       )}
     </div>
   );
-} 
+}

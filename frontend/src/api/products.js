@@ -93,13 +93,15 @@ export const productsAPI = {
   // Add product (admin)
   addProduct: async (productData, token) => {
     try {
+      const headers = { 
+        'Authorization': `Bearer ${token}`
+      };
+      
+      // Don't set Content-Type for FormData, let the browser set it with boundary
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData),
+        headers,
+        body: productData, // productData is now FormData
       });
       
       if (!response.ok) {
@@ -117,13 +119,15 @@ export const productsAPI = {
   // Edit product (admin)
   editProduct: async (id, productData, token) => {
     try {
+      const headers = { 
+        'Authorization': `Bearer ${token}`
+      };
+      
+      // Don't set Content-Type for FormData, let the browser set it with boundary
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "PUT",
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData),
+        headers,
+        body: productData, // productData is now FormData
       });
       
       if (!response.ok) {
