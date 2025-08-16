@@ -1,0 +1,12 @@
+{
+  "name": "yaqeen-clothing",
+  "version": "0.1.0",
+  "private": false,
+  "scripts": {
+    "install-all": "npm install --prefix backend && npm install --prefix frontend",
+    "start": "concurrently \"npm start --prefix backend\" \"npm start --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
