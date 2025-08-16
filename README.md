@@ -2,7 +2,7 @@
 
 ## Install dependencies
 
-Clone the repository and install dependencies for both backend & frontend:
+Clone the repository and install dependencies for both backend and frontend:
 
 ```bash
 git clone https://github.com/maryamhelal/Yaqeen-Clothing.git
@@ -19,7 +19,7 @@ npm run install-all
 #### Example .env for the backend folder
 
 ```bash
-PORT = 5000
+PORT=5000
 MONGO_URI=your_mongo_link
 JWT_SECRET=secret-jwt-token
 EMAIL_USER=your_email
@@ -28,17 +28,28 @@ EMAIL_PASS=your_app_password
 
 ## Running the app
 
-### Backend + Frontend
+### Locally
 
 ```bash
 npm start
 ```
 
-- You can access the application by going to [http://localhost:3000](http://localhost:3000) in your browser.
-- You can access the swagger ui by going to [http://localhost:5000/api-docs](http://localhost:5000/api-docs) in your browser.
-
 ### Using Docker
+
+start containers:
 
 ```bash
 docker compose up -d
 ```
+
+stop containers:
+
+```bash
+docker compose down
+```
+
+### Services
+
+- **Frontend**: Runs on port 3000, accessible at [http://localhost:3000](http://localhost:3000)
+- **Backend**: Runs on port 5000, accessible at [http://localhost:5000](http://localhost:5000)
+- **Swagger UI**: Runs on port 5000, accessible at [http://localhost:5000/api-docs](http://localhost:5000/api-docs)
