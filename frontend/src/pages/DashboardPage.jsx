@@ -55,18 +55,18 @@ export default function DashboardPage() {
           >
             Tags
           </button>
-          <button
-            onClick={() => setTab("users")}
-            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
-              tab === "users"
-                ? "bg-primary-dark text-white"
-                : "bg-white text-gray-800 border border-gray-200"
-            }`}
-          >
-            Users
-          </button>
           {isSuperAdmin() && (
             <>
+              <button
+                onClick={() => setTab("users")}
+                className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
+                  tab === "users"
+                    ? "bg-primary-dark text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
+                }`}
+              >
+                Users
+              </button>
               <button
                 onClick={() => setTab("admins")}
                 className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${

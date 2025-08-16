@@ -49,7 +49,35 @@ const upload = require("../middleware/upload");
  *       500:
  *         description: Internal server error
  */
-router.post("/", auth, upload.single('image'), tagController.createTag);
+router.post("/", auth, upload.single("image"), tagController.createTag);
+
+/**
+ * @swagger
+ * /api/tags/id/{id}:
+ *   get:
+ *     summary: Get tag by ID
+ *     description: Retrieve a specific tag by its ID
+ *     tags: [Tags]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tag iD
+ *     responses:
+ *       200:
+ *         description: Tag retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Tag'
+ *       404:
+ *         description: Tag not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/id/:id", tagController.getTagById);
 
 /**
  * @swagger
@@ -129,7 +157,12 @@ router.get("/name/:name", tagController.getTag);
  *       500:
  *         description: Internal server error
  */
-router.put("/name/:name", auth, upload.single('image'), tagController.updateTag);
+router.put(
+  "/name/:name",
+  auth,
+  upload.single("image"),
+  tagController.updateTag
+);
 
 /**
  * @swagger

@@ -40,9 +40,45 @@ export default function ProductManagement() {
   });
 
   useEffect(() => {
-    productsAPI.getAllProducts().then((result) => {
-      setProducts(result.products || []);
-    });
+    const fetchProductsWithTags = async () => {
+      try {
+        const result = await productsAPI.getAllProducts();
+        let productsData = result.products || [];
+
+        // Map category & collection ids to their names
+        const enrichedProducts = await Promise.all(
+          productsData.map(async (product) => {
+            let categoryName = "";
+            let collectionName = "";
+
+            try {
+              if (product.category) {
+                const cat = await tagsAPI.getTagById(product.category);
+                categoryName = cat.name;
+              }
+              if (product.collection) {
+                const coll = await tagsAPI.getTagById(product.collection);
+                collectionName = coll.name;
+              }
+            } catch (err) {
+              console.error("Error fetching category/collection:", err);
+            }
+
+            return {
+              ...product,
+              categoryName,
+              collectionName,
+            };
+          })
+        );
+
+        setProducts(enrichedProducts);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+
+    fetchProductsWithTags();
   }, []);
 
   useEffect(() => {
@@ -669,8 +705,8 @@ export default function ProductManagement() {
                       className="border p-1 rounded w-16"
                     />
                   </td>
-                  <td className="p-2">{product.category}</td>
-                  <td className="p-2">{product.collection}</td>
+                  <td className="p-2">{product.categoryName}</td>
+                  <td className="p-2">{product.collectionName}</td>
                   <td className="p-2">
                     <button
                       onClick={() => handleEdit(product)}

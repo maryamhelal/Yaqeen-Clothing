@@ -23,18 +23,15 @@ export default function CategoryCard({ name, image }) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 mb-4">
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 mb-4">
           <div
             className="
-              px-4 py-2 
-              bg-primary-darker 
-              rounded-md 
-              shadow-md
-              text-white font-semibold
-              transform group-hover:-translate-y-10
+              px-4 py-2
+              text-white text-xl font-bold
+              transform group-hover:-translate-y-2
               transition-all duration-300 ease-out"
           >
-            {name}
+            {name.toUpperCase()}
           </div>
         </div>
       </div>
