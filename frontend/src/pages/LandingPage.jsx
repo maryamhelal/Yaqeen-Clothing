@@ -39,7 +39,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-pink-50 to-purple-50 py-20">
+      <div className="bg-gradient-to-r from-pink-50 to-purple-50 pt-20 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
             Discover Your Style
@@ -94,30 +94,32 @@ export default function LandingPage() {
               {collections.map((collection) => (
                 <div
                   key={collection._id || collection.name}
-                  className="bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
+                  className="bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg text-center hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() => handleCollectionClick(collection.name)}
                 >
                   {collection.image && (
                     <img
                       src={collection.image}
                       alt={collection.name}
-                      className="w-full h-80 object-cover rounded-lg mb-4"
+                      className="w-full h-80 object-cover rounded-t-lg"
                       onError={(e) => {
                         e.target.style.display = "none";
                       }}
                     />
                   )}
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                    {collection.name}
-                  </h3>
-                  {collection.description && (
-                    <p className="text-gray-600 mb-4">
-                      {collection.description}
-                    </p>
-                  )}
-                  <button className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
-                    Explore
-                  </button>
+                  <div className="p-4">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                      {collection.name}
+                    </h3>
+                    {collection.description && (
+                      <p className="text-gray-600 mb-4">
+                        {collection.description}
+                      </p>
+                    )}
+                    <button className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
+                      Explore
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

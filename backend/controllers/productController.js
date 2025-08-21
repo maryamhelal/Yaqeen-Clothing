@@ -2,85 +2,51 @@ const productService = require("../services/productService");
 
 exports.createProduct = async (req, res) => {
   try {
-    let { name, description, price, colors, category, collection, images } =
+    const { name, description, price, salePercentage, category, collection } =
       req.body;
-    if (typeof colors === "string") colors = JSON.parse(colors);
-    if (typeof images === "string") images = JSON.parse(images);
 
-    // Convert color images from base64 to Buffer
-    colors = colors.map((color) => ({
-      ...color,
-      hex: color.hex || "#ffffff",
-      image: color.image
-        ? Buffer.from(
-            color.image.replace(/^data:image\/\w+;base64,/, ""),
-            "base64"
-          )
-        : undefined,
-    }));
+    let colors = JSON.parse(req.body.colors || "[]");
 
-    // Convert product images from base64 to Buffer
-    images = images.map((img) =>
-      img
-        ? Buffer.from(img.replace(/^data:image\/\w+;base64,/, ""), "base64")
-        : undefined
-    );
+    colors = colors.map((color, idx) => {
+      const file = req.files[`colorImages_${idx}`]?.[0];
+      return {
+        ...color,
+        image: file ? file.buffer : undefined,
+      };
+    });
+
+    const productImages = req.files["images"]
+      ? req.files["images"].map((f) => f.buffer)
+      : [];
 
     const product = await productService.createProduct({
-      name,
-      description,
-      price,
-      images,
+      ...req.body,
       colors,
-      category,
-      collection,
+      images: productImages,
     });
+
     res.status(201).json(product);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Failed to create product" });
   }
 };
 
 exports.updateProduct = async (req, res) => {
   try {
-    let { name, description, price, colors, category, collection, images } =
-      req.body;
-    if (typeof colors === "string") colors = JSON.parse(colors);
-    if (typeof images === "string") images = JSON.parse(images);
+    const updateData = { ...req.body };
+    if (req.files?.length) {
+      updateData.images = req.files.map((file) => file.path);
+    }
 
-    colors = colors.map((color) => ({
-      ...color,
-      image: color.image
-        ? Buffer.from(
-            color.image.replace(/^data:image\/\w+;base64,/, ""),
-            "base64"
-          )
-        : undefined,
-    }));
-
-    images = images.map((img) =>
-      img
-        ? Buffer.from(img.replace(/^data:image\/\w+;base64,/, ""), "base64")
-        : undefined
-    );
-
-    const updateData = {
-      name,
-      description,
-      price,
-      colors,
-      category,
-      collection,
-    };
-    if (images) updateData.images = images;
     const product = await productService.updateProduct(
       req.params.id,
       updateData
     );
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product) return res.status(404).json({ error: "Not found" });
     res.json(product);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: "Failed to update product" });
   }
 };
 

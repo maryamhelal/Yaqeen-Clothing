@@ -23,6 +23,7 @@ export default function ProductManagement() {
   const [colorInput, setColorInput] = useState({
     name: "",
     hex: "#000000",
+    image: null,
     sizes: [],
   });
   const [sizeInput, setSizeInput] = useState({ size: "", quantity: 0 });
@@ -131,7 +132,7 @@ export default function ProductManagement() {
       return;
     }
     setForm({ ...form, colors: [...form.colors, { ...colorInput }] });
-    setColorInput({ name: "", hex: "#000000", sizes: [] });
+    setColorInput({ name: "", hex: "#000000", image: null, sizes: [] });
     setError("");
   };
   const handleEditColor = (idx) => {
@@ -140,6 +141,9 @@ export default function ProductManagement() {
   };
   const handleDeleteColor = (idx) => {
     setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) });
+  };
+  const handleColorImageChange = (e) => {
+    setColorInput({ ...colorInput, image: e.target.files[0] });
   };
 
   // --- Form Submission ---
@@ -182,14 +186,27 @@ export default function ProductManagement() {
       formData.append("salePercentage", form.salePercentage);
       formData.append("category", form.category);
       formData.append("collection", form.collection);
-      formData.append("colors", JSON.stringify(form.colors));
 
-      // Add image files
-      if (imageFiles.length > 0) {
-        imageFiles.forEach((file, index) => {
-          formData.append("images", file);
-        });
-      }
+      // Colors (metadata only)
+      const colorsMetadata = form.colors.map(({ name, hex, sizes }, idx) => ({
+        name,
+        hex,
+        sizes,
+        hasImage: !!form.colors[idx].image,
+      }));
+      formData.append("colors", JSON.stringify(colorsMetadata));
+
+      // Add product images
+      imageFiles.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      // Add color images
+      form.colors.forEach((color, idx) => {
+        if (color.image) {
+          formData.append(`colorImages_${idx}`, color.image);
+        }
+      });
 
       if (editing) {
         await productsAPI.editProduct(editing, formData, token);
@@ -340,7 +357,7 @@ export default function ProductManagement() {
   };
 
   return (
-    <div>
+    <div className="px-2 sm:px-4">
       <h2 className="text-2xl font-bold mb-4">Product Management</h2>
 
       {error && (
@@ -359,7 +376,7 @@ export default function ProductManagement() {
         onSubmit={handleSubmit}
         className="bg-white p-4 rounded-xl shadow mb-8 space-y-4"
       >
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             name="name"
             value={form.name}
@@ -433,24 +450,33 @@ export default function ProductManagement() {
           onChange={handleImageChange}
           className="border p-2 rounded w-full"
         />
+
         {/* Colors and sizes */}
         <div className="mb-2">
-          <div className="flex space-x-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 mb-2">
+            <div>
+              <input
+                placeholder="Color Name"
+                value={colorInput.name}
+                onChange={(e) =>
+                  setColorInput({ ...colorInput, name: e.target.value })
+                }
+                className="border p-2 rounded"
+              />
+              <input
+                type="color"
+                value={colorInput.hex}
+                onChange={(e) =>
+                  setColorInput({ ...colorInput, hex: e.target.value })
+                }
+                className="border ml-2 p-2 rounded w-10 h-10"
+              />
+            </div>
             <input
-              placeholder="Color Name"
-              value={colorInput.name}
-              onChange={(e) =>
-                setColorInput({ ...colorInput, name: e.target.value })
-              }
-              className="border p-2 rounded"
-            />
-            <input
-              type="color"
-              value={colorInput.hex}
-              onChange={(e) =>
-                setColorInput({ ...colorInput, hex: e.target.value })
-              }
-              className="border p-2 rounded w-12 h-12"
+              type="file"
+              accept="image/*"
+              onChange={handleColorImageChange}
+              className="border p-2 rounded flex-1"
             />
             <button
               type="button"
@@ -460,15 +486,16 @@ export default function ProductManagement() {
               Add Color
             </button>
           </div>
-          {/* Add sizes to the color being created */}
-          <div className="flex space-x-2 mb-2">
+
+          {/* Add sizes */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 mb-2">
             <input
               placeholder="Size"
               value={sizeInput.size}
               onChange={(e) =>
                 setSizeInput({ ...sizeInput, size: e.target.value })
               }
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded flex-1"
             />
             <input
               placeholder="Quantity"
@@ -480,7 +507,7 @@ export default function ProductManagement() {
                   quantity: parseInt(e.target.value) || 0,
                 })
               }
-              className="border p-2 rounded"
+              className="border p-2 rounded flex-1"
             />
             <button
               type="button"
@@ -490,10 +517,10 @@ export default function ProductManagement() {
               Add Size
             </button>
           </div>
-          {/* Display sizes for the color being created */}
+
           {colorInput.sizes && colorInput.sizes.length > 0 && (
             <div className="mb-2">
-              <p>Sizes for {colorInput.name}:</p>
+              <p className="font-medium">Sizes for {colorInput.name}:</p>
               {colorInput.sizes.map((size, idx) => (
                 <div key={idx} className="flex items-center space-x-2">
                   <span>
@@ -511,12 +538,16 @@ export default function ProductManagement() {
             </div>
           )}
         </div>
+
         {/* Display added colors */}
         {form.colors && form.colors.length > 0 && (
           <div className="mb-4">
-            <p>Added Colors:</p>
+            <p className="font-medium">Added Colors:</p>
             {form.colors.map((color, idx) => (
-              <div key={idx} className="flex items-center space-x-2 mb-2">
+              <div
+                key={idx}
+                className="flex flex-wrap items-center space-x-2 mb-2"
+              >
                 <div
                   style={{
                     backgroundColor: color.hex,
@@ -545,9 +576,10 @@ export default function ProductManagement() {
             ))}
           </div>
         )}
+
         <button
           type="submit"
-          className="bg-primary-dark text-white px-4 py-2 rounded"
+          className="bg-primary-dark text-white px-4 py-2 rounded w-full sm:w-auto"
         >
           {editing ? "Update Product" : "Add Product"}
         </button>

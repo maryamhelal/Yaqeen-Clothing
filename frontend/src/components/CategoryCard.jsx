@@ -27,7 +27,8 @@ export default function CategoryCard({ name, image }) {
           <div
             className="
               px-4 py-2
-              text-white text-xl font-bold
+              text-[#e0d7ce] text-md font-bold
+              bg-primary-darker rounded-lg
               transform group-hover:-translate-y-2
               transition-all duration-300 ease-out"
           >

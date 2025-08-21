@@ -134,9 +134,39 @@ router.get("/name/:name", productController.getProductByName);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreateProductRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Dress"
+ *               description:
+ *                 type: string
+ *                 example: "A beautiful dress in our collection"
+ *               price:
+ *                 type: number
+ *                 example: 74.68
+ *               salePercentage:
+ *                 type: integer
+ *                 example: 0
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *               colors:
+ *                 type: string
+ *                 description: JSON array of colors with sizes
+ *                 example: '[{"name":"red","hex":"#ff0000","sizes":[{"size":"s"},{"size":"m"}]}]'
+ *               category:
+ *                 type: string
+ *                 description: Category ID
+ *                 example: "689a65f7c950165eecdd3e02"
+ *               collection:
+ *                 type: string
+ *                 description: Collection ID
+ *                 example: "689a62f811fe4cd253a67e12"
  *     responses:
  *       201:
  *         description: Product created successfully
@@ -155,9 +185,9 @@ router.get("/name/:name", productController.getProductByName);
  */
 router.post(
   "/",
-  upload.none(),
+  upload.array("images", 5),
   auth,
-  requireRole(["admin", "superadmin"]),
+  requireRole(["admin"]),
   productController.createProduct
 );
 

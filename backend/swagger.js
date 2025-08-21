@@ -67,26 +67,44 @@ const options = {
         Product: {
           type: "object",
           properties: {
-            _id: { type: "string", example: "507f1f77bcf86cd799439011" },
+            _id: { type: "string", example: "689f4f2b16f93d8095b96ac9" },
             name: { type: "string", example: "Classic T-Shirt" },
             description: {
               type: "string",
               example: "A comfortable cotton t-shirt",
             },
-            price: { type: "number", example: 29.99 },
-            category: { type: "string", example: "T-Shirts" },
-            collection: { type: "string", example: "Summer Collection" },
+            price: { type: "number", example: 3000 },
+            salePercentage: { type: "number", example: 35 },
+            salePrice: { type: "number", example: 1950 },
             images: {
               type: "array",
               items: { type: "string" },
-              example: ["image1.jpg", "image2.jpg"],
+              example: ["/uploads/images-1755270955314-734466673.jpg"],
             },
-            sizes: {
+            colors: {
               type: "array",
-              items: { type: "string" },
-              example: ["S", "M", "L", "XL"],
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string", example: "black" },
+                  hex: { type: "string", example: "#000000" },
+                  sizes: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        size: { type: "string", example: "s" },
+                      },
+                    },
+                  },
+                },
+              },
             },
-            inStock: { type: "boolean", example: true },
+            category: { type: "string", example: "689a6952c950165eecdd3e72" },
+            collection: { type: "string", example: "689a62f811fe4cd253a67e12" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+            __v: { type: "integer", example: 0 },
           },
         },
         Order: {

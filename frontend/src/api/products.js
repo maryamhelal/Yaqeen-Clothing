@@ -137,11 +137,10 @@ export const productsAPI = {
         Authorization: `Bearer ${token}`,
       };
 
-      // Don't set Content-Type for FormData, let the browser set it with boundary
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers,
-        body: productData, // productData is now FormData
+        body: productData,
       });
 
       if (!response.ok) {
