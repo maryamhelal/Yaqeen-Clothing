@@ -7,6 +7,7 @@ import {
   faBars,
   faUser,
   faTimes,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/yaqeen logo.png";
 import { useAuth } from "../context/AuthContext";
@@ -18,6 +19,10 @@ export default function Navbar() {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
+
   const cartItemCount = cart.reduce(
     (total, item) => total + (item.quantity || 0),
     0
@@ -34,7 +39,18 @@ export default function Navbar() {
       }
     };
 
+    const fetchCollections = async () => {
+      try {
+        const collectionsData = await tagsAPI.getCollections();
+        setCollections(collectionsData);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+        setCollections([]);
+      }
+    };
+
     fetchCategories();
+    fetchCollections();
   }, []);
 
   return (
@@ -51,21 +67,66 @@ export default function Navbar() {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8 items-center">
-              {categories.map((cat) => (
-                <NavLink
-                  key={cat._id || cat.name}
-                  to={`/category/${cat.name}`}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors duration-200 ${
-                      isActive
-                        ? "text-primary-dark border-b-2 border-primary-dark"
-                        : "text-gray-700 hover:text-primary-dark"
-                    }`
-                  }
-                >
-                  {cat.name}
-                </NavLink>
-              ))}
+              {/* Categories Dropdown */}
+              <div className="relative group">
+                <button className="text-sm font-medium text-gray-700 hover:text-primary-dark transition-colors flex items-center">
+                  <span>Categories</span>
+                  <FontAwesomeIcon
+                    icon={faChevronDown}
+                    className="w-3 h-3 ml-1"
+                  />
+                </button>
+                <div className="absolute left-0 bg-white shadow-lg rounded-lg hidden group-hover:block z-50">
+                  <div className="flex flex-col">
+                    {categories.map((cat) => (
+                      <NavLink
+                        key={cat._id || cat.name}
+                        to={`/category/${cat.name}`}
+                        className={({ isActive }) =>
+                          `px-4 py-2 text-sm transition-colors duration-200 ${
+                            isActive
+                              ? "text-primary-dark font-semibold"
+                              : "text-gray-700 hover:text-primary-dark"
+                          }`
+                        }
+                      >
+                        {cat.name}
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Collections Dropdown */}
+              <div className="relative group">
+                <button className="text-sm font-medium text-gray-700 hover:text-primary-dark transition-colors flex items-center">
+                  <span>Collections</span>
+                  <FontAwesomeIcon
+                    icon={faChevronDown}
+                    className="w-3 h-3 ml-1"
+                  />
+                </button>
+                <div className="absolute left-0 bg-white shadow-lg rounded-lg hidden group-hover:block z-50">
+                  <div className="flex flex-col">
+                    {collections.map((col) => (
+                      <NavLink
+                        key={col._id || col.name}
+                        to={`/collection/${col.name}`}
+                        className={({ isActive }) =>
+                          `px-4 py-2 text-sm transition-colors duration-200 ${
+                            isActive
+                              ? "text-primary-dark font-semibold"
+                              : "text-gray-700 hover:text-primary-dark"
+                          }`
+                        }
+                      >
+                        {col.name}
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Dashboard */}
               {user && (isAdmin() || isSuperAdmin()) && (
                 <NavLink
                   to="/dashboard"
@@ -99,14 +160,14 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Burger/X Icon for Mobile */}
+            {/* Burger Icon for Mobile */}
             <button
               className="md:hidden flex items-center p-2 text-gray-700 hover:text-primary-dark focus:outline-none ml-auto"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
               <FontAwesomeIcon
-                icon={menuOpen ? faTimes : faBars}
+                icon={faBars}
                 className="w-7 h-7 transition-all duration-300"
               />
             </button>
@@ -146,22 +207,64 @@ export default function Navbar() {
             </button>
           </div>
           <div className="flex flex-col px-4 py-6 space-y-4">
-            {categories.map((cat) => (
-              <NavLink
-                key={cat._id || cat.name}
-                to={`/category/${cat.name}`}
-                className={({ isActive }) =>
-                  `block py-2 text-base font-medium transition-colors duration-200 ${
-                    isActive
-                      ? "text-primary-dark font-semibold"
-                      : "text-gray-700 hover:text-primary-dark"
-                  }`
-                }
-                onClick={() => setMenuOpen(false)}
-              >
-                {cat.name}
-              </NavLink>
-            ))}
+            {/* Categories Dropdown */}
+            <button
+              onClick={() => setCategoriesOpen(!categoriesOpen)}
+              className="flex items-center justify-between w-full py-2 text-base font-medium text-gray-700 hover:text-primary-dark transition-colors"
+            >
+              Categories
+              <span>{categoriesOpen ? "−" : "+"}</span>
+            </button>
+            {categoriesOpen && (
+              <div className="ml-4 flex flex-col space-y-2">
+                {categories.map((cat) => (
+                  <NavLink
+                    key={cat._id || cat.name}
+                    to={`/category/${cat.name}`}
+                    className={({ isActive }) =>
+                      `block py-1 text-sm transition-colors duration-200 ${
+                        isActive
+                          ? "text-primary-dark font-semibold"
+                          : "text-gray-700 hover:text-primary-dark"
+                      }`
+                    }
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {cat.name}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+
+            {/* Collections Dropdown */}
+            <button
+              onClick={() => setCollectionsOpen(!collectionsOpen)}
+              className="flex items-center justify-between w-full py-2 text-base font-medium text-gray-700 hover:text-primary-dark transition-colors"
+            >
+              Collections
+              <span>{collectionsOpen ? "−" : "+"}</span>
+            </button>
+            {collectionsOpen && (
+              <div className="ml-4 flex flex-col space-y-2">
+                {collections.map((col) => (
+                  <NavLink
+                    key={col._id || col.name}
+                    to={`/collection/${col.name}`}
+                    className={({ isActive }) =>
+                      `block py-1 text-sm transition-colors duration-200 ${
+                        isActive
+                          ? "text-primary-dark font-semibold"
+                          : "text-gray-700 hover:text-primary-dark"
+                      }`
+                    }
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {col.name}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+            {/* Dashboard in mobile menu */}
             {user && (isAdmin() || isSuperAdmin()) && (
               <NavLink
                 to="/dashboard"

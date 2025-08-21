@@ -4,19 +4,24 @@ import { tagsAPI } from "../api/tags";
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
         const categoriesData = await tagsAPI.getCategories();
-        setCategories(categoriesData);
+        const collectionsData = await tagsAPI.getCollections();
+
+        setCategories(categoriesData.slice(0, 1));
+        setCollections(collectionsData.slice(0, 1));
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching data:", error);
         setCategories([]);
+        setCollections([]);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   return (
@@ -38,6 +43,7 @@ export default function Footer() {
                   Home
                 </Link>
               </li>
+              {/* First category */}
               {categories.map((cat) => (
                 <li key={cat._id || cat.name}>
                   <Link
@@ -45,6 +51,17 @@ export default function Footer() {
                     className="text-gray-300 hover:text-white"
                   >
                     {cat.name}
+                  </Link>
+                </li>
+              ))}
+              {/* First collection */}
+              {collections.map((col) => (
+                <li key={col._id || col.name}>
+                  <Link
+                    to={`/collection/${col.name}`}
+                    className="text-gray-300 hover:text-white"
+                  >
+                    {col.name}
                   </Link>
                 </li>
               ))}
