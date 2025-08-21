@@ -200,8 +200,9 @@ export default function ProductDetailsPage() {
               selectedSize
             )
           }
+          disabled={quantity < 1}
         >
-          Add to Cart
+          {quantity < 1 ? "Sold out" : "Add to Cart"}
         </button>
       </div>
     </div>
