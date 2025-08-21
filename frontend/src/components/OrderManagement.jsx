@@ -20,7 +20,12 @@ export default function OrderManagement() {
     setLoading(true);
     setError("");
     try {
-      const result = await ordersAPI.getAllOrders(token, currentPage, 10, statusFilter);
+      const result = await ordersAPI.getAllOrders(
+        token,
+        currentPage,
+        10,
+        statusFilter
+      );
       setOrders(result.orders || []);
       setTotalPages(result.totalPages || 1);
     } catch (err) {
@@ -37,11 +42,11 @@ export default function OrderManagement() {
 
   const handleUpdate = async (orderId) => {
     if (!statusUpdate[orderId]) return;
-    
+
     setLoading(true);
     try {
       await ordersAPI.updateOrderStatus(orderId, statusUpdate[orderId], token);
-      setStatusUpdate(prev => {
+      setStatusUpdate((prev) => {
         const newState = { ...prev };
         delete newState[orderId];
         return newState;
@@ -65,24 +70,24 @@ export default function OrderManagement() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      paid: 'bg-blue-100 text-blue-800',
-      shipped: 'bg-purple-100 text-purple-800',
-      delivered: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800'
+      pending: "bg-yellow-100 text-yellow-800",
+      paid: "bg-blue-100 text-blue-800",
+      shipped: "bg-purple-100 text-purple-800",
+      delivered: "bg-green-100 text-green-800",
+      cancelled: "bg-red-100 text-red-800",
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   if (loading && orders.length === 0) {
@@ -97,10 +102,12 @@ export default function OrderManagement() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-        
+
         {/* Status Filter */}
         <div className="flex items-center space-x-4">
-          <label className="text-sm font-medium text-gray-700">Filter by status:</label>
+          <label className="text-sm font-medium text-gray-700">
+            Filter by status:
+          </label>
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilterChange(e.target.value)}
@@ -153,7 +160,10 @@ export default function OrderManagement() {
             <tbody className="bg-white divide-y divide-gray-200">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                  <td
+                    colSpan="7"
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
                     {loading ? "Loading orders..." : "No orders found"}
                   </td>
                 </tr>
@@ -176,8 +186,12 @@ export default function OrderManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={statusUpdate[order._id] || order.status}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        className={`text-sm px-2 py-1 rounded-full font-medium ${getStatusColor(statusUpdate[order._id] || order.status)} border-0 focus:ring-2 focus:ring-primary`}
+                        onChange={(e) =>
+                          handleStatusChange(order._id, e.target.value)
+                        }
+                        className={`text-sm px-2 py-1 rounded-full font-medium ${getStatusColor(
+                          statusUpdate[order._id] || order.status
+                        )} border-0 focus:ring-2 focus:ring-primary`}
                       >
                         <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
@@ -215,11 +229,16 @@ export default function OrderManagement() {
                           ))}
                           {order.shippingAddress && (
                             <div className="bg-gray-50 p-2 rounded">
-                              <div className="font-medium">Shipping Address:</div>
+                              <div className="font-medium">
+                                Shipping Address:
+                              </div>
                               <div className="text-sm text-gray-600">
-                                {order.shippingAddress.name && `${order.shippingAddress.name}, `}
-                                {order.shippingAddress.phone && `${order.shippingAddress.phone}, `}
-                                {order.shippingAddress.city && order.shippingAddress.area && 
+                                {order.shippingAddress.name &&
+                                  `${order.shippingAddress.name}, `}
+                                {order.shippingAddress.phone &&
+                                  `${order.shippingAddress.phone}, `}
+                                {order.shippingAddress.city &&
+                                  order.shippingAddress.area &&
                                   `${order.shippingAddress.area}, ${order.shippingAddress.city}`}
                               </div>
                             </div>
@@ -228,15 +247,16 @@ export default function OrderManagement() {
                       </details>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {statusUpdate[order._id] && statusUpdate[order._id] !== order.status && (
-                        <button
-                          onClick={() => handleUpdate(order._id)}
-                          disabled={loading}
-                          className="bg-primary-dark text-white px-3 py-1 rounded text-sm hover:bg-primary-darker transition-colors disabled:opacity-50"
-                        >
-                          {loading ? "Updating..." : "Update"}
-                        </button>
-                      )}
+                      {statusUpdate[order._id] &&
+                        statusUpdate[order._id] !== order.status && (
+                          <button
+                            onClick={() => handleUpdate(order._id)}
+                            disabled={loading}
+                            className="bg-primary-dark text-white px-3 py-1 rounded text-sm hover:bg-primary-darker transition-colors disabled:opacity-50"
+                          >
+                            {loading ? "Updating..." : "Update"}
+                          </button>
+                        )}
                     </td>
                   </tr>
                 ))
@@ -267,7 +287,8 @@ export default function OrderManagement() {
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Showing page <span className="font-medium">{currentPage}</span> of{" "}
+                  Showing page{" "}
+                  <span className="font-medium">{currentPage}</span> of{" "}
                   <span className="font-medium">{totalPages}</span>
                 </p>
               </div>
@@ -281,7 +302,9 @@ export default function OrderManagement() {
                     Previous
                   </button>
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    const page =
+                      Math.max(1, Math.min(totalPages - 4, currentPage - 2)) +
+                      i;
                     return (
                       <button
                         key={page}
@@ -311,4 +334,4 @@ export default function OrderManagement() {
       </div>
     </div>
   );
-} 
+}

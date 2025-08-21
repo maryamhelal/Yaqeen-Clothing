@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { productsAPI } from "../api/products";
 import { AuthContext } from "../context/AuthContext";
 import { tagsAPI } from "../api/tags";
@@ -237,41 +237,6 @@ export default function ProductManagement() {
     });
   };
 
-  // --- Sale Management ---
-  const handleUpdateSale = async (productId, salePercentage) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/sales/product/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ salePercentage }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccess(result.message);
-        if (result.warnings) {
-          setError(`Warning: ${result.warnings.join(", ")}`);
-        }
-        // Refresh products
-        productsAPI.getAllProducts().then((result) => {
-          setProducts(result.products || []);
-        });
-      } else {
-        setError(result.error || "Failed to update sale");
-      }
-    } catch (err) {
-      setError("Failed to update sale");
-      console.error(err);
-    }
-  };
-
   const handleBulkSaleUpdate = async () => {
     if (selectedProducts.length === 0) {
       setError("Please select products to update");
@@ -503,7 +468,7 @@ export default function ProductManagement() {
               onChange={(e) =>
                 setSizeInput({ ...sizeInput, size: e.target.value })
               }
-              className="border p-2 rounded"
+              className="border p-2 rounded w-full"
             />
             <input
               placeholder="Quantity"
@@ -618,7 +583,7 @@ export default function ProductManagement() {
               onClick={() => setShowSaleEmailModal(true)}
               className="bg-green-500 text-white px-4 py-2 rounded"
             >
-              Send Sale Email
+              Send Email
             </button>
           </div>
           <p className="text-sm text-gray-600">
@@ -683,27 +648,18 @@ export default function ProductManagement() {
                       {product.salePercentage > 0 && (
                         <div className="text-red-600 font-bold">
                           {getEffectiveSalePrice(product)} EGP
-                          <span className="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
-                            {product.salePercentage}% OFF
-                          </span>
                         </div>
                       )}
                     </div>
                   </td>
                   <td className="p-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={product.salePercentage || 0}
-                      onChange={(e) =>
-                        handleUpdateSale(
-                          product._id,
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                      className="border p-1 rounded w-16"
-                    />
+                    {product.salePercentage > 0 ? (
+                      <p className="font-bold bg-red-100 text-red-800 px-2 py-1 rounded text-xs w-fit">
+                        {product.salePercentage}% OFF
+                      </p>
+                    ) : (
+                      <p>{0}</p>
+                    )}
                   </td>
                   <td className="p-2">{product.categoryName}</td>
                   <td className="p-2">{product.collectionName}</td>
