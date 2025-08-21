@@ -5,7 +5,7 @@ import { CartContext } from "../context/CartContext";
 
 export default function ProductDetailsPage() {
   const { productName } = useParams();
-  const { addToCart } = useContext(CartContext);
+  const { addToCart, updateQuantity } = useContext(CartContext);
   const [product, setProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -122,11 +122,11 @@ export default function ProductDetailsPage() {
           </div>
         )}
         {/* Sizes */}
-        {product.sizes?.length > 0 && (
+        {product.colors?.sizes?.length > 0 && (
           <div className="mb-4">
             <div className="font-semibold mb-2">Size:</div>
             <div className="flex space-x-2">
-              {product.sizes.map((sizeObj) => (
+              {product.colors.sizes.map((sizeObj) => (
                 <button
                   key={sizeObj.size}
                   className={`px-3 py-1 rounded-lg border-2 ${
@@ -143,21 +143,19 @@ export default function ProductDetailsPage() {
           </div>
         )}
         {/* Size Chart */}
-        {product.sizes?.length > 0 && (
+        {product.colors?.sizes?.length > 0 && (
           <div className="mb-4">
             <div className="font-semibold mb-2">Size Chart:</div>
             <table className="w-full text-left border border-gray-300 rounded-lg">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b">Size</th>
-                  <th className="py-2 px-4 border-b">Quantity Available</th>
                 </tr>
               </thead>
               <tbody>
-                {product.sizes.map((sizeObj) => (
+                {product.colors.sizes.map((sizeObj) => (
                   <tr key={sizeObj.size}>
                     <td className="py-2 px-4 border-b">{sizeObj.size}</td>
-                    <td className="py-2 px-4 border-b">{sizeObj.quantity}</td>
                   </tr>
                 ))}
               </tbody>
@@ -165,16 +163,32 @@ export default function ProductDetailsPage() {
           </div>
         )}
         {/* Quantity */}
-        <div className="mb-4 flex items-center space-x-3">
-          <span className="font-semibold">Quantity:</span>
-          <input
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-            className="w-16 border rounded-lg px-2 py-1"
-          />
-        </div>
+        {quantity > 0 && (
+          <div className="mb-4 flex items-center space-x-3">
+            <span className="font-semibold">Quantity:</span>
+            <div className="flex items-center border border-gray-300 rounded-lg">
+              <button
+                className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
+                onClick={() =>
+                  updateQuantity(product.id, Math.max(1, quantity - 1))
+                }
+              >
+                -
+              </button>
+              <span className="w-8 text-center">{quantity}</span>
+              <button
+                type="button"
+                className="px-3 py-1"
+                onClick={() =>
+                  updateQuantity(product.id, Math.max(1, quantity + 1))
+                }
+                disabled={quantity > [product.colors?.sizes?.quantity]}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
         {/* Add to Cart */}
         <button
           className="w-full bg-primary-dark text-white py-3 rounded-lg font-bold hover:bg-primary-darker transition-colors"

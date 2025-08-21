@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function ProductCard(props) {
   const product = props.product || props;
+  const { updateQuantity } = useContext(CartContext);
   const { addToCart } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(
@@ -164,36 +165,42 @@ export default function ProductCard(props) {
           </div>
         )}
         {/* Quantity */}
-        <div className="mb-4 flex items-center w-full space-between">
-          <span className="font-semibold">Quantity:</span>
-          <div className="border border-gray-300 rounded-lg space-between">
-            <button
-              type="button"
-              className="px-3 py-1"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
-            >
-              -
-            </button>
-            <span className="w-8 text-center">{quantity}</span>
-            <button
-              type="button"
-              className="px-3 py-1"
-              onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
-              disabled={quantity >= maxQty}
-            >
-              +
-            </button>
+        {quantity > 0 && (
+          <div className="mb-4 flex items-center space-x-3">
+            <span className="font-semibold">Quantity:</span>
+            <div className="flex items-center border border-gray-300 rounded-lg">
+              <button
+                className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
+                onClick={() =>
+                  updateQuantity(product.id, Math.max(1, quantity - 1))
+                }
+              >
+                -
+              </button>
+              <span className="w-8 text-center">{quantity}</span>
+              <button
+                type="button"
+                className="px-3 py-1"
+                onClick={() =>
+                  updateQuantity(product.id, Math.max(1, quantity + 1))
+                }
+                disabled={quantity > maxQty}
+              >
+                +
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         {/* Selected color/size info */}
         <div className="mb-2 text-sm text-gray-600">
           <button
             onClick={handleAddToCart}
             className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold hover:bg-primary-darker transition-colors"
-            disabled={!hasColors || !hasSizes}
+            disabled={!hasColors || !hasSizes || quantity < 1}
           >
-            {!hasColors || !hasSizes ? "Sold out" : "Add to Cart"}
+            {!hasColors || !hasSizes || quantity < 1
+              ? "Sold out"
+              : "Add to Cart"}
           </button>
           {!hasColors && (
             <div className="text-red-500 text-sm mt-2">
