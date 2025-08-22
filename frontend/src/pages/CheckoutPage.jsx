@@ -80,9 +80,13 @@ export default function CheckoutPage() {
     try {
       const orderData = {
         items: cart.map((item) => ({
-          ...item,
-          size: item.size || item.selectedSize,
-          color: item.color || item.selectedColor,
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity,
         })),
         totalPrice: totalWithShipping,
         shippingAddress: {

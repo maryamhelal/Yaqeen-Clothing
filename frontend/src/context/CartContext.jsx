@@ -16,14 +16,12 @@ export function CartProvider({ children }) {
 
   const addToCart = (product, quantity, selectedColor, selectedSize) => {
     setCart((prev) => {
-      // Find existing cart item with same product, color, and size
       const existing = prev.find(
         (item) =>
-          item.id === product.id &&
-          item.selectedColor === selectedColor &&
-          item.selectedSize === selectedSize
+          item.id === product._id &&
+          item.color === selectedColor &&
+          item.size === selectedSize
       );
-      // Find available quantity for this size
       const colorObj =
         product.colors?.find((c) => c.name === selectedColor) || {};
       const sizeObj =
@@ -32,31 +30,50 @@ export function CartProvider({ children }) {
       if (existing) {
         const newQty = Math.min(existing.quantity + quantity, maxQty);
         return prev.map((item) =>
-          item.id === product.id &&
-          item.selectedColor === selectedColor &&
-          item.selectedSize === selectedSize
+          item.id === product._id &&
+          item.color === selectedColor &&
+          item.size === selectedSize
             ? { ...item, quantity: newQty }
             : item
         );
       }
       // If adding new, clamp to maxQty
       const itemToAdd = {
-        ...product,
+        id: product._id,
+        name: product.name,
+        price:
+          product.salePercentage > 0
+            ? product.salePrice ||
+              Math.round(product.price * (1 - product.salePercentage / 100))
+            : product.price,
+        image: colorObj.image || product.image,
+        color: selectedColor,
+        size: selectedSize,
         quantity: Math.min(quantity, maxQty),
-        size: selectedSize || product.size,
-        color: selectedColor || product.color,
+        maxQty,
       };
       return [...prev, itemToAdd];
     });
   };
 
-  const removeFromCart = (id) =>
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  const updateQuantity = (id, quantity) =>
+  const updateQuantity = (id, color, size, newQty) => {
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prev.map((item) =>
+        item.id === id && item.color === color && item.size === size
+          ? { ...item, quantity: newQty }
+          : item
+      )
     );
+  };
 
+  const removeFromCart = (id, color, size) => {
+    setCart((prev) =>
+      prev.filter(
+        (item) =>
+          !(item.id === id && item.color === color && item.size === size)
+      )
+    );
+  };
   const clearCart = () => setCart([]);
 
   return (

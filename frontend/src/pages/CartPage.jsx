@@ -44,7 +44,7 @@ export default function CartPage() {
                 <div className="divide-y divide-gray-200">
                   {cart.map((item) => (
                     <div
-                      key={item.id}
+                      key={`${item.id}-${item.color}-${item.size}`}
                       className="p-6 flex items-center space-x-4"
                     >
                       <img
@@ -57,56 +57,68 @@ export default function CartPage() {
                           {item.name}
                         </h3>
                         <p className="text-primary-dark font-bold">
-                          {item.price.toLocaleString()} EGP
+                          {item.price?.toLocaleString()} EGP
                         </p>
+                        <div className="text-sm text-gray-500">
+                          Size: {item.size} | Color: {item.color}
+                        </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center border border-gray-300 rounded-lg">
-                          <button
-                            onClick={() =>
-                              updateQuantity(
-                                item.id,
-                                Math.max(1, item.quantity - 1)
-                              )
-                            }
-                            className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
-                          >
-                            -
-                          </button>
-                          <span className="px-3 py-1">{item.quantity}</span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                            className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
-                          >
-                            +
-                          </button>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-800">
-                            {(item.price * item.quantity).toLocaleString()} EGP
-                          </p>
-                        </div>
                         <button
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-red-500 hover:text-red-700 transition-colors"
+                          onClick={() =>
+                            updateQuantity(
+                              item.id,
+                              item.color,
+                              item.size,
+                              Math.max(1, item.quantity - 1)
+                            )
+                          }
+                          className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
+                          disabled={item.quantity <= 1}
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
+                          -
+                        </button>
+                        <span className="px-3 py-1">{item.quantity}</span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(
+                              item.id,
+                              item.color,
+                              item.size,
+                              Math.min(item.quantity + 1, item.maxQty || 1)
+                            )
+                          }
+                          className="px-3 py-1 text-gray-600 hover:text-primary-dark transition-colors"
+                          disabled={item.quantity >= (item.maxQty || 1)}
+                        >
+                          +
                         </button>
                       </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-800">
+                          {(item.price * item.quantity).toLocaleString()} EGP
+                        </p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          removeFromCart(item.id, item.color, item.size)
+                        }
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -120,16 +132,6 @@ export default function CartPage() {
                   Order Summary
                 </h2>
                 <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-semibold">
-                      {subtotal.toLocaleString()} EGP
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-semibold">Free</span>
-                  </div>
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold text-gray-800">

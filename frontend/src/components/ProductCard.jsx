@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
@@ -14,7 +14,7 @@ export default function ProductCard(props) {
   const colorObj = hasColors
     ? product.colors.find((c) => c.name === selectedColor) || product.colors[0]
     : null;
-  const availableSizes = colorObj?.sizes || [];
+  const availableSizes = useMemo(() => colorObj?.sizes || [], [colorObj]);
   const hasSizes = availableSizes.length > 0;
   const [selectedSize, setSelectedSize] = useState(
     hasSizes ? availableSizes[0].size : null
@@ -33,7 +33,7 @@ export default function ProductCard(props) {
       setSelectedSize(availableSizes[0].size);
       setQuantity(1);
     }
-  }, [selectedColor]);
+  }, [selectedColor, availableSizes, selectedSize]);
 
   // Clamp quantity to maxQty
   useEffect(() => {
@@ -63,15 +63,8 @@ export default function ProductCard(props) {
   const hasSale = salePercentage > 0;
 
   const handleAddToCart = () => {
-    if (!selectedColor || !selectedSize) return;
-    addToCart({
-      ...product,
-      quantity,
-      selectedColor,
-      selectedSize,
-      price: effectivePrice, // Use sale price if available
-      image,
-    });
+    if (!selectedColor || !selectedSize || quantity < 1) return;
+    addToCart(product, quantity, selectedColor, selectedSize);
   };
 
   return (
@@ -196,9 +189,9 @@ export default function ProductCard(props) {
           <button
             onClick={handleAddToCart}
             className="w-full bg-primary-dark text-white py-2 rounded-lg font-semibold hover:bg-primary-darker transition-colors"
-            disabled={!hasColors || !hasSizes || quantity < 1}
+            disabled={!hasColors || !hasSizes || quantity < 1 || maxQty < 1}
           >
-            {!hasColors || !hasSizes || quantity < 1
+            {!hasColors || !hasSizes || quantity < 1 || maxQty < 1
               ? "Sold out"
               : "Add to Cart"}
           </button>
