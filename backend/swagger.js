@@ -76,10 +76,9 @@ const options = {
             price: { type: "number", example: 3000 },
             salePercentage: { type: "number", example: 35 },
             salePrice: { type: "number", example: 1950 },
-            images: {
-              type: "array",
-              items: { type: "string" },
-              example: ["/uploads/images-1755270955314-734466673.jpg"],
+            image: {
+              type: "string",
+              example: "/uploads/image-1755270955314-734466673.jpg",
             },
             colors: {
               type: "array",
@@ -88,12 +87,18 @@ const options = {
                 properties: {
                   name: { type: "string", example: "black" },
                   hex: { type: "string", example: "#000000" },
+                  image: {
+                    type: "string",
+                    example:
+                      "/uploads/colorImages_0-1755270955314-734466673.jpg",
+                  },
                   sizes: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        size: { type: "string", example: "s" },
+                        size: { type: "string", example: "M" },
+                        quantity: { type: "number", example: 10 },
                       },
                     },
                   },
@@ -102,9 +107,6 @@ const options = {
             },
             category: { type: "string", example: "689a6952c950165eecdd3e72" },
             collection: { type: "string", example: "689a62f811fe4cd253a67e12" },
-            createdAt: { type: "string", format: "date-time" },
-            updatedAt: { type: "string", format: "date-time" },
-            __v: { type: "integer", example: 0 },
           },
         },
         Order: {

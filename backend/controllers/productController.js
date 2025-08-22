@@ -1,42 +1,88 @@
 const productService = require("../services/productService");
+const Product = require("../models/Product");
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, salePercentage, category, collection } =
-      req.body;
-
-    let colors = JSON.parse(req.body.colors || "[]");
-
-    colors = colors.map((color, idx) => {
-      const file = req.files[`colorImages_${idx}`]?.[0];
-      return {
-        ...color,
-        image: file ? file.buffer : undefined,
-      };
-    });
-
-    const productImages = req.files["images"]
-      ? req.files["images"].map((f) => f.buffer)
-      : [];
-
-    const product = await productService.createProduct({
-      ...req.body,
+    const {
+      name,
+      description,
+      price,
+      salePercentage,
+      category,
+      collection,
       colors,
-      images: productImages,
-    });
+    } = req.body;
 
+    // Product image (single)
+    let productImageUrl = null;
+    if (req.files.image && req.files.image[0]) {
+      productImageUrl = `${req.protocol}://${req.get("host")}/uploads/${
+        req.files.image[0].filename
+      }`;
+    }
+
+    // Parse colors JSON and attach image URLs
+    let colorsArr = [];
+    if (colors) {
+      colorsArr = JSON.parse(colors).map((color, idx) => {
+        let colorImageUrl = null;
+        const colorImageField = `colorImages_${idx}`;
+        if (req.files[colorImageField] && req.files[colorImageField][0]) {
+          colorImageUrl = `${req.protocol}://${req.get("host")}/uploads/${
+            req.files[colorImageField][0].filename
+          }`;
+        }
+        return {
+          ...color,
+          image: colorImageUrl,
+        };
+      });
+    }
+
+    // Save product
+    const product = new Product({
+      name,
+      description,
+      price,
+      salePercentage,
+      image: productImageUrl,
+      colors: colorsArr,
+      category,
+      collection,
+    });
+    await product.save();
     res.status(201).json(product);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create product" });
+    res.status(400).json({ error: err.message });
   }
 };
 
 exports.updateProduct = async (req, res) => {
   try {
     const updateData = { ...req.body };
-    if (req.files?.length) {
-      updateData.images = req.files.map((file) => file.path);
+
+    // Product image (single)
+    if (req.files.image && req.files.image[0]) {
+      updateData.image = `${req.protocol}://${req.get("host")}/uploads/${
+        req.files.image[0].filename
+      }`;
+    }
+
+    // Parse colors JSON and attach image URLs
+    if (updateData.colors) {
+      updateData.colors = JSON.parse(updateData.colors).map((color, idx) => {
+        let colorImageUrl = null;
+        const colorImageField = `colorImages_${idx}`;
+        if (req.files[colorImageField] && req.files[colorImageField][0]) {
+          colorImageUrl = `${req.protocol}://${req.get("host")}/uploads/${
+            req.files[colorImageField][0].filename
+          }`;
+        }
+        return {
+          ...color,
+          image: colorImageUrl,
+        };
+      });
     }
 
     const product = await productService.updateProduct(

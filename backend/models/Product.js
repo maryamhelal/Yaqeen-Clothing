@@ -25,7 +25,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     salePrice: { type: Number },
     salePercentage: { type: Number, default: 0, min: 0, max: 100 },
-    images: [String],
+    image: String,
     colors: [colorSchema],
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
     collection: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },

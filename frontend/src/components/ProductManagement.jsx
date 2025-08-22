@@ -19,7 +19,7 @@ export default function ProductManagement() {
     category: "",
     collection: "",
   });
-  const [imageFiles, setImageFiles] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
   const [colorInput, setColorInput] = useState({
     name: "",
     hex: "#000000",
@@ -109,7 +109,7 @@ export default function ProductManagement() {
 
   const handleFormChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  const handleImageChange = (e) => setImageFiles([...e.target.files]);
+  const handleImageChange = (e) => setImageFile(e.target.files[0]);
 
   // --- Color/Size Management ---
   const handleAddSizeToColor = () => {
@@ -176,10 +176,7 @@ export default function ProductManagement() {
     }
 
     try {
-      // Create FormData for file upload
       const formData = new FormData();
-
-      // Add product data
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("price", form.price);
@@ -187,7 +184,7 @@ export default function ProductManagement() {
       formData.append("category", form.category);
       formData.append("collection", form.collection);
 
-      // Colors (metadata only)
+      // Colors metadata
       const colorsMetadata = form.colors.map(({ name, hex, sizes }, idx) => ({
         name,
         hex,
@@ -196,10 +193,10 @@ export default function ProductManagement() {
       }));
       formData.append("colors", JSON.stringify(colorsMetadata));
 
-      // Add product images
-      imageFiles.forEach((file) => {
-        formData.append("images", file);
-      });
+      // Add product image
+      if (imageFile) {
+        formData.append("image", imageFile); // <-- changed from images
+      }
 
       // Add color images
       form.colors.forEach((color, idx) => {
@@ -222,12 +219,11 @@ export default function ProductManagement() {
         description: "",
         price: "",
         salePercentage: 0,
-        images: [],
         colors: [],
         category: "",
         collection: "",
       });
-      setImageFiles([]);
+      setImageFile(null);
       productsAPI.getAllProducts().then((result) => {
         setProducts(result.products || []);
       });
@@ -242,7 +238,7 @@ export default function ProductManagement() {
     setForm({
       ...product,
       salePercentage: product.salePercentage || 0,
-      images: [],
+      image: product.image || "", // <-- changed from images: []
       colors: product.colors || [],
     });
   };
@@ -446,7 +442,7 @@ export default function ProductManagement() {
         />
         <input
           type="file"
-          multiple
+          accept="image/*"
           onChange={handleImageChange}
           className="border p-2 rounded w-full"
         />

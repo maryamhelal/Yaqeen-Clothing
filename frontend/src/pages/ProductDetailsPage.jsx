@@ -28,7 +28,9 @@ export default function ProductDetailsPage() {
   const colorObj =
     product.colors?.find((c) => c.name === selectedColor) ||
     product.colors?.[0];
-  const images = colorObj?.images?.length ? colorObj.images : product.images;
+  const selectedColorObj = product.colors?.find(
+    (color) => color.name === selectedColor
+  );
 
   // Calculate effective price
   const getEffectivePrice = () => {
@@ -51,7 +53,7 @@ export default function ProductDetailsPage() {
       <div className="relative">
         <div className="mb-4">
           <img
-            src={images?.[0]}
+            src={product.image}
             alt={product.name}
             className="w-full h-96 object-cover rounded-xl"
           />
@@ -63,14 +65,11 @@ export default function ProductDetailsPage() {
           )}
         </div>
         <div className="flex space-x-2">
-          {images?.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt=""
-              className="w-20 h-20 object-cover rounded-lg border"
-            />
-          ))}
+          <img
+            src={selectedColorObj?.image || product.image}
+            alt={product.name}
+            className="w-20 h-20 object-cover rounded-lg border"
+          />
         </div>
       </div>
       {/* Details */}

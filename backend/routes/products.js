@@ -1,19 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
 const path = require("path");
 const productController = require("../controllers/productController");
 const { auth, requireRole } = require("../middleware/auth");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer();
+const upload = require("../middleware/upload");
 
 /**
  * @swagger
@@ -183,11 +173,16 @@ router.get("/name/:name", productController.getProductByName);
  *       500:
  *         description: Internal server error
  */
+const colorImageFields = Array.from({ length: 10 }, (_, i) => ({
+  name: `colorImages_${i}`,
+  maxCount: 1,
+}));
+
 router.post(
   "/",
-  upload.array("images", 5),
+  upload.fields([{ name: "image", maxCount: 1 }, ...colorImageFields]),
   auth,
-  requireRole(["admin"]),
+  requireRole(["admin", "superadmin"]),
   productController.createProduct
 );
 
@@ -233,7 +228,7 @@ router.post(
  */
 router.put(
   "/:id",
-  upload.none(),
+  upload.fields([{ name: "image", maxCount: 1 }, ...colorImageFields]),
   auth,
   requireRole(["admin", "superadmin"]),
   productController.updateProduct

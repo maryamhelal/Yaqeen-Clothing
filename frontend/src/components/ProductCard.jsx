@@ -48,7 +48,7 @@ export default function ProductCard(props) {
     salePercentage = 0,
     salePrice,
     colors = [],
-    images = [],
+    image = "",
   } = product;
 
   // Calculate effective price
@@ -70,7 +70,7 @@ export default function ProductCard(props) {
       selectedColor,
       selectedSize,
       price: effectivePrice, // Use sale price if available
-      images,
+      image,
     });
   };
 
@@ -81,7 +81,7 @@ export default function ProductCard(props) {
         onClick={() => navigate(`/product/${product.name}`)}
       >
         <img
-          src={images?.[0] || product.image}
+          src={colorObj?.image || image}
           alt={name}
           className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
         />
