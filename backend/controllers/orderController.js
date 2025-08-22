@@ -1,38 +1,37 @@
 const orderService = require("../services/orderService");
 const emailService = require("../services/emailService");
 const Product = require("../models/Product");
+const OrderCounter = require("../models/OrderCounter");
 
 exports.createOrder = async (req, res) => {
   try {
-    let orderer = req.body.orderer || {};
-    if (req.user) {
-      orderer = {
-        userId: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-      };
+    // Get and increment the order counter
+    let counter = await OrderCounter.findOneAndUpdate(
+      { name: "order" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    const orderNumber = "ORD-" + counter.seq;
+
+    const orderData = { ...req.body, orderNumber };
+
+    const order = await Order.create(orderData);
+
+    // Subtract ordered quantities from product stock
+    for (const item of order.items) {
+      const product = await Product.findById(item.id);
+      if (product) {
+        const colorObj = product.colors.find((c) => c.name === item.color);
+        if (colorObj) {
+          const sizeObj = colorObj.sizes.find((s) => s.size === item.size);
+          if (sizeObj) {
+            sizeObj.quantity = Math.max(0, sizeObj.quantity - item.quantity);
+          }
+        }
+        await product.save();
+      }
     }
 
-    const itemsWithColorImage = await Promise.all(
-      req.body.items.map(async (item) => {
-        const product = await Product.findById(item.productId);
-        let colorImage = null;
-        if (
-          product &&
-          Array.isArray(product.colors) &&
-          product.colors.length > 0
-        ) {
-          const color = product.colors.find((c) => c.name === item.color);
-          colorImage = color ? color.image : null;
-        }
-        return { ...item, colorImage };
-      })
-    );
-    const order = await orderService.createOrder({
-      ...req.body,
-      orderer,
-      items: itemsWithColorImage,
-    });
     let emailWarning = null;
     try {
       const itemsHtml = order.items
@@ -175,8 +174,8 @@ exports.getAllOrders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const status = req.query.status || '';
-    
+    const status = req.query.status || "";
+
     const result = await orderService.getAllOrders(page, limit, status);
     res.json(result);
   } catch (err) {
@@ -200,8 +199,12 @@ exports.getMyOrders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    
-    const result = await orderService.getOrdersByUser(req.user._id, page, limit);
+
+    const result = await orderService.getOrdersByUser(
+      req.user._id,
+      page,
+      limit
+    );
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
