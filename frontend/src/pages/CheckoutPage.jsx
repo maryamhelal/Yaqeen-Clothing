@@ -1,9 +1,9 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 import { authAPI } from "../api/auth"; // Use this import
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
@@ -59,8 +59,10 @@ export default function CheckoutPage() {
     cityOptions.find((c) => c.value === selectedCity)?.price || 0;
   const totalWithShipping = subtotal + shippingPrice;
 
+  const location = useLocation();
+
   useEffect(() => {
-    if (cart.length === 0) {
+    if (cart.length === 0 && location.pathname === "/checkout") {
       navigate("/", { replace: true });
     }
     if (user) {
@@ -77,7 +79,7 @@ export default function CheckoutPage() {
       setSelectedArea(user.address?.area || "");
       setResidenceType(user.address?.residenceType || "");
     }
-  }, [cart, navigate, user]);
+  }, [cart, navigate, user, location]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
