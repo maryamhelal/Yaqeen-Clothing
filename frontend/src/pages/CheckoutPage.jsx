@@ -2,12 +2,13 @@ import React, { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
+import { authAPI } from "../api/auth"; // Use this import
 import { useNavigate } from "react-router-dom";
 import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
-  const { user, token } = useAuth();
+  const { user, token, login } = useAuth(); // <-- Add login from context
   const cityOptions = [
     { label: "Cairo, Giza", value: "cairo_giza", price: 70 },
     { label: "Alexandria", value: "alexandria", price: 75 },
@@ -44,6 +45,10 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   });
+  const [saveInfo, setSaveInfo] = useState(false); // <-- Checkbox state
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const subtotal = cart.reduce(
@@ -61,10 +66,16 @@ export default function CheckoutPage() {
     if (user) {
       setForm({
         name: user.name || "",
-        address: user.address || "",
+        street: user.address?.street || "",
+        landmarks: user.address?.landmarks || "",
+        floor: user.address?.floor || "",
+        apartment: user.address?.apartment || "",
         phone: user.phone || "",
         email: user.email || "",
       });
+      setSelectedCity(user.address?.city || cityOptions[0].value);
+      setSelectedArea(user.address?.area || "");
+      setResidenceType(user.address?.residenceType || "");
     }
   }, [cart, navigate, user]);
 
@@ -73,43 +84,104 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user && !form.email) {
-      alert("Email is required for guest checkout.");
+    setError("");
+    if (!form.phone || !form.email) {
+      setError("Phone and email are required.");
       return;
     }
-    try {
-      const orderData = {
-        items: cart.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          color: item.color,
-          size: item.size,
-          quantity: item.quantity,
-        })),
-        totalPrice: totalWithShipping,
-        shippingAddress: {
+    let newUser = null;
+    if (!user && saveInfo) {
+      if (!password || !confirmPassword) {
+        setError("Password and confirm password are required.");
+        return;
+      }
+      if (password.length < 5) {
+        setError("Password must be at least 5 characters.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+      try {
+        newUser = await authAPI.register({
           name: form.name,
-          city: selectedCity,
-          area: selectedArea,
-          street: form.street,
-          landmarks: form.landmarks,
-          residenceType,
-          floor: residenceType === "apartment" ? form.floor : undefined,
-          apartment: residenceType === "apartment" ? form.apartment : undefined,
+          email: form.email,
           phone: form.phone,
-        },
-        orderer: user
-          ? { userId: user.id, name: user.name, email: user.email }
-          : { name: form.name, email: form.email, userId: null },
-      };
-      const result = await ordersAPI.createOrder(orderData, token);
-      clearCart();
-      navigate("/thank-you", { state: { order: result.order } });
+          password,
+          address: {
+            city: selectedCity,
+            area: selectedArea,
+            street: form.street,
+            landmarks: form.landmarks,
+            residenceType,
+            floor: residenceType === "apartment" ? form.floor : undefined,
+            apartment:
+              residenceType === "apartment" ? form.apartment : undefined,
+          },
+        });
+        await login(newUser.token, newUser.user);
+      } catch (err) {
+        setError(
+          err?.message === "Email already exists"
+            ? "This email is already registered. Please log in or use a different email."
+            : err?.message || "Error creating account. Please check your info."
+        );
+        return;
+      }
+    }
+    const orderData = {
+      items: cart.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        color: item.color,
+        size: item.size,
+        quantity: item.quantity,
+      })),
+      totalPrice: totalWithShipping,
+      shippingAddress: {
+        name: form.name,
+        city: selectedCity,
+        area: selectedArea,
+        street: form.street,
+        landmarks: form.landmarks,
+        residenceType,
+        floor: residenceType === "apartment" ? form.floor : undefined,
+        apartment: residenceType === "apartment" ? form.apartment : undefined,
+        phone: form.phone,
+      },
+      orderer:
+        user || newUser?.user
+          ? {
+              userId: (user || newUser?.user).id,
+              name: (user || newUser?.user).name,
+              email: (user || newUser?.user).email,
+              phone: (user || newUser?.user).phone,
+            }
+          : {
+              name: form.name,
+              email: form.email,
+              phone: form.phone,
+              userId: null,
+            },
+    };
+    try {
+      const result = await ordersAPI.createOrder(
+        orderData,
+        token || newUser?.token
+      );
+      if (result && result.order) {
+        clearCart();
+        navigate("/thank-you", { state: { order: result.order } });
+      } else {
+        setError(
+          "Order was placed but no confirmation was received. Please contact support."
+        );
+      }
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert("There was an error placing your order. Please try again.");
+      setError("There was an error placing your order. Please try again.");
     }
   };
 
@@ -126,6 +198,9 @@ export default function CheckoutPage() {
               Shipping Information
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="text-red-500 font-medium mb-2">{error}</div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Full Name
@@ -137,6 +212,35 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  name="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={form.phone}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  disabled={!!user}
                 />
               </div>
               <div>
@@ -244,26 +348,58 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               )}
-              {/* Add email field for guest checkout */}
+              {/* Save info for next time (guests only) */}
               {!user && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
+                <div className="mt-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={saveInfo}
+                      onChange={() => setSaveInfo((v) => !v)}
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Save this information for next time
+                    </span>
                   </label>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
+                  {saveInfo && (
+                    <div className="mt-2">
+                      <div className="text-xs text-gray-600 mb-2">
+                        An account will be created and you will be asked to
+                        choose a password.
+                      </div>
+                      <div className="mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Password
+                        </label>
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          minLength={5}
+                          required
+                          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Confirm Password
+                        </label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          minLength={5}
+                          required
+                          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               <button
                 type="submit"
-                className="w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors"
+                className="w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors mt-6"
               >
                 Place Order
               </button>
@@ -277,12 +413,12 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               {cart.map((item, idx) => (
                 <div
-                  key={item._id || idx}
+                  key={`${item.id}-${item.color}-${item.size}`}
                   className="flex justify-between items-center"
                 >
                   <div className="flex items-center space-x-3">
                     <img
-                      src={item.images?.[0] || item.image}
+                      src={item.image}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-lg border"
                     />

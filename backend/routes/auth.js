@@ -123,7 +123,7 @@ router.post("/register", async (req, res) => {
       emailWarning,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message || "Registration failed" });
   }
 });
 
@@ -599,12 +599,12 @@ router.get("/verify", auth, async (req, res) => {
         role: user.role,
         address: user.address,
         phone: user.phone,
-      }
+      },
     });
   } catch (error) {
     res.status(401).json({
       valid: false,
-      error: "Invalid or expired token"
+      error: "Invalid or expired token",
     });
   }
 });

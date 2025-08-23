@@ -44,6 +44,11 @@ const orderSchema = new mongoose.Schema({
     email: String,
   },
   createdAt: { type: Date, default: Date.now },
+  orderNumber: {
+    type: String,
+    unique: true,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

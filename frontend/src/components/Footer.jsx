@@ -75,7 +75,10 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
             <p className="text-gray-300">
-              Email: <a href="mailto:info@yaqeen.com">info@yaqeen.com</a>
+              Email:{" "}
+              <a href="mailto:yaqeenmodesty@gmail.com">
+                yaqeenmodesty@gmail.com
+              </a>
             </p>
             <p className="text-gray-300">Phone: +20 123 456 789</p>
             <p className="text-gray-300">

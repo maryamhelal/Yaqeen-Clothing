@@ -92,7 +92,7 @@ export default function ProductDetailsPage() {
           />
           {/* Sale Badge */}
           {hasSale && (
-            <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
+            <div className="absolute top-28 right-10 bg-red-500 text-white px-2 py-2 rounded-full text-sm font-bold">
               {product.salePercentage}% OFF
             </div>
           )}
