@@ -196,17 +196,34 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
     let type = "user";
+
     if (!user) {
       user = await Admin.findOne({ email });
       type = user ? "admin" : null;
     }
-    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    if (!user) {
+      console.log("Login failed: user not found", email);
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: "Invalid credentials" });
+    if (!match) {
+      console.log("Login failed: bad password", email);
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("Missing JWT_SECRET in .env");
+      return res.status(500).json({ error: "Server misconfigured" });
+    }
+
     const token = jwt.sign({ id: user._id, type }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
+
     res.json({
+      success: true,
       token,
       user: {
         id: user._id,
@@ -219,6 +236,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ error: err.message });
   }
 });

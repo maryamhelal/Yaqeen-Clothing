@@ -2,13 +2,13 @@ import { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
-import { authAPI } from "../api/auth"; // Use this import
+import { authAPI } from "../api/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
-  const { user, token, login } = useAuth(); // <-- Add login from context
+  const { user, token, login } = useAuth();
   const cityOptions = [
     { label: "Cairo, Giza", value: "cairo_giza", price: 70 },
     { label: "Alexandria", value: "alexandria", price: 75 },
@@ -33,6 +33,7 @@ export default function CheckoutPage() {
     aswan_hurghada: ["Aswan City", "Hurghada City"],
     upper_egypt: ["Minya", "Sohag", "Qena", "Luxor"],
   };
+
   const [selectedCity, setSelectedCity] = useState(cityOptions[0].value);
   const [selectedArea, setSelectedArea] = useState("");
   const [residenceType, setResidenceType] = useState("");
@@ -45,11 +46,13 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   });
-  const [saveInfo, setSaveInfo] = useState(false); // <-- Checkbox state
+  const [saveInfo, setSaveInfo] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -58,8 +61,6 @@ export default function CheckoutPage() {
   const shippingPrice =
     cityOptions.find((c) => c.value === selectedCity)?.price || 0;
   const totalWithShipping = subtotal + shippingPrice;
-
-  const location = useLocation();
 
   useEffect(() => {
     if (cart.length === 0 && location.pathname === "/checkout") {
@@ -86,27 +87,33 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     setError("");
+
     if (!form.phone || !form.email) {
       setError("Phone and email are required.");
+      setSubmitting(false);
       return;
     }
-    let newUser = null;
-    if (!user && saveInfo) {
-      if (!password || !confirmPassword) {
-        setError("Password and confirm password are required.");
-        return;
-      }
-      if (password.length < 5) {
-        setError("Password must be at least 5 characters.");
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-      }
-      try {
-        newUser = await authAPI.register({
+
+    let effectiveToken = token || null;
+    let effectiveUser = user || null;
+
+    try {
+      if (!user && saveInfo) {
+        if (!password || !confirmPassword) {
+          throw new Error("Password and confirm password are required.");
+        }
+        if (password.length < 5) {
+          throw new Error("Password must be at least 5 characters.");
+        }
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match.");
+        }
+
+        // 1) Register
+        const regRes = await authAPI.register({
           name: form.name,
           email: form.email,
           phone: form.phone,
@@ -122,58 +129,51 @@ export default function CheckoutPage() {
               residenceType === "apartment" ? form.apartment : undefined,
           },
         });
-        await login(newUser.token, newUser.user);
-      } catch (err) {
-        setError(
-          err?.message === "Email already exists"
-            ? "This email is already registered. Please log in or use a different email."
-            : err?.message || "Error creating account. Please check your info."
-        );
-        return;
       }
-    }
-    const orderData = {
-      items: cart.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        color: item.color,
-        size: item.size,
-        quantity: item.quantity,
-      })),
-      totalPrice: totalWithShipping,
-      shippingAddress: {
-        name: form.name,
-        city: selectedCity,
-        area: selectedArea,
-        street: form.street,
-        landmarks: form.landmarks,
-        residenceType,
-        floor: residenceType === "apartment" ? form.floor : undefined,
-        apartment: residenceType === "apartment" ? form.apartment : undefined,
-        phone: form.phone,
-      },
-      orderer:
-        user || newUser?.user
-          ? {
-              userId: (user || newUser?.user).id,
-              name: (user || newUser?.user).name,
-              email: (user || newUser?.user).email,
-              phone: (user || newUser?.user).phone,
-            }
-          : {
-              name: form.name,
-              email: form.email,
-              phone: form.phone,
-              userId: null,
-            },
-    };
-    try {
+
+      const orderData = {
+        items: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity,
+        })),
+        totalPrice: totalWithShipping,
+        shippingAddress: {
+          name: form.name,
+          city: selectedCity,
+          area: selectedArea,
+          street: form.street,
+          landmarks: form.landmarks,
+          residenceType,
+          floor: residenceType === "apartment" ? form.floor : undefined,
+          apartment: residenceType === "apartment" ? form.apartment : undefined,
+          phone: form.phone,
+        },
+        orderer:
+          effectiveToken && effectiveUser
+            ? {
+                userId: effectiveUser.id,
+                name: effectiveUser.name,
+                email: effectiveUser.email,
+                phone: effectiveUser.phone,
+              }
+            : {
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                userId: null,
+              },
+      };
+
       const result = await ordersAPI.createOrder(
         orderData,
-        token || newUser?.token
+        effectiveToken || null
       );
+
       if (result && result.order) {
         clearCart();
         navigate("/thank-you", { state: { order: result.order } });
@@ -182,8 +182,13 @@ export default function CheckoutPage() {
           "Order was placed but no confirmation was received. Please contact support."
         );
       }
-    } catch (error) {
-      setError("There was an error placing your order. Please try again.");
+    } catch (err) {
+      setError(
+        err?.message ||
+          "There was an error placing your order. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -366,8 +371,8 @@ export default function CheckoutPage() {
                   {saveInfo && (
                     <div className="mt-2">
                       <div className="text-xs text-gray-600 mb-2">
-                        An account will be created and you will be asked to
-                        choose a password.
+                        An account will be created using your email and
+                        password.
                       </div>
                       <div className="mb-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -401,19 +406,23 @@ export default function CheckoutPage() {
               )}
               <button
                 type="submit"
-                className="w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors mt-6"
+                disabled={submitting}
+                className={`w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors mt-6 ${
+                  submitting ? "opacity-60 cursor-not-allowed" : ""
+                }`}
               >
-                Place Order
+                {submitting ? "Placing Order..." : "Place Order"}
               </button>
             </form>
           </div>
+
           {/* Order Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 h-fit">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Order Summary
             </h2>
             <div className="space-y-4">
-              {cart.map((item, idx) => (
+              {cart.map((item) => (
                 <div
                   key={`${item.id}-${item.color}-${item.size}`}
                   className="flex justify-between items-center"
