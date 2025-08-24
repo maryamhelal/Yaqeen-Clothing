@@ -1,4 +1,3 @@
-const { generateEmailTemplate } = require("./emailTemplates");
 const { sendMail } = require("../services/emailService");
 
 exports.sendOrderConfirmation = async (to, order) => {
@@ -40,20 +39,19 @@ exports.sendOrderConfirmation = async (to, order) => {
 
   // Full HTML
   const html = `
-    <div style="font-family: Arial, sans-serif; background: #f4f4f8; padding: 0; margin: 0;">
-      <div style="max-width: 520px; margin: 32px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden;">
+    <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
+      <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
         
         <!-- Header -->
-        <div style="background: linear-gradient(90deg, #c7d2fe 0%, #a5b4fc 100%); padding: 24px 0; text-align: center;">
-          <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" 
-               alt="Yaqeen Logo" style="height: 60px; margin-bottom: 8px;" />
-          <h1 style="margin: 0; color: #ffffff; font-size: 1.7rem; font-weight: bold; letter-spacing: 1px;">
-            Thank you for your order!
-          </h1>
+        <div style="background-color: #b388cc; padding: 16px; text-align: center;">
+          <img src="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN" alt="Yaqeen Logo" width="120" />
+            <h1 style="margin: 0; color: #ffffff; font-size: 1.7rem; font-weight: bold; letter-spacing: 1px;">
+              Thank you for your order!
+            </h1>
         </div>
 
         <!-- Body -->
-        <div style="padding: 28px 24px 18px 24px;">
+        <div style="padding: 24px;">
           <p style="font-size: 1.1rem; margin-bottom: 12px; color: #222;">Hi <b>${
             order.orderer.name || "there"
           }</b>,</p>
@@ -85,12 +83,10 @@ exports.sendOrderConfirmation = async (to, order) => {
           <!-- Shipping Info -->
           <div style="margin-bottom: 18px;">
             <h3 style="margin: 0 0 4px 0; font-size: 1.05rem; color: #4f46e5;">Name</h3>
-            <div style="color: #333;">${order.shippingAddress?.name || ""}</div>
+            <div style="color: #333;">${order.orderer.name || ""}</div>
             
             <h3 style="margin: 0 0 4px 0; font-size: 1.05rem; color: #4f46e5;">Phone Number</h3>
-            <div style="color: #333;">${
-              order.shippingAddress?.phone || ""
-            }</div>
+            <div style="color: #333;">${order.orderer.phone || ""}</div>
             
             <h3 style="margin: 0 0 4px 0; font-size: 1.05rem; color: #4f46e5;">Shipping Address</h3>
             <div style="color: #333;">
