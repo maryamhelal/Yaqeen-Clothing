@@ -30,6 +30,8 @@ const userSchema = new mongoose.Schema(
       unsubscribeToken: { type: String, unique: true, sparse: true },
       lastEmailSent: { type: Date },
     },
+    resetOTP: { type: String },
+    resetOTPExpires: { type: Date },
   },
   { timestamps: true }
 );

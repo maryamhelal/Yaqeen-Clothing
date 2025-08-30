@@ -288,7 +288,9 @@ router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
-    const otp = generateAndSaveOTP(user);
+
+    const otp = await generateAndSaveOTP(user);
+
     let emailWarning = null;
     const html = generateEmailTemplate({
       title: `Hi ${user.name || "there"}`,
@@ -359,12 +361,20 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otp.trim();
     const user = await User.findOne({
-      email,
-      resetOTP: otp,
+      email: cleanEmail,
+      resetOTP: cleanOtp,
       resetOTPExpires: { $gt: Date.now() },
     });
-    if (!user) return res.status(400).json({ error: "Invalid or expired OTP" });
+    if (!user) {
+      console.log("Reset failed: user not found or OTP expired", {
+        email,
+        otp,
+      });
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetOTP = undefined;
     user.resetOTPExpires = undefined;
@@ -533,7 +543,7 @@ router.post("/resend-otp", async (req, res) => {
     if (!user) return res.status(400).json({ error: "User not found" });
     const now = Date.now();
     if (user.resetOTPExpires && user.resetOTP) {
-      const lastSent = user.resetOTPExpires - 15 * 60 * 1000; // When the OTP was generated
+      const lastSent = user.resetOTPExpires - 15 * 60 * 1000;
       const elapsed = now - lastSent;
       if (elapsed < 60 * 1000) {
         const wait = Math.ceil((60 * 1000 - elapsed) / 1000);
@@ -542,8 +552,8 @@ router.post("/resend-otp", async (req, res) => {
           .json({ error: `Please wait ${wait} seconds before resending OTP.` });
       }
     }
-    // Generate new OTP
-    const otp = generateAndSaveOTP(user);
+    const otp = await generateAndSaveOTP(user);
+
     let emailWarning = null;
     const html = generateEmailTemplate({
       title: `Hi ${user.name || "there"}`,
@@ -555,7 +565,7 @@ router.post("/resend-otp", async (req, res) => {
       await emailService.sendMail({
         to: user.email,
         subject: "Your Password Reset OTP",
-        text: `Your OTP is: ${otp}`, // fallback for plain text clients
+        text: `Your OTP is: ${otp}`,
         html,
       });
     } catch (e) {
