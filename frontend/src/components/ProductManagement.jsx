@@ -6,7 +6,7 @@ import { tagsAPI } from "../api/tags";
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function ProductManagement() {
-  const { token } = useContext(AuthContext);
+  const { token, isSuperAdmin } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
@@ -698,12 +698,14 @@ export default function ProductManagement() {
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="text-red-500"
-                    >
-                      Delete
-                    </button>
+                    {isSuperAdmin() && (
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="text-red-500"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
