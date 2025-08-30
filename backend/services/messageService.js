@@ -4,17 +4,24 @@ const emailService = require("./emailService");
 exports.createMessage = async (data) => {
   const message = await messageRepo.createMessage(data);
 
-  await emailService.sendMail({
-    to: process.env.ADMIN_EMAIL,
-    subject: `New Message from ${message.name}`,
-    html: `
-    <h2>New Message from ${message.name}</h2>
-    <p><strong>Phone:</strong> ${message.phone}</p>
-    <p><strong>Email:</strong> ${message.email}</p>
-    <p><strong>Message:</strong></p>
-    <p>${message.message}</p>
-    `,
-  });
+  // Get all admins and superadmins
+  const Admin = require("../models/Admin");
+  const admins = await Admin.findAll();
+  const adminEmails = admins.map((a) => a.email).filter(Boolean);
+
+  if (adminEmails.length > 0) {
+    await emailService.sendMail({
+      to: adminEmails.join(","),
+      subject: `New Message from ${message.name}`,
+      html: `
+        <h2>New Message from ${message.name}</h2>
+        <p><strong>Phone:</strong> ${message.phone}</p>
+        <p><strong>Email:</strong> ${message.email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.message}</p>
+      `,
+    });
+  }
 };
 
 exports.getAllMessages = async () => {
@@ -23,4 +30,4 @@ exports.getAllMessages = async () => {
 
 exports.getUserMessages = async (userEmail) => {
   return await messageRepo.getUserMessages(userEmail);
-}
+};
