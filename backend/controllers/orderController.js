@@ -1,6 +1,7 @@
 const orderService = require("../services/orderService");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const User = require("../models/User");
 const confirmationEmail = require("../utils/confirmationEmail");
 
 exports.createOrder = async (req, res) => {
@@ -15,6 +16,25 @@ exports.createOrder = async (req, res) => {
       throw new Error("Order must contain at least one item.");
     }
 
+    let userMongoId = null;
+    let userId = null;
+    let userDoc = null;
+    // Try to resolve user from orderer, or from req.user if available
+    if (
+      orderer &&
+      orderer.userMongoId &&
+      typeof orderer.userMongoId === "string"
+    ) {
+      userDoc = await User.findById(orderer.userMongoId);
+    } else if (orderer && typeof orderer.userId === "number") {
+      userDoc = await User.findOne({ userId: orderer.userId });
+    } else if (req.user && req.user._id) {
+      userDoc = await User.findById(req.user._id);
+    }
+    if (userDoc) {
+      userMongoId = userDoc._id;
+      userId = userDoc.userId;
+    }
     const orderData = {
       items: items.map((item) => ({
         id: item.id,
@@ -27,11 +47,21 @@ exports.createOrder = async (req, res) => {
       })),
       totalPrice,
       shippingAddress,
-      orderer,
+      orderer: {
+        ...orderer,
+        userMongoId,
+        userId,
+      },
       orderNumber,
     };
 
     const order = await Order.create(orderData);
+
+    // Add order to user's orders array
+    if (userDoc) {
+      userDoc.orders.push(order._id);
+      await userDoc.save();
+    }
 
     // Subtract ordered quantities from product stock
     for (const item of order.items) {
@@ -109,7 +139,7 @@ exports.getMyOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
 
     const result = await orderService.getOrdersByUser(
-      req.user._id,
+      req.user.userId,
       page,
       limit
     );

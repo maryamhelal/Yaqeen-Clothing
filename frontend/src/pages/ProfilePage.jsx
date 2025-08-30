@@ -332,7 +332,7 @@ export default function ProfilePage() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h4 className="font-semibold text-gray-800">
-                        Order #{order._id.slice(-8).toUpperCase()}
+                        Order #{order.orderNumber}
                       </h4>
                       <p className="text-sm text-gray-600">
                         {new Date(order.createdAt).toLocaleDateString("en-US", {

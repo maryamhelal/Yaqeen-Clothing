@@ -35,11 +35,12 @@ const orderSchema = new mongoose.Schema({
     default: "Cash",
   },
   orderer: {
-    userId: {
+    userMongoId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
+    userId: Number,
     name: String,
     email: String,
     phone: String,

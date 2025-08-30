@@ -1,7 +1,7 @@
 const { sendMail } = require("../services/emailService");
 
 exports.sendOrderConfirmation = async (to, order) => {
-  const subject = `Order Confirmation - #${order._id}`;
+  const subject = `Order Confirmation - #${order.orderNumber}`;
 
   // Generate product rows
   const itemsHtml = order.items
@@ -56,7 +56,9 @@ exports.sendOrderConfirmation = async (to, order) => {
             order.orderer.name || "there"
           }</b>,</p>
           <p style="font-size: 1rem; margin-bottom: 18px; color: #444;">
-            We've received your order <b>#${order._id}</b>. Here's a summary:
+            We've received your order <b>#${
+              order.orderNumber
+            }</b>. Here's a summary:
           </p>
 
           <!-- Product table -->

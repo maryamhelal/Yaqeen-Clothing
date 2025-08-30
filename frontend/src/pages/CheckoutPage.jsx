@@ -173,7 +173,12 @@ export default function CheckoutPage() {
           name: form.name,
           email: form.email,
           phone: form.phone,
-          userId: user ? user.id : loginRes?.user ? loginRes.user.id : null,
+          userId: user ? user.userId : loginRes?.user ? loginRes.userId : null,
+          userMongoId: user
+            ? user._id
+            : loginRes?.user
+            ? loginRes.user._id
+            : null,
         },
       };
 

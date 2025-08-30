@@ -184,10 +184,10 @@ export default function OrderManagement() {
                         {order.orderer?.email || "No email"}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {order.orderer?.phone || "No phone"}
+                        Phone: {order.orderer?.phone || "No phone"}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {order.orderer?.userId || "No user ID"}
+                        User ID: {order.orderer?.userId || "No userId"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
