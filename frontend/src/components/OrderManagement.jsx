@@ -115,6 +115,7 @@ export default function OrderManagement() {
           >
             <option value="">All Orders</option>
             <option value="pending">Pending</option>
+            <option value="preparing">Preparing</option>
             <option value="paid">Paid</option>
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
