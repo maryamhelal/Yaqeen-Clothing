@@ -7,9 +7,9 @@ export default function UserManagement() {
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setUsers);
   }, [token]);
 
@@ -17,9 +17,9 @@ export default function UserManagement() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
-    setUsers(users.filter(u => u._id !== id));
+    setUsers(users.filter((u) => u._id !== id));
   };
 
   return (
@@ -29,6 +29,7 @@ export default function UserManagement() {
         <table className="min-w-full bg-white rounded-xl shadow text-sm md:text-base text-center">
           <thead>
             <tr>
+              <th className="p-2">User ID</th>
               <th className="p-2">Name</th>
               <th className="p-2">Email</th>
               <th className="p-2">Phone</th>
@@ -37,23 +38,43 @@ export default function UserManagement() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {users.map((user) => (
               <tr key={user._id} className="border-b">
+                <td className="p-2">{user._id}</td>
                 <td className="p-2">{user.name}</td>
                 <td className="p-2">{user.email}</td>
                 <td className="p-2">{user.phone}</td>
                 <td className="p-2">
-                  {user.address && typeof user.address === 'object' ? (
+                  {user.address && typeof user.address === "object" ? (
                     <>
-                      {user.address.city && <span>{user.address.city.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}, </span>}
+                      {user.address.city && (
+                        <span>
+                          {user.address.city
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                          ,{" "}
+                        </span>
+                      )}
                       {user.address.area && <span>{user.address.area}, </span>}
-                      {user.address.street && <span>{user.address.street}, </span>}
-                      {user.address.landmarks && <span>{user.address.landmarks}, </span>}
-                      {user.address.residenceType && <span>{user.address.residenceType.replace(/_/g, ' ')}</span>}
-                      {user.address.residenceType === 'apartment' && (
+                      {user.address.street && (
+                        <span>{user.address.street}, </span>
+                      )}
+                      {user.address.landmarks && (
+                        <span>{user.address.landmarks}, </span>
+                      )}
+                      {user.address.residenceType && (
+                        <span>
+                          {user.address.residenceType.replace(/_/g, " ")}
+                        </span>
+                      )}
+                      {user.address.residenceType === "apartment" && (
                         <>
-                          {user.address.floor && <span>, Floor: {user.address.floor}</span>}
-                          {user.address.apartment && <span>, Apt: {user.address.apartment}</span>}
+                          {user.address.floor && (
+                            <span>, Floor: {user.address.floor}</span>
+                          )}
+                          {user.address.apartment && (
+                            <span>, Apt: {user.address.apartment}</span>
+                          )}
                         </>
                       )}
                     </>
@@ -62,7 +83,12 @@ export default function UserManagement() {
                   )}
                 </td>
                 <td className="p-2">
-                  <button onClick={() => handleDelete(user._id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                  <button
+                    onClick={() => handleDelete(user._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -71,4 +97,4 @@ export default function UserManagement() {
       </div>
     </div>
   );
-} 
+}

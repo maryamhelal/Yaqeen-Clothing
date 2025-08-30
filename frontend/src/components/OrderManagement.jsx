@@ -173,7 +173,7 @@ export default function OrderManagement() {
                   <tr key={order._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        #{order._id.slice(-8).toUpperCase()}
+                        #{order.orderNumber}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -182,6 +182,12 @@ export default function OrderManagement() {
                       </div>
                       <div className="text-sm text-gray-500">
                         {order.orderer?.email || "No email"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {order.orderer?.phone || "No phone"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {order.orderer?.userId || "No user ID"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

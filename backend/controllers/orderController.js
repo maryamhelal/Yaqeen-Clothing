@@ -1,18 +1,12 @@
 const orderService = require("../services/orderService");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
-const OrderCounter = require("../models/OrderCounter");
 const confirmationEmail = require("../utils/confirmationEmail");
 
 exports.createOrder = async (req, res) => {
   try {
     // Generate sequential order number
-    let counter = await OrderCounter.findOneAndUpdate(
-      { name: "order" },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    const orderNumber = "ORD-" + counter.seq;
+    const orderNumber = (await Order.countDocuments()) + 1;
 
     // Use items from request body
     const { items, shippingAddress, totalPrice, orderer } = req.body;
