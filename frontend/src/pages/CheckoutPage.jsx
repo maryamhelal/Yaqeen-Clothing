@@ -67,6 +67,46 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // Promocode state
+  const [promocode, setPromocode] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoInfo, setPromoInfo] = useState(null);
+
+  // Validate promocode on apply
+  const handleApplyPromocode = async () => {
+    setPromoError("");
+    setPromoDiscount(0);
+    setPromoInfo(null);
+    if (!promocode) return;
+    try {
+      // Call backend to validate promocode (simulate by creating order with promocode, but not submitting)
+      const previewOrder = {
+        items: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity,
+          categoryId: item.categoryId,
+          collectionId: item.collectionId,
+        })),
+        totalPrice: subtotal,
+        promocode: { code: promocode },
+      };
+      const res = await ordersAPI.previewPromocode(previewOrder); // You need to implement this endpoint
+      if (res && res.valid) {
+        setPromoDiscount(res.discountAmount);
+        setPromoInfo(res.promocode);
+      } else {
+        setPromoError(res.error || "Invalid promocode");
+      }
+    } catch (err) {
+      setPromoError(err?.message || "Error validating promocode");
+    }
+  };
   // Only keep one backend-driven shippingPrice declaration
   const selectedCityObj = cities.find((c) => c._id === selectedCity);
   const shippingPrice = selectedCityObj ? selectedCityObj.price : 0;
@@ -188,8 +228,15 @@ export default function CheckoutPage() {
           color: item.color,
           size: item.size,
           quantity: item.quantity,
+          categoryId: item.categoryId,
+          collectionId: item.collectionId,
         })),
-        totalPrice: totalWithShipping,
+        totalPrice: totalWithShipping - promoDiscount,
+        promocode: promoInfo
+          ? { code: promoInfo.code }
+          : promocode
+          ? { code: promocode }
+          : undefined,
         shippingAddress: {
           name: form.name,
           city: selectedCity,
@@ -546,6 +593,32 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               ))}
+              {/* Promocode input and discount display */}
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  placeholder="Enter promocode"
+                  value={promocode}
+                  onChange={(e) => setPromocode(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyPromocode}
+                  className="bg-primary-dark text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-darker transition-colors"
+                >
+                  Apply
+                </button>
+              </div>
+              {promoError && (
+                <div className="text-red-500 text-sm mt-1">{promoError}</div>
+              )}
+              {promoDiscount > 0 && promoInfo && (
+                <div className="text-green-600 text-sm mt-1">
+                  Promocode <b>{promoInfo.code}</b> applied: -{promoDiscount}{" "}
+                  EGP
+                </div>
+              )}
               <div className="border-t border-gray-200 pt-4 space-y-2">
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Subtotal</span>
@@ -555,9 +628,17 @@ export default function CheckoutPage() {
                   <span>Shipping</span>
                   <span>{shippingPrice.toLocaleString()} EGP</span>
                 </div>
+                {promoDiscount > 0 && (
+                  <div className="flex justify-between font-semibold text-lg text-green-600">
+                    <span>Discount</span>
+                    <span>-{promoDiscount.toLocaleString()} EGP</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-xl">
                   <span>Total</span>
-                  <span>{totalWithShipping.toLocaleString()} EGP</span>
+                  <span>
+                    {(totalWithShipping - promoDiscount).toLocaleString()} EGP
+                  </span>
                 </div>
               </div>
             </div>

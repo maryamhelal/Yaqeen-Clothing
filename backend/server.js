@@ -15,6 +15,7 @@ const messageRoutes = require("./routes/messages");
 const saleRoutes = require("./routes/sales");
 const unsubscribeRoutes = require("./routes/unsubscribe");
 const cityRoutes = require("./routes/cities");
+const promocodeRoutes = require("./routes/promocodes");
 require("./models/Admin");
 
 const app = express();
@@ -45,6 +46,7 @@ app.use(
 
 // API Routes
 app.use("/api/products", productRoutes);
+app.use("/api/promocodes", promocodeRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admins", adminRoutes);

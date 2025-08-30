@@ -24,6 +24,13 @@ const orderSchema = new mongoose.Schema({
   items: [orderItemSchema],
   shippingAddress: shippingAddressSchema,
   totalPrice: Number,
+  promocode: {
+    code: String,
+    percentage: Number,
+    type: String,
+    targetId: mongoose.Schema.Types.ObjectId,
+    discountAmount: Number,
+  },
   status: {
     type: String,
     enum: ["pending", "preparing", "paid", "shipped", "delivered", "cancelled"],

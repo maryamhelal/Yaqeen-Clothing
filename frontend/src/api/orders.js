@@ -1,31 +1,46 @@
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
+const API_BASE_URL = `${
+  process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"
+}/api`;
+
+export async function previewPromocode(orderData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/promocodes/preview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+    return await res.json();
+  } catch (err) {
+    return { valid: false, error: err.message };
+  }
+}
 
 export const ordersAPI = {
-  // Create new order
+  previewPromocode,
   createOrder: async (orderData, token = null) => {
     try {
       const headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       };
-      
+
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${API_BASE_URL}/orders`, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: JSON.stringify(orderData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create order');
+        throw new Error(errorData.error || "Failed to create order");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error("Error creating order:", error);
       throw error;
     }
   },
@@ -34,20 +49,20 @@ export const ordersAPI = {
   getOrder: async (orderId, token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch order');
+        throw new Error(errorData.error || "Failed to fetch order");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching order:', error);
+      console.error("Error fetching order:", error);
       throw error;
     }
   },
@@ -60,27 +75,30 @@ export const ordersAPI = {
         limit: limit.toString(),
       });
 
-      const response = await fetch(`${API_BASE_URL}/orders/my/orders?${params}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
+      const response = await fetch(
+        `${API_BASE_URL}/orders/my/orders?${params}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch user orders');
+        throw new Error(errorData.error || "Failed to fetch user orders");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching user orders:', error);
+      console.error("Error fetching user orders:", error);
       throw error;
     }
   },
 
   // Get all orders (admin)
-  getAllOrders: async (token, page = 1, limit = 10, status = '') => {
+  getAllOrders: async (token, page = 1, limit = 10, status = "") => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -89,20 +107,20 @@ export const ordersAPI = {
       });
 
       const response = await fetch(`${API_BASE_URL}/orders/admin?${params}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch all orders');
+        throw new Error(errorData.error || "Failed to fetch all orders");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching all orders:', error);
+      console.error("Error fetching all orders:", error);
       throw error;
     }
   },
@@ -111,23 +129,23 @@ export const ordersAPI = {
   updateOrderStatus: async (orderId, status, token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update order status');
+        throw new Error(errorData.error || "Failed to update order status");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error updating order status:', error);
+      console.error("Error updating order status:", error);
       throw error;
     }
   },
-}; 
+};

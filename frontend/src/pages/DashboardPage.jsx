@@ -4,6 +4,7 @@ import ProductManagement from "../components/ProductManagement";
 import OrderManagement from "../components/OrderManagement";
 import AdminManagement from "../components/AdminManagement";
 import UserManagement from "../components/UserManagement";
+import AdminPromocodesPage from "./AdminPromocodesPage";
 import TagsManagement from "../components/TagsManagement";
 import AdminMessagesPage from "./AdminMessagesPage";
 import CityManagement from "../components/CityManagement";
@@ -99,6 +100,16 @@ export default function DashboardPage() {
               >
                 Admins
               </button>
+              <button
+                onClick={() => setTab("promocodes")}
+                className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
+                  tab === "promocodes"
+                    ? "bg-primary-dark text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
+                }`}
+              >
+                Promocodes
+              </button>
             </>
           )}
         </div>
@@ -112,6 +123,7 @@ export default function DashboardPage() {
         {tab === "messages" && <AdminMessagesPage />}
         {tab === "admins" && isSuperAdmin() && <AdminManagement />}
         {tab === "users" && isSuperAdmin() && <UserManagement />}
+        {tab === "promocodes" && isSuperAdmin() && <AdminPromocodesPage />}
       </div>
     </div>
   );

@@ -10,7 +10,13 @@ exports.createOrder = async (req, res) => {
     const orderNumber = (await Order.countDocuments()) + 1;
 
     // Use items from request body
-    const { items, shippingAddress, totalPrice, orderer } = req.body;
+    const {
+      items,
+      shippingAddress,
+      totalPrice,
+      orderer,
+      promocode: promocodeInput,
+    } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       throw new Error("Order must contain at least one item.");
@@ -35,6 +41,66 @@ exports.createOrder = async (req, res) => {
       userMongoId = userDoc._id;
       userId = userDoc.userId;
     }
+    let appliedPromocode = null;
+    let discountAmount = 0;
+    let finalTotalPrice = totalPrice;
+
+    if (promocodeInput && promocodeInput.code) {
+      const Promocode = require("../models/Promocode");
+      const promocodeDoc = await Promocode.findOne({
+        code: promocodeInput.code,
+        active: true,
+      });
+      if (!promocodeDoc) {
+        return res
+          .status(400)
+          .json({ error: "Invalid or inactive promocode." });
+      }
+      if (promocodeDoc.expiry && new Date(promocodeDoc.expiry) < new Date()) {
+        return res.status(400).json({ error: "Promocode expired." });
+      }
+      if (promocodeDoc.uses >= promocodeDoc.maxUses) {
+        return res
+          .status(400)
+          .json({ error: "Promocode usage limit reached." });
+      }
+      // Only apply to eligible items
+      let eligibleTotal = 0;
+      items.forEach((item) => {
+        if (
+          (promocodeDoc.type === "product" &&
+            item.id == String(promocodeDoc.targetId)) ||
+          (promocodeDoc.type === "category" &&
+            item.categoryId == String(promocodeDoc.targetId)) ||
+          (promocodeDoc.type === "collection" &&
+            item.collectionId == String(promocodeDoc.targetId))
+        ) {
+          eligibleTotal += item.price * item.quantity;
+        }
+      });
+      if (eligibleTotal === 0) {
+        return res
+          .status(400)
+          .json({
+            error: "Promocode not applicable to any items in your cart.",
+          });
+      }
+      discountAmount = Math.round(
+        (eligibleTotal * promocodeDoc.percentage) / 100
+      );
+      finalTotalPrice = totalPrice - discountAmount;
+      appliedPromocode = {
+        code: promocodeDoc.code,
+        percentage: promocodeDoc.percentage,
+        type: promocodeDoc.type,
+        targetId: promocodeDoc.targetId,
+        discountAmount,
+      };
+      // Increment promocode usage
+      promocodeDoc.uses += 1;
+      await promocodeDoc.save();
+    }
+
     const orderData = {
       items: items.map((item) => ({
         id: item.id,
@@ -44,8 +110,11 @@ exports.createOrder = async (req, res) => {
         color: item.color,
         size: item.size,
         quantity: item.quantity,
+        categoryId: item.categoryId,
+        collectionId: item.collectionId,
       })),
-      totalPrice,
+      totalPrice: finalTotalPrice,
+      promocode: appliedPromocode,
       shippingAddress,
       orderer: {
         ...orderer,
