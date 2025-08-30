@@ -211,7 +211,7 @@ router.post("/login", async (req, res) => {
     let type = "user";
 
     if (!user) {
-      user = await Admin.findOne({ cleanEmail });
+      user = await Admin.findOne({ email: cleanEmail });
       type = user ? "admin" : null;
     }
 
