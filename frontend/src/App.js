@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import ContactMessagePage from "./pages/ContactMessagePage";
+import AdminMessagesPage from "./pages/AdminMessagesPage";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import CategoryPage from "./pages/CategoryPage";
@@ -40,6 +42,8 @@ function App() {
             />
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
+            <Route path="/contact-message" element={<ContactMessagePage />} />
+            <Route path="/admin/messages" element={<AdminMessagesPage />} />
           </Routes>
         </main>
         <Footer />

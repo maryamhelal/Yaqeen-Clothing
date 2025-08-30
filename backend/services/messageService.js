@@ -6,7 +6,7 @@ exports.createMessage = async (data) => {
 
   // Get all admins and superadmins
   const Admin = require("../models/Admin");
-  const admins = await Admin.findAll();
+  const admins = await Admin.find({ role: { $in: ["admin", "superadmin"] } });
   const adminEmails = admins.map((a) => a.email).filter(Boolean);
 
   if (adminEmails.length > 0) {

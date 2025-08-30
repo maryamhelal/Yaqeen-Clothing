@@ -73,7 +73,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+            <h4 className="text-lg font-semibold">Contact</h4>
             <p className="text-gray-300">
               Email:{" "}
               <a href="mailto:yaqeenmodesty@gmail.com">
@@ -108,6 +108,14 @@ export default function Footer() {
                 yaqeenshopp
               </a>
             </p>
+            <div className="my-2">
+              <a
+                href="/contact-message"
+                className="inline-block text-white bg-primary-darker px-2 py-2 rounded hover:bg-primary-dark transition"
+              >
+                Send us a message
+              </a>
+            </div>
           </div>
         </div>
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
