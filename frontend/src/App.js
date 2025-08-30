@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ContactMessagePage from "./pages/ContactMessagePage";
@@ -16,39 +15,65 @@ import DashboardPage from "./pages/DashboardPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
+import { Helmet } from "react-helmet";
 
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/category/:categoryName" element={<CategoryPage />} />
-            <Route
-              path="/collection/:collectionName"
-              element={<CollectionPage />}
-            />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/dashboard/*" element={<DashboardPage />} />
-            <Route
-              path="/product/:productName"
-              element={<ProductDetailsPage />}
-            />
-            <Route path="/thank-you" element={<ThankYouPage />} />
-            <Route path="/unsubscribe" element={<UnsubscribePage />} />
-            <Route path="/contact-message" element={<ContactMessagePage />} />
-            <Route path="/admin/messages" element={<AdminMessagesPage />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <>
+      <Helmet>
+        <title>Yaqeen Clothing - Modern Modest Fashion</title>
+        <meta
+          name="description"
+          content="Shop Yaqeen Clothing for modern, modest dresses, abayas, and fashion for women. Fast delivery, secure payment, and unique collections."
+        />
+        <meta
+          name="keywords"
+          content="modest fashion, dresses, abayas, hijab, clothing, women, Yaqeen, online shop, Egypt, modern, winter collection, long dress, short dress"
+        />
+        <meta name="author" content="Yaqeen Clothing" />
+        <meta property="og:title" content="Yaqeen Clothing" />
+        <meta
+          property="og:description"
+          content="Discover modern modest fashion at Yaqeen Clothing."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://yaqeenclothing.com" />
+        <meta property="og:image" content="/logo512.png" />
+      </Helmet>
+      <Router>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route
+                path="/category/:categoryName"
+                element={<CategoryPage />}
+              />
+              <Route
+                path="/collection/:collectionName"
+                element={<CollectionPage />}
+              />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/dashboard/*" element={<DashboardPage />} />
+              <Route
+                path="/product/:productName"
+                element={<ProductDetailsPage />}
+              />
+              <Route path="/thank-you" element={<ThankYouPage />} />
+              <Route path="/unsubscribe" element={<UnsubscribePage />} />
+              <Route path="/contact-message" element={<ContactMessagePage />} />
+              <Route path="/admin/messages" element={<AdminMessagesPage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </>
   );
 }
 
