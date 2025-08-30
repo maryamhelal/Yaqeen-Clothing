@@ -40,7 +40,7 @@ export default function UserManagement() {
           <tbody>
             {users.map((user) => (
               <tr key={user._id} className="border-b">
-                <td className="p-2">{user._id}</td>
+                <td className="p-2">{user.userId}</td>
                 <td className="p-2">{user.name}</td>
                 <td className="p-2">{user.email}</td>
                 <td className="p-2">{user.phone}</td>
