@@ -21,7 +21,7 @@ function App() {
   return (
     <>
       <Helmet>
-        <title>Yaqeen Clothing - Modern Modest Fashion</title>
+        <title>Yaqeen Clothing</title>
         <meta
           name="description"
           content="Shop Yaqeen Clothing for modern, modest dresses, abayas, and fashion for women. Fast delivery, secure payment, and unique collections."

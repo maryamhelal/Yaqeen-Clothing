@@ -4,38 +4,44 @@ import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 import { authAPI } from "../api/auth";
 import { useLocation, useNavigate } from "react-router-dom";
-import CitySelectTable from "../components/CitySelectTable";
+// import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
   const { user, token, login } = useAuth();
-  const cityOptions = [
-    { label: "Cairo, Giza", value: "cairo_giza", price: 70 },
-    { label: "Alexandria", value: "alexandria", price: 75 },
-    { label: "Other Governorates", value: "other_governorates", price: 75 },
-    { label: "Delta, Canal", value: "delta_canal", price: 85 },
-    { label: "Aswan, Hurghada", value: "aswan_hurghada", price: 115 },
-    { label: "Upper Egypt", value: "upper_egypt", price: 115 },
-  ];
-  const areaOptions = {
-    cairo_giza: [
-      "Nasr City",
-      "Heliopolis",
-      "Dokki",
-      "Mohandessin",
-      "Maadi",
-      "6th of October",
-      "Sheikh Zayed",
-    ],
-    alexandria: ["Sidi Gaber", "Stanley", "Smouha", "Gleem"],
-    other_governorates: ["Ismailia", "Port Said", "Suez"],
-    delta_canal: ["Mansoura", "Tanta", "Zagazig"],
-    aswan_hurghada: ["Aswan City", "Hurghada City"],
-    upper_egypt: ["Minya", "Sohag", "Qena", "Luxor"],
-  };
-
-  const [selectedCity, setSelectedCity] = useState(cityOptions[0].value);
+  // Dynamic city/area state
+  const [cities, setCities] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+
+  // Fetch cities on mount
+  useEffect(() => {
+    import("../api/cities").then(({ citiesAPI }) => {
+      citiesAPI.getCities().then((data) => {
+        setCities(data);
+        if (data.length > 0) {
+          setSelectedCity(data[0]._id);
+        }
+      });
+    });
+  }, []);
+
+  // Fetch areas when selectedCity changes
+  useEffect(() => {
+    if (selectedCity) {
+      import("../api/cities").then(({ citiesAPI }) => {
+        citiesAPI.getCityAreas(selectedCity).then((data) => {
+          setAreas(data);
+          setSelectedArea(data[0] || "");
+        });
+      });
+    } else {
+      setAreas([]);
+      setSelectedArea("");
+    }
+  }, [selectedCity]);
+
   const [residenceType, setResidenceType] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -61,8 +67,9 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shippingPrice =
-    cityOptions.find((c) => c.value === selectedCity)?.price || 0;
+  // Only keep one backend-driven shippingPrice declaration
+  const selectedCityObj = cities.find((c) => c._id === selectedCity);
+  const shippingPrice = selectedCityObj ? selectedCityObj.price : 0;
   const totalWithShipping = subtotal + shippingPrice;
 
   useEffect(() => {
@@ -82,11 +89,24 @@ export default function CheckoutPage() {
         companyName: user.address?.companyName || "",
         companyNumber: user.address?.companyNumber || "",
       });
-      setSelectedCity(user.address?.city || cityOptions[0].value);
-      setSelectedArea(user.address?.area || "");
+      if (cities.length > 0) {
+        const userCity = cities.find(
+          (c) => c.name === user.address?.city || c._id === user.address?.city
+        );
+        setSelectedCity(userCity ? userCity._id : cities[0]._id);
+      }
       setResidenceType(user.address?.residenceType || "");
     }
-  }, [cart, navigate, user, location]);
+  }, [cart, navigate, user, location, cities]);
+
+  // Autofill area after areas are loaded and user has area
+  useEffect(() => {
+    if (user && user.address?.area && areas.length > 0) {
+      if (areas.includes(user.address.area)) {
+        setSelectedArea(user.address.area);
+      }
+    }
+  }, [areas, user]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -281,18 +301,25 @@ export default function CheckoutPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Shipping City/Region
                 </label>
-                <CitySelectTable
+                <select
+                  name="city"
                   value={selectedCity}
-                  onChange={(val) => {
-                    setSelectedCity(val);
+                  onChange={(e) => {
+                    setSelectedCity(e.target.value);
                     setSelectedArea("");
                   }}
-                  cityOptions={cityOptions}
-                />
-              </div>
-              <div>
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select city</option>
+                  {cities.map((city) => (
+                    <option key={city._id} value={city._id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
                 <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                  Area
+                  Select area
                 </label>
                 <select
                   name="area"
@@ -302,7 +329,7 @@ export default function CheckoutPage() {
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   <option value="">Select area</option>
-                  {(areaOptions[selectedCity] || []).map((area) => (
+                  {areas.map((area) => (
                     <option key={area} value={area}>
                       {area}
                     </option>

@@ -142,6 +142,9 @@ export default function OrderManagement() {
                   Customer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Shipping Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -191,6 +194,47 @@ export default function OrderManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {order.shippingAddress?.city || "No city"}
+                      </div>
+                      <div className="text-sm text-gray-900">
+                        {order.shippingAddress?.area || "No area"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {order.shippingAddress?.street || "No street"}
+                      </div>
+                      {order.shippingAddress?.landmarks && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.landmarks}
+                        </div>
+                      )}
+                      {order.shippingAddress?.floor && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.floor}
+                        </div>
+                      )}
+                      {order.shippingAddress?.apartment && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.apartment}
+                        </div>
+                      )}
+                      {order.shippingAddress && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.houseNumber}
+                        </div>
+                      )}
+                      {order.shippingAddress?.companyName && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.companyName}
+                        </div>
+                      )}
+                      {order.shippingAddress?.companyNumber && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.companyNumber}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={statusUpdate[order._id] || order.status}
                         onChange={(e) =>
@@ -235,22 +279,6 @@ export default function OrderManagement() {
                               </div>
                             </div>
                           ))}
-                          {order.shippingAddress && (
-                            <div className="bg-gray-50 p-2 rounded">
-                              <div className="font-medium">
-                                Shipping Address:
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {order.shippingAddress.name &&
-                                  `${order.shippingAddress.name}, `}
-                                {order.shippingAddress.phone &&
-                                  `${order.shippingAddress.phone}, `}
-                                {order.shippingAddress.city &&
-                                  order.shippingAddress.area &&
-                                  `${order.shippingAddress.area}, ${order.shippingAddress.city}`}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </details>
                     </td>

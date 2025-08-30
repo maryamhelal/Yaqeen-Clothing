@@ -14,6 +14,7 @@ const tagRoutes = require("./routes/tags");
 const messageRoutes = require("./routes/messages");
 const saleRoutes = require("./routes/sales");
 const unsubscribeRoutes = require("./routes/unsubscribe");
+const cityRoutes = require("./routes/cities");
 require("./models/Admin");
 
 const app = express();
@@ -50,6 +51,7 @@ app.use("/api/admins", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/cities", cityRoutes);
 app.use("/api/sales", saleRoutes);
 app.use("/api/unsubscribe", unsubscribeRoutes);
 

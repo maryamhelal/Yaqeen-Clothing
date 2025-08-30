@@ -6,6 +6,7 @@ import AdminManagement from "../components/AdminManagement";
 import UserManagement from "../components/UserManagement";
 import TagsManagement from "../components/TagsManagement";
 import AdminMessagesPage from "./AdminMessagesPage";
+import CityManagement from "../components/CityManagement";
 
 export default function DashboardPage() {
   const { user, isAdmin, isSuperAdmin } = useAuth();
@@ -57,6 +58,16 @@ export default function DashboardPage() {
             Tags
           </button>
           <button
+            onClick={() => setTab("cities")}
+            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
+              tab === "cities"
+                ? "bg-primary-dark text-white"
+                : "bg-white text-gray-800 border border-gray-200"
+            }`}
+          >
+            Cities
+          </button>
+          <button
             onClick={() => setTab("messages")}
             className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold whitespace-nowrap ${
               tab === "messages"
@@ -97,6 +108,7 @@ export default function DashboardPage() {
         {tab === "products" && <ProductManagement />}
         {tab === "orders" && <OrderManagement />}
         {tab === "tags" && <TagsManagement />}
+        {tab === "cities" && <CityManagement />}
         {tab === "messages" && <AdminMessagesPage />}
         {tab === "admins" && isSuperAdmin() && <AdminManagement />}
         {tab === "users" && isSuperAdmin() && <UserManagement />}

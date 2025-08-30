@@ -263,6 +263,32 @@ export default function ProfilePage() {
                   )}
                 </>
               )}
+              {user.address?.residenceType === "private_house" && (
+                <>
+                  {user.address.houseNumber && (
+                    <div>
+                      <span className="font-semibold">House Number:</span>{" "}
+                      {user.address.houseNumber}
+                    </div>
+                  )}
+                </>
+              )}
+              {user.address?.residenceType === "work" && (
+                <>
+                  {user.address.companyName && (
+                    <div>
+                      <span className="font-semibold">Company Name:</span>{" "}
+                      {user.address.companyName}
+                    </div>
+                  )}
+                  {user.address.companyNumber && (
+                    <div>
+                      <span className="font-semibold">Company Number:</span>{" "}
+                      {user.address.companyNumber}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -319,7 +345,7 @@ export default function ProfilePage() {
           Forgot Password?
         </button>
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
-        <div className="bg-primary/20 rounded-lg p-4">
+        <div className="bg-primary rounded-lg p-4">
           {orders.length === 0 ? (
             <div className="text-gray-500 text-center py-4">No orders yet.</div>
           ) : (
@@ -393,13 +419,61 @@ export default function ProfilePage() {
                         Shipping Address:
                       </h5>
                       <p className="text-sm text-gray-600">
-                        {order.shippingAddress.name &&
-                          `${order.shippingAddress.name}, `}
-                        {order.shippingAddress.phone &&
-                          `${order.shippingAddress.phone}, `}
-                        {order.shippingAddress.city &&
-                          order.shippingAddress.area &&
-                          `${order.shippingAddress.area}, ${order.shippingAddress.city}`}
+                        {order.orderer.name && (
+                          <p>Name: {`${order.orderer.name}`}</p>
+                        )}
+                        {order.orderer.email && (
+                          <p>Email: {`${order.orderer.email}`}</p>
+                        )}
+                        {order.orderer.phone && (
+                          <p>Phone: {`${order.orderer.phone}`}</p>
+                        )}
+                        {order.shippingAddress.city && (
+                          <p>City: {`${order.shippingAddress.city}`}</p>
+                        )}
+                        {order.shippingAddress.area && (
+                          <p>Area: {`${order.shippingAddress.area}`}</p>
+                        )}
+                        {order.shippingAddress.street && (
+                          <p>Street: {`${order.shippingAddress.street}`}</p>
+                        )}
+                        {order.shippingAddress.residenceType && (
+                          <p>
+                            Residence Type:{" "}
+                            {`${order.shippingAddress.residenceType}`}
+                          </p>
+                        )}
+                        {order.shippingAddress.apartment && (
+                          <p>
+                            Apartment: {`${order.shippingAddress.apartment}`}
+                          </p>
+                        )}
+                        {order.shippingAddress.floor && (
+                          <p>Floor: {`${order.shippingAddress.floor}`}</p>
+                        )}
+                        {order.shippingAddress.houseNumber && (
+                          <p>
+                            House Number:{" "}
+                            {`${order.shippingAddress.houseNumber}`}
+                          </p>
+                        )}
+                        {order.shippingAddress.companyName && (
+                          <p>
+                            Company Name:{" "}
+                            {`${order.shippingAddress.companyName}`}
+                          </p>
+                        )}
+                        {order.shippingAddress.companyNumber && (
+                          <p>
+                            Company Number:{" "}
+                            {`${order.shippingAddress.companyNumber}`}
+                          </p>
+                        )}
+                        {order.shippingAddress.landmarks && (
+                          <p>
+                            Landmarks: {`${order.shippingAddress.landmarks}`}
+                          </p>
+                        )}
                       </p>
                     </div>
                   )}

@@ -1,35 +1,36 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function RegisterPage() {
   const { register, loading, error, clearError } = useAuth();
-  const cityOptions = [
-    { label: "Cairo, Giza", value: "cairo_giza" },
-    { label: "Alexandria", value: "alexandria" },
-    { label: "Other Governorates", value: "other_governorates" },
-    { label: "Delta, Canal", value: "delta_canal" },
-    { label: "Aswan, Hurghada", value: "aswan_hurghada" },
-    { label: "Upper Egypt", value: "upper_egypt" },
-  ];
-  const areaOptions = {
-    cairo_giza: [
-      "Nasr City",
-      "Heliopolis",
-      "Dokki",
-      "Mohandessin",
-      "Maadi",
-      "6th of October",
-      "Sheikh Zayed",
-    ],
-    alexandria: ["Sidi Gaber", "Stanley", "Smouha", "Gleem"],
-    other_governorates: ["Ismailia", "Port Said", "Suez"],
-    delta_canal: ["Mansoura", "Tanta", "Zagazig"],
-    aswan_hurghada: ["Aswan City", "Hurghada City"],
-    upper_egypt: ["Minya", "Sohag", "Qena", "Luxor"],
-  };
-  const [selectedCity, setSelectedCity] = useState(cityOptions[0].value);
+  const [cities, setCities] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+
+  useEffect(() => {
+    import("../api/cities").then(({ citiesAPI }) => {
+      citiesAPI.getCities().then((data) => {
+        setCities(data);
+        if (data.length > 0) setSelectedCity(data[0]._id);
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selectedCity) {
+      import("../api/cities").then(({ citiesAPI }) => {
+        citiesAPI.getCityAreas(selectedCity).then((data) => {
+          setAreas(data);
+          setSelectedArea(data[0] || "");
+        });
+      });
+    } else {
+      setAreas([]);
+      setSelectedArea("");
+    }
+  }, [selectedCity]);
   const [residenceType, setResidenceType] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -194,9 +195,9 @@ export default function RegisterPage() {
               required
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             >
-              {cityOptions.map((city) => (
-                <option key={city.value} value={city.value}>
-                  {city.label}
+              {cities.map((city) => (
+                <option key={city._id} value={city._id}>
+                  {city.name}
                 </option>
               ))}
             </select>
@@ -213,7 +214,7 @@ export default function RegisterPage() {
               className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
             >
               <option value="">Select area</option>
-              {(areaOptions[selectedCity] || []).map((area) => (
+              {areas.map((area) => (
                 <option key={area} value={area}>
                   {area}
                 </option>
