@@ -74,13 +74,22 @@ const { generateAndSaveOTP } = require("../utils/otp");
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
-    const existing = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existing = await User.findOne({ email: cleanEmail });
     if (existing)
       return res.status(400).json({ error: "Email already exists" });
+
+    if (password.length < 5) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 5 characters." });
+    }
+
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
-      email,
+      email: cleanEmail,
       password: hash,
       address,
       phone,
@@ -195,11 +204,14 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email });
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    let user = await User.findOne({ email: cleanEmail });
     let type = "user";
 
     if (!user) {
-      user = await Admin.findOne({ email });
+      user = await Admin.findOne({ cleanEmail });
       type = user ? "admin" : null;
     }
 
@@ -210,7 +222,7 @@ router.post("/login", async (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      console.log("Login failed: bad password", email);
+      console.log("Login failed: incorrect password", email);
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
@@ -286,7 +298,9 @@ router.post("/login", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) return res.status(400).json({ error: "User not found" });
 
     const otp = await generateAndSaveOTP(user);

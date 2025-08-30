@@ -89,7 +89,7 @@ export default function RegisterPage() {
       const result = await register({
         name: formData.name,
         phone: formData.phone,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
         address: addressObj,
       });
