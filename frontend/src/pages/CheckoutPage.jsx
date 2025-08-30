@@ -45,6 +45,9 @@ export default function CheckoutPage() {
     apartment: "",
     phone: "",
     email: "",
+    houseNumber: "",
+    companyName: "",
+    companyNumber: "",
   });
   const [saveInfo, setSaveInfo] = useState(false);
   const [password, setPassword] = useState("");
@@ -75,6 +78,9 @@ export default function CheckoutPage() {
         apartment: user.address?.apartment || "",
         phone: user.phone || "",
         email: user.email || "",
+        houseNumber: user.address?.houseNumber || "",
+        companyName: user.address?.companyName || "",
+        companyNumber: user.address?.companyNumber || "",
       });
       setSelectedCity(user.address?.city || cityOptions[0].value);
       setSelectedArea(user.address?.area || "");
@@ -129,6 +135,12 @@ export default function CheckoutPage() {
             floor: residenceType === "apartment" ? form.floor : undefined,
             apartment:
               residenceType === "apartment" ? form.apartment : undefined,
+            houseNumber:
+              residenceType === "private_house" ? form.houseNumber : undefined,
+            companyName:
+              residenceType === "work" ? form.companyName : undefined,
+            companyNumber:
+              residenceType === "work" ? form.companyNumber : undefined,
           },
         });
         if (!registerRes || !registerRes.user || !registerRes.token) {
@@ -167,6 +179,11 @@ export default function CheckoutPage() {
           residenceType,
           floor: residenceType === "apartment" ? form.floor : undefined,
           apartment: residenceType === "apartment" ? form.apartment : undefined,
+          houseNumber:
+            residenceType === "private_house" ? form.houseNumber : undefined,
+          companyName: residenceType === "work" ? form.companyName : undefined,
+          companyNumber:
+            residenceType === "work" ? form.companyNumber : undefined,
           phone: form.phone,
         },
         orderer: {
@@ -363,6 +380,49 @@ export default function CheckoutPage() {
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
+                </div>
+              )}
+              {residenceType === "private_house" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                    House Number
+                  </label>
+                  <input
+                    name="houseNumber"
+                    type="number"
+                    min="0"
+                    value={form.houseNumber}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              )}
+              {residenceType === "work" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                    Company Name
+                  </label>
+                  <input
+                    name="companyName"
+                    type="text"
+                    value={form.companyName}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              )}
+              {residenceType === "work" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                    Company Number
+                  </label>
+                  <input
+                    name="companyNumber"
+                    type="number"
+                    value={form.companyNumber}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
                 </div>
               )}
               {/* Save info for next time (guests only) */}

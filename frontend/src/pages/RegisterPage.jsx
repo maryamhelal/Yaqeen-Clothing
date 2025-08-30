@@ -84,6 +84,12 @@ export default function RegisterPage() {
         floor: residenceType === "apartment" ? formData.floor : undefined,
         apartment:
           residenceType === "apartment" ? formData.apartment : undefined,
+        houseNumber:
+          residenceType === "private_house" ? formData.houseNumber : undefined,
+        companyName:
+          residenceType === "work" ? formData.companyName : undefined,
+        companyNumber:
+          residenceType === "work" ? formData.companyNumber : undefined,
       };
 
       const result = await register({
@@ -98,7 +104,7 @@ export default function RegisterPage() {
         navigate("/");
       }
     } catch (err) {
-      // Error is handled by the context
+      console.log(err);
     }
   };
 
@@ -282,6 +288,54 @@ export default function RegisterPage() {
                   type="number"
                   min="0"
                   value={formData.apartment}
+                  onChange={handleChange}
+                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          )}
+          {residenceType === "private_house" && (
+            <div className="flex gap-4 mt-2">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  House Number
+                </label>
+                <input
+                  name="houseNumber"
+                  type="number"
+                  min="0"
+                  value={formData.houseNumber}
+                  onChange={handleChange}
+                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+          )}
+          {residenceType === "work" && (
+            <div className="flex gap-4 mt-2">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Name
+                </label>
+                <input
+                  name="companyName"
+                  type="text"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Number
+                </label>
+                <input
+                  name="companyNumber"
+                  type="number"
+                  value={formData.companyNumber}
                   onChange={handleChange}
                   className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
                   required

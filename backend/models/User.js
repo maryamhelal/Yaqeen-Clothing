@@ -12,6 +12,9 @@ const addressSchema = new mongoose.Schema(
     },
     floor: Number,
     apartment: Number,
+    houseNumber: Number,
+    companyName: String,
+    companyNumber: Number,
   },
   { _id: false }
 );
