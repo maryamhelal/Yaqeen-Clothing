@@ -97,9 +97,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    let effectiveToken = token || null;
-    let effectiveUser = user || null;
-
     try {
       if (!user && saveInfo) {
         if (!password || !confirmPassword) {
@@ -111,13 +108,18 @@ export default function CheckoutPage() {
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match.");
         }
+      }
 
-        // 1) Register
-        const regRes = await authAPI.register({
+      let authToken = token;
+      let loginRes = null;
+
+      // If guest checkout with save info checked, then register + login
+      if (!user && saveInfo) {
+        const registerRes = await authAPI.register({
           name: form.name,
           email: form.email,
-          phone: form.phone,
           password,
+          phone: form.phone,
           address: {
             city: selectedCity,
             area: selectedArea,
@@ -129,6 +131,20 @@ export default function CheckoutPage() {
               residenceType === "apartment" ? form.apartment : undefined,
           },
         });
+        if (!registerRes || !registerRes.user || !registerRes.token) {
+          throw new Error(registerRes.error || "Registration failed");
+        }
+
+        loginRes = await authAPI.login({
+          email: form.email,
+          password,
+        });
+        if (!loginRes || !loginRes.user || !loginRes.token) {
+          throw new Error(loginRes.error || "Login after registration failed");
+        }
+        await login({ email: form.email, password });
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       const orderData = {
@@ -153,26 +169,15 @@ export default function CheckoutPage() {
           apartment: residenceType === "apartment" ? form.apartment : undefined,
           phone: form.phone,
         },
-        orderer:
-          effectiveToken && effectiveUser
-            ? {
-                userId: effectiveUser.id,
-                name: effectiveUser.name,
-                email: effectiveUser.email,
-                phone: effectiveUser.phone,
-              }
-            : {
-                name: form.name,
-                email: form.email,
-                phone: form.phone,
-                userId: null,
-              },
+        orderer: {
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          userId: user ? user.id : loginRes?.user ? loginRes.user.id : null,
+        },
       };
 
-      const result = await ordersAPI.createOrder(
-        orderData,
-        effectiveToken || null
-      );
+      const result = await ordersAPI.createOrder(orderData, authToken || null);
 
       if (result && result.order) {
         clearCart();

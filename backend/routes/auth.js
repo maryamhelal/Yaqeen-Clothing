@@ -110,6 +110,7 @@ router.post("/register", async (req, res) => {
     }
     // Return the structured address in the response
     res.status(201).json({
+      success: true,
       message: "User registered",
       user: {
         id: user._id,
@@ -222,15 +223,15 @@ router.post("/login", async (req, res) => {
       expiresIn: "7d",
     });
 
+    // At the end, return the response as JSON:
     res.json({
-      success: true,
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         type,
-        role: user.role,
+        role: user.role || "user",
         address: user.address,
         phone: user.phone,
       },

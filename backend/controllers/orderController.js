@@ -35,7 +35,6 @@ exports.createOrder = async (req, res) => {
       shippingAddress,
       orderer,
       orderNumber,
-      status: "preparing",
     };
 
     const order = await Order.create(orderData);
@@ -60,7 +59,6 @@ exports.createOrder = async (req, res) => {
       await confirmationEmail.sendOrderConfirmation(order.orderer.email, order);
     } catch (emailErr) {
       console.error("Error sending confirmation email:", emailErr.message);
-      // Optionally, you can still return success even if email fails
     }
 
     res.status(201).json({ orderId: order._id, order });
