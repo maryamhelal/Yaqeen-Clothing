@@ -241,6 +241,12 @@ export default function ProfilePage() {
                     {user.address.landmarks}
                   </div>
                 )}
+              {user.address?.building && (
+                <div>
+                  <span className="font-semibold">Building number:</span>{" "}
+                  {user.address.building}
+                </div>
+              )}
               {user.address?.residenceType && (
                 <div>
                   <span className="font-semibold">Residence Type:</span>{" "}
@@ -263,28 +269,12 @@ export default function ProfilePage() {
                   )}
                 </>
               )}
-              {user.address?.residenceType === "private_house" && (
-                <>
-                  {user.address.houseNumber && (
-                    <div>
-                      <span className="font-semibold">House Number:</span>{" "}
-                      {user.address.houseNumber}
-                    </div>
-                  )}
-                </>
-              )}
               {user.address?.residenceType === "work" && (
                 <>
                   {user.address.companyName && (
                     <div>
                       <span className="font-semibold">Company Name:</span>{" "}
                       {user.address.companyName}
-                    </div>
-                  )}
-                  {user.address.companyNumber && (
-                    <div>
-                      <span className="font-semibold">Company Number:</span>{" "}
-                      {user.address.companyNumber}
                     </div>
                   )}
                 </>
