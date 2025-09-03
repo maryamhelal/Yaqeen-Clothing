@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
-import { ordersAPI } from "../api/orders";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useEffect, useContext } from "react";
+import { ordersAPI } from "../../api/orders";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function OrderManagement() {
   const { token } = useContext(AuthContext);

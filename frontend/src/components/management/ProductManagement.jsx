@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
-import { productsAPI } from "../api/products";
-import { AuthContext } from "../context/AuthContext";
-import { tagsAPI } from "../api/tags";
+import { productsAPI } from "../../api/products";
+import { AuthContext } from "../../context/AuthContext";
+import { tagsAPI } from "../../api/tags";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 

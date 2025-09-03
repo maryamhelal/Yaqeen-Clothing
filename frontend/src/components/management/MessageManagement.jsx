@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { messagesAPI } from "../api/messages";
+import { useAuth } from "../../context/AuthContext";
+import { messagesAPI } from "../../api/messages";
 
-const AdminMessagesPage = () => {
+const MessageManagement = () => {
   const { user, token } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,4 +61,4 @@ const AdminMessagesPage = () => {
   );
 };
 
-export default AdminMessagesPage;
+export default MessageManagement;

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { productsAPI } from "../api/products";
+import { productsAPI } from "../../api/products";
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { tagsAPI } from "../api/tags";
+import { AuthContext } from "../../context/AuthContext";
+import { tagsAPI } from "../../api/tags";
 
-export default function AdminPromocodesPage() {
+export default function PromocodeManagement() {
   const { token } = useContext(AuthContext);
   const [promocodes, setPromocodes] = useState([]);
   const [form, setForm] = useState({

@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import ProductManagement from "../components/ProductManagement";
-import OrderManagement from "../components/OrderManagement";
-import AdminManagement from "../components/AdminManagement";
-import UserManagement from "../components/UserManagement";
-import AdminPromocodesPage from "./AdminPromocodesPage";
-import TagsManagement from "../components/TagsManagement";
-import AdminMessagesPage from "./AdminMessagesPage";
-import CityManagement from "../components/CityManagement";
+import ProductManagement from "../components/management/ProductManagement";
+import OrderManagement from "../components/management/OrderManagement";
+import AdminManagement from "../components/management/AdminManagement";
+import UserManagement from "../components/management/UserManagement";
+import PromocodeManagement from "../components/management/PromocodeManagement";
+import TagsManagement from "../components/management/TagsManagement";
+import MessageManagement from "../components/management/MessageManagement";
+import CityManagement from "../components/management/CityManagement";
 
 export default function DashboardPage() {
   const { user, isAdmin, isSuperAdmin } = useAuth();
@@ -120,10 +120,10 @@ export default function DashboardPage() {
         {tab === "orders" && <OrderManagement />}
         {tab === "tags" && <TagsManagement />}
         {tab === "cities" && <CityManagement />}
-        {tab === "messages" && <AdminMessagesPage />}
+        {tab === "messages" && <MessageManagement />}
         {tab === "admins" && isSuperAdmin() && <AdminManagement />}
         {tab === "users" && isSuperAdmin() && <UserManagement />}
-        {tab === "promocodes" && isSuperAdmin() && <AdminPromocodesPage />}
+        {tab === "promocodes" && isSuperAdmin() && <PromocodeManagement />}
       </div>
     </div>
   );

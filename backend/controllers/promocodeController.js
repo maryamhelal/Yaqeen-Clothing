@@ -3,7 +3,7 @@ const Promocode = require("../models/Promocode");
 // Preview promocode validity and discount
 exports.previewPromocode = async (req, res) => {
   try {
-    const { items, totalPrice, promocode: promocodeInput } = req.body;
+    const { items, promocode: promocodeInput } = req.body;
     if (!promocodeInput || !promocodeInput.code) {
       return res.status(400).json({ error: "No promocode provided." });
     }

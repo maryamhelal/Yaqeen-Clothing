@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { citiesAPI } from "../api/cities";
-import { useAuth } from "../context/AuthContext";
+import { citiesAPI } from "../../api/cities";
+import { useAuth } from "../../context/AuthContext";
 
 export default function CityManagement() {
   const { token } = useAuth();

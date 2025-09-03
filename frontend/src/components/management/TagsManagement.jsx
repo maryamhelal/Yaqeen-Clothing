@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { tagsAPI } from "../api/tags";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { tagsAPI } from "../../api/tags";
 
 export default function TagsManagement() {
   const { token } = useAuth();

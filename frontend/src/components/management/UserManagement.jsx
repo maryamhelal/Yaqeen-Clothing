@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function UserManagement() {
   const { token } = useContext(AuthContext);
