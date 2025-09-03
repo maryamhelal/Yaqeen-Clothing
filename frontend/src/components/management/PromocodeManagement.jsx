@@ -3,6 +3,7 @@ import { productsAPI } from "../../api/products";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { tagsAPI } from "../../api/tags";
+import { promocodesAPI } from "../../api/promocodes";
 
 export default function PromocodeManagement() {
   const { token } = useContext(AuthContext);
@@ -27,20 +28,12 @@ export default function PromocodeManagement() {
   const [fetchError, setFetchError] = useState("");
 
   const fetchPromocodes = async () => {
+    setFetchError("");
     try {
-      const res = await fetch("/api/promocodes", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) {
-        setPromocodes([]);
-        setError("Failed to fetch promocodes: " + res.statusText);
-        return;
-      }
-      const data = await res.json();
+      const data = await promocodesAPI.getAllPromocodes(token);
       setPromocodes(Array.isArray(data) ? data : []);
     } catch (err) {
-      setPromocodes([]);
-      setError("Failed to fetch promocodes: " + err.message);
+      setFetchError("Failed to fetch promocodes: " + err.message);
     }
   };
   useEffect(() => {
@@ -108,19 +101,12 @@ export default function PromocodeManagement() {
     e.preventDefault();
     setError("");
     try {
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `/api/promocodes/${editingId}`
-        : "/api/promocodes";
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error("Error saving promocode: " + res.statusText);
+      const data = editingId
+        ? await promocodesAPI.updatePromocode(token, editingId, form)
+        : await promocodesAPI.createPromocode(token, form);
+      setPromocodes((prev) =>
+        prev.map((p) => (p._id === editingId ? data : p))
+      );
       setForm({
         code: "",
         percentage: 0,
@@ -143,10 +129,11 @@ export default function PromocodeManagement() {
   };
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this promocode?")) return;
-    await fetch(`/api/promocodes/${id}`, {
-      method: "DELETE",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    try {
+      await promocodesAPI.deletePromocode(token, id);
+    } catch (err) {
+      setError(err.message);
+    }
     fetchPromocodes();
   };
 
