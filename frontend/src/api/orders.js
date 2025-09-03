@@ -2,21 +2,7 @@ const API_BASE_URL = `${
   process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"
 }/api`;
 
-export async function previewPromocode(orderData) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/promocodes/preview`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
-    });
-    return await res.json();
-  } catch (err) {
-    return { valid: false, error: err.message };
-  }
-}
-
 export const ordersAPI = {
-  previewPromocode,
   createOrder: async (orderData, token = null) => {
     try {
       const headers = {

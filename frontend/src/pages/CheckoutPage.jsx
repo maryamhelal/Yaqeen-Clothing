@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { ordersAPI } from "../api/orders";
 import { authAPI } from "../api/auth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { promocodesAPI } from "../api/promocodes";
 // import CitySelectTable from "../components/CitySelectTable";
 
 export default function CheckoutPage() {
@@ -81,7 +82,6 @@ export default function CheckoutPage() {
     setPromoInfo(null);
     if (!promocode) return;
     try {
-      // Call backend to validate promocode (simulate by creating order with promocode, but not submitting)
       const previewOrder = {
         items: cart.map((item) => ({
           id: item.id,
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
         totalPrice: subtotal,
         promocode: { code: promocode },
       };
-      const res = await ordersAPI.previewPromocode(previewOrder); // You need to implement this endpoint
+      const res = await promocodesAPI.previewPromocode(previewOrder);
       if (res && res.valid) {
         setPromoDiscount(res.discountAmount);
         setPromoInfo(res.promocode);

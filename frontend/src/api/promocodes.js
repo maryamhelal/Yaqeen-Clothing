@@ -93,4 +93,25 @@ export const promocodesAPI = {
       throw error;
     }
   },
+  previewPromocode: async (promocodeData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/promocodes/preview`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(promocodeData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to preview promocode");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error previewing promocode:", error);
+      throw error;
+    }
+  },
 };
