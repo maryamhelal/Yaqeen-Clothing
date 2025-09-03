@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const addressSchema = new mongoose.Schema(
   {
+    cityId: { type: mongoose.Schema.Types.ObjectId, ref: "City" },
     city: String,
     area: String,
     street: String,
