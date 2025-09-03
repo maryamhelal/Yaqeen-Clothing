@@ -14,6 +14,7 @@ export default function CheckoutPage() {
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
 
   // Fetch cities on mount
@@ -23,6 +24,7 @@ export default function CheckoutPage() {
         setCities(data);
         if (data.length > 0) {
           setSelectedCity(data[0]._id);
+          setSelectedCityName(data[0].name);
         }
       });
     });
@@ -48,13 +50,12 @@ export default function CheckoutPage() {
     name: "",
     street: "",
     landmarks: "",
-    floor: "",
-    apartment: "",
     phone: "",
     email: "",
-    houseNumber: "",
+    building: "",
+    floor: "",
+    apartment: "",
     companyName: "",
-    companyNumber: "",
   });
   const [saveInfo, setSaveInfo] = useState(false);
   const [password, setPassword] = useState("");
@@ -121,19 +122,19 @@ export default function CheckoutPage() {
         name: user.name || "",
         street: user.address?.street || "",
         landmarks: user.address?.landmarks || "",
-        floor: user.address?.floor || "",
-        apartment: user.address?.apartment || "",
         phone: user.phone || "",
         email: user.email || "",
-        houseNumber: user.address?.houseNumber || "",
+        building: user.address?.building || "",
+        floor: user.address?.floor || "",
+        apartment: user.address?.apartment || "",
         companyName: user.address?.companyName || "",
-        companyNumber: user.address?.companyNumber || "",
       });
       if (cities.length > 0) {
         const userCity = cities.find(
           (c) => c.name === user.address?.city || c._id === user.address?.city
         );
         setSelectedCity(userCity ? userCity._id : cities[0]._id);
+        setSelectedCityName(userCity ? userCity.name : cities[0].name);
       }
       setResidenceType(user.address?.residenceType || "");
     }
@@ -187,20 +188,18 @@ export default function CheckoutPage() {
           password,
           phone: form.phone,
           address: {
-            city: selectedCity,
+            cityId: selectedCity,
+            city: selectedCityName,
             area: selectedArea,
             street: form.street,
             landmarks: form.landmarks,
+            building: form.building,
             residenceType,
             floor: residenceType === "apartment" ? form.floor : undefined,
             apartment:
               residenceType === "apartment" ? form.apartment : undefined,
-            houseNumber:
-              residenceType === "private_house" ? form.houseNumber : undefined,
             companyName:
               residenceType === "work" ? form.companyName : undefined,
-            companyNumber:
-              residenceType === "work" ? form.companyNumber : undefined,
           },
         });
         if (!registerRes || !registerRes.user || !registerRes.token) {
@@ -239,18 +238,16 @@ export default function CheckoutPage() {
           : undefined,
         shippingAddress: {
           name: form.name,
-          city: selectedCity,
+          cityId: selectedCity,
+          city: selectedCityName,
           area: selectedArea,
           street: form.street,
           landmarks: form.landmarks,
+          building: residenceType === "work" ? form.building : undefined,
           residenceType,
           floor: residenceType === "apartment" ? form.floor : undefined,
           apartment: residenceType === "apartment" ? form.apartment : undefined,
-          houseNumber:
-            residenceType === "private_house" ? form.houseNumber : undefined,
           companyName: residenceType === "work" ? form.companyName : undefined,
-          companyNumber:
-            residenceType === "work" ? form.companyNumber : undefined,
           phone: form.phone,
         },
         orderer: {
@@ -353,6 +350,10 @@ export default function CheckoutPage() {
                   value={selectedCity}
                   onChange={(e) => {
                     setSelectedCity(e.target.value);
+                    setSelectedCityName(
+                      cities.find((city) => city._id === e.target.value)
+                        ?.name || ""
+                    );
                     setSelectedArea("");
                   }}
                   required
@@ -411,6 +412,20 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                  Building Number
+                </label>
+                <input
+                  name="building"
+                  type="text"
+                  placeholder="Building number"
+                  value={form.building}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
                   Residence Type
                 </label>
                 <select
@@ -456,21 +471,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               )}
-              {residenceType === "private_house" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                    House Number
-                  </label>
-                  <input
-                    name="houseNumber"
-                    type="number"
-                    min="0"
-                    value={form.houseNumber}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              )}
               {residenceType === "work" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
@@ -480,20 +480,6 @@ export default function CheckoutPage() {
                     name="companyName"
                     type="text"
                     value={form.companyName}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              )}
-              {residenceType === "work" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                    Company Number
-                  </label>
-                  <input
-                    name="companyNumber"
-                    type="number"
-                    value={form.companyNumber}
                     onChange={handleChange}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
                   />

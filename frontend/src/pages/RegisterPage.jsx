@@ -7,13 +7,17 @@ export default function RegisterPage() {
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
 
   useEffect(() => {
     import("../api/cities").then(({ citiesAPI }) => {
       citiesAPI.getCities().then((data) => {
         setCities(data);
-        if (data.length > 0) setSelectedCity(data[0]._id);
+        if (data.length > 0) {
+          setSelectedCity(data[0]._id);
+          setSelectedCityName(data[0].name);
+        }
       });
     });
   }, []);
@@ -40,8 +44,10 @@ export default function RegisterPage() {
     confirmPassword: "",
     street: "",
     landmarks: "",
+    building: "",
     floor: "",
     apartment: "",
+    companyName: "",
   });
   const [localError, setLocalError] = useState("");
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
@@ -67,6 +73,10 @@ export default function RegisterPage() {
       setLocalError("Passwords do not match.");
       return;
     }
+    if (!formData.building) {
+      setLocalError("Please enter building number.");
+      return;
+    }
     if (
       residenceType === "apartment" &&
       (!formData.floor || !formData.apartment)
@@ -74,23 +84,25 @@ export default function RegisterPage() {
       setLocalError("Please enter floor and apartment number.");
       return;
     }
+    if (residenceType === "work" && !formData.companyName) {
+      setLocalError("Please enter company name.");
+      return;
+    }
 
     try {
       const addressObj = {
-        city: selectedCity,
+        cityId: selectedCity,
+        city: selectedCityName,
         area: selectedArea,
         street: formData.street,
         landmarks: formData.landmarks,
+        building: formData.building,
         residenceType,
         floor: residenceType === "apartment" ? formData.floor : undefined,
         apartment:
           residenceType === "apartment" ? formData.apartment : undefined,
-        houseNumber:
-          residenceType === "private_house" ? formData.houseNumber : undefined,
         companyName:
           residenceType === "work" ? formData.companyName : undefined,
-        companyNumber:
-          residenceType === "work" ? formData.companyNumber : undefined,
       };
 
       const result = await register({
@@ -190,6 +202,9 @@ export default function RegisterPage() {
               value={selectedCity}
               onChange={(e) => {
                 setSelectedCity(e.target.value);
+                setSelectedCityName(
+                  e.target.options[e.target.selectedIndex].text
+                );
                 setSelectedArea("");
               }}
               required
@@ -249,6 +264,20 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Building Number
+            </label>
+            <input
+              name="building"
+              type="number"
+              min="0"
+              value={formData.building}
+              onChange={handleChange}
+              className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
               Residence Type
             </label>
             <select
@@ -296,24 +325,6 @@ export default function RegisterPage() {
               </div>
             </div>
           )}
-          {residenceType === "private_house" && (
-            <div className="flex gap-4 mt-2">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  House Number
-                </label>
-                <input
-                  name="houseNumber"
-                  type="number"
-                  min="0"
-                  value={formData.houseNumber}
-                  onChange={handleChange}
-                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          )}
           {residenceType === "work" && (
             <div className="flex gap-4 mt-2">
               <div className="flex-1">
@@ -324,19 +335,6 @@ export default function RegisterPage() {
                   name="companyName"
                   type="text"
                   value={formData.companyName}
-                  onChange={handleChange}
-                  className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
-                  required
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Number
-                </label>
-                <input
-                  name="companyNumber"
-                  type="number"
-                  value={formData.companyNumber}
                   onChange={handleChange}
                   className="w-full border border-primary rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-dark focus:border-transparent"
                   required

@@ -7,15 +7,14 @@ const addressSchema = new mongoose.Schema(
     area: String,
     street: String,
     landmarks: String,
+    building: Number,
     residenceType: {
       type: String,
       enum: ["apartment", "private_house", "work"],
     },
     floor: Number,
     apartment: Number,
-    houseNumber: Number,
     companyName: String,
-    companyNumber: Number,
   },
   { _id: false }
 );
