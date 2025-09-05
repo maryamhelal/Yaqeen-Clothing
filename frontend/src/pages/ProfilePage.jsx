@@ -467,6 +467,23 @@ export default function ProfilePage() {
                       </p>
                     </div>
                   )}
+
+                  {/* Payment Method */}
+                  {order.paymentMethod && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-bold">Payment Method:</span>{" "}
+                        {order.paymentMethod}
+                      </p>
+                      {order.paymentMethod === "Instapay" &&
+                        order.instapayUsername && (
+                          <p className="text-sm text-gray-600">
+                            <span>Instapay Username:</span>{" "}
+                            {order.instapayUsername}
+                          </p>
+                        )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -66,7 +66,7 @@ export default function OrderManagement() {
 
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const formatDate = (dateString) => {
@@ -145,6 +145,9 @@ export default function OrderManagement() {
                   Shipping Address
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Payment Method
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -179,12 +182,12 @@ export default function OrderManagement() {
                         #{order.orderNumber}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {order.orderer?.name || "Guest"}
+                        Name: {order.orderer?.name || "No name"}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {order.orderer?.email || "No email"}
+                        Email: {order.orderer?.email || "No email"}
                       </div>
                       <div className="text-sm text-gray-500">
                         Phone: {order.orderer?.phone || "No phone"}
@@ -193,7 +196,7 @@ export default function OrderManagement() {
                         User ID: {order.orderer?.userId || "No userId"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {order.shippingAddress?.city || "No city"}
                       </div>
@@ -208,6 +211,16 @@ export default function OrderManagement() {
                           {order.shippingAddress?.landmarks}
                         </div>
                       )}
+                      {order.shippingAddress?.building && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.building}
+                        </div>
+                      )}
+                      {order.shippingAddress?.residenceType && (
+                        <div className="text-sm text-gray-500">
+                          {order.shippingAddress?.residenceType}
+                        </div>
+                      )}
                       {order.shippingAddress?.floor && (
                         <div className="text-sm text-gray-500">
                           {order.shippingAddress?.floor}
@@ -218,23 +231,29 @@ export default function OrderManagement() {
                           {order.shippingAddress?.apartment}
                         </div>
                       )}
-                      {order.shippingAddress && (
-                        <div className="text-sm text-gray-500">
-                          {order.shippingAddress?.houseNumber}
-                        </div>
-                      )}
                       {order.shippingAddress?.companyName && (
                         <div className="text-sm text-gray-500">
                           {order.shippingAddress?.companyName}
                         </div>
                       )}
-                      {order.shippingAddress?.companyNumber && (
-                        <div className="text-sm text-gray-500">
-                          {order.shippingAddress?.companyNumber}
-                        </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      {order.paymentMethod === "Cash" ? (
+                        <span className="text-sm text-gray-900">
+                          Cash on Delivery
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-sm text-gray-900">
+                            Instapay
+                          </span>
+                          <div className="text-sm text-gray-900">
+                            Username: {order.instapayUsername}
+                          </div>
+                        </>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <select
                         value={statusUpdate[order._id] || order.status}
                         onChange={(e) =>
@@ -252,17 +271,17 @@ export default function OrderManagement() {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {order.totalPrice?.toLocaleString()} EGP
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {formatDate(order.createdAt)}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <details className="text-sm">
                         <summary className="cursor-pointer text-primary-dark hover:text-primary-darker">
                           View Details
@@ -282,7 +301,7 @@ export default function OrderManagement() {
                         </div>
                       </details>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       {statusUpdate[order._id] &&
                         statusUpdate[order._id] !== order.status && (
                           <button

@@ -16,6 +16,8 @@ export default function CheckoutPage() {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [instapayUsername, setInstapayUsername] = useState("");
 
   // Fetch cities on mount
   useEffect(() => {
@@ -75,13 +77,18 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoInfo, setPromoInfo] = useState(null);
+  const [promoValidating, setPromoValidating] = useState(false);
 
   // Validate promocode on apply
   const handleApplyPromocode = async () => {
     setPromoError("");
     setPromoDiscount(0);
     setPromoInfo(null);
-    if (!promocode) return;
+    setPromoValidating(true);
+    if (!promocode) {
+      setPromoValidating(false);
+      return;
+    }
     try {
       const previewOrder = {
         items: cart.map((item) => ({
@@ -106,6 +113,8 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       setPromoError(err?.message || "Error validating promocode");
+    } finally {
+      setPromoValidating(false);
     }
   };
   // Only keep one backend-driven shippingPrice declaration
@@ -261,6 +270,8 @@ export default function CheckoutPage() {
             ? loginRes.user._id
             : null,
         },
+        paymentMethod,
+        instapayUsername: paymentMethod === "Instapay" && instapayUsername,
       };
 
       const result = await ordersAPI.createOrder(orderData, authToken || null);
@@ -341,6 +352,7 @@ export default function CheckoutPage() {
                   disabled={!!user}
                 />
               </div>
+              {/* City and Area Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Shipping City/Region
@@ -485,6 +497,48 @@ export default function CheckoutPage() {
                   />
                 </div>
               )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Payment Method
+                </label>
+                <select
+                  name="paymentMethod"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="Cash">Cash on Delivery</option>
+                  <option value="Instapay">Instapay</option>
+                </select>
+              </div>
+              {paymentMethod === "Instapay" && (
+                <div className="text-sm text-gray-600">
+                  Use this link to pay via Instapay:{" "}
+                  <a
+                    href="https://ipn.eg/S/maryam.helaal/instapay/7S8ts4"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    https://ipn.eg/S/maryam.helaal/instapay/7S8ts4
+                  </a>
+                </div>
+              )}
+              {paymentMethod === "Instapay" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+                    Instapay Username
+                  </label>
+                  <input
+                    name="instapayUsername"
+                    placeholder="Enter your Instapay username"
+                    value={instapayUsername}
+                    onChange={(e) => setInstapayUsername(e.target.value)}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              )}
               {/* Save info for next time (guests only) */}
               {!user && (
                 <div className="mt-4">
@@ -536,12 +590,18 @@ export default function CheckoutPage() {
               )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || promoValidating}
                 className={`w-full bg-primary-dark text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-darker transition-colors mt-6 ${
-                  submitting ? "opacity-60 cursor-not-allowed" : ""
+                  submitting || promoValidating
+                    ? "opacity-60 cursor-not-allowed"
+                    : ""
                 }`}
               >
-                {submitting ? "Placing Order..." : "Place Order"}
+                {promoValidating
+                  ? "Validating Promocode..."
+                  : submitting
+                  ? "Placing Order..."
+                  : "Place Order"}
               </button>
             </form>
           </div>
@@ -599,10 +659,10 @@ export default function CheckoutPage() {
               {promoError && (
                 <div className="text-red-500 text-sm mt-1">{promoError}</div>
               )}
-              {promoDiscount > 0 && promoInfo && (
+              {promoInfo && (
                 <div className="text-green-600 text-sm mt-1">
-                  Promocode <b>{promoInfo.code}</b> applied: -{promoDiscount}{" "}
-                  EGP
+                  Promocode <b>{promoInfo.code}</b> applied
+                  {promoDiscount > 0 && <>: -{promoDiscount} EGP</>}
                 </div>
               )}
               <div className="border-t border-gray-200 pt-4 space-y-2">

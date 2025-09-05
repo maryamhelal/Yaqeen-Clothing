@@ -13,10 +13,15 @@ export const ordersAPI = {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
+      const dataToSend = { ...orderData };
+      if (orderData.paymentMethod === "Instapay") {
+        dataToSend.instapayUsername = orderData.instapayUsername || "";
+      }
+
       const response = await fetch(`${API_BASE_URL}/orders`, {
         method: "POST",
         headers,
-        body: JSON.stringify(orderData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {

@@ -16,6 +16,8 @@ exports.createOrder = async (req, res) => {
       totalPrice,
       orderer,
       promocode: promocodeInput,
+      paymentMethod,
+      instapayUsername,
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -79,11 +81,9 @@ exports.createOrder = async (req, res) => {
         }
       });
       if (eligibleTotal === 0) {
-        return res
-          .status(400)
-          .json({
-            error: "Promocode not applicable to any items in your cart.",
-          });
+        return res.status(400).json({
+          error: "Promocode not applicable to any items in your cart.",
+        });
       }
       discountAmount = Math.round(
         (eligibleTotal * promocodeDoc.percentage) / 100
@@ -122,6 +122,8 @@ exports.createOrder = async (req, res) => {
         userId,
       },
       orderNumber,
+      paymentMethod,
+      instapayUsername: paymentMethod === "Instapay" && instapayUsername,
     };
 
     const order = await Order.create(orderData);

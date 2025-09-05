@@ -15,9 +15,11 @@ const shippingAddressSchema = new mongoose.Schema({
   area: String,
   street: String,
   landmarks: String,
+  building: Number,
   residenceType: String,
   floor: String,
   apartment: String,
+  companyName: String,
 });
 
 const orderSchema = new mongoose.Schema({
@@ -38,8 +40,12 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash", "Instapay", "Card"],
+    enum: ["Cash", "Instapay"],
     default: "Cash",
+  },
+  instapayUsername: {
+    type: String,
+    default: null,
   },
   orderer: {
     userMongoId: {
