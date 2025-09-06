@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import ProductCard from "../components/ProductCard";
-import { productsAPI } from "../api/products";
+import ProductCard from "../../components/ProductCard";
+import { productsAPI } from "../../api/products";
 
-export default function CategoryPage() {
-  const { categoryName } = useParams();
+export default function CollectionPage() {
+  const { collectionName } = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -13,14 +13,14 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [categoryName, currentPage]);
+  }, [collectionName, currentPage]);
 
   const fetchProducts = async () => {
     setLoading(true);
     setError("");
     try {
-      const result = await productsAPI.getProductsByCategory(
-        categoryName,
+      const result = await productsAPI.getProductsByCollection(
+        collectionName,
         currentPage,
         12
       );
@@ -41,14 +41,14 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-16">
-      {/* Category Header */}
+      {/* Collection Header */}
       <div className="bg-gradient-to-r from-pink-50 to-purple-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold text-gray-800 capitalize mb-4">
-            {categoryName}
+            {collectionName}
           </h1>
           <p className="text-lg text-gray-600">
-            Discover our beautiful collection of {categoryName.toLowerCase()}
+            Discover our beautiful collection of {collectionName.toLowerCase()}
           </p>
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function CategoryPage() {
         ) : products.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-500 text-lg">
-              No products found in this category.
+              No products found in this collection.
             </div>
           </div>
         ) : (

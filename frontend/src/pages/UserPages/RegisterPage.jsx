@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function RegisterPage() {
   const { register, loading, error, clearError } = useAuth();
@@ -11,7 +11,7 @@ export default function RegisterPage() {
   const [selectedArea, setSelectedArea] = useState("");
 
   useEffect(() => {
-    import("../api/cities").then(({ citiesAPI }) => {
+    import("../../api/cities").then(({ citiesAPI }) => {
       citiesAPI.getCities().then((data) => {
         setCities(data);
         if (data.length > 0) {
@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (selectedCity) {
-      import("../api/cities").then(({ citiesAPI }) => {
+      import("../../api/cities").then(({ citiesAPI }) => {
         citiesAPI.getCityAreas(selectedCity).then((data) => {
           setAreas(data);
           setSelectedArea(data[0] || "");

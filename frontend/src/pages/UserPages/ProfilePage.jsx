@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { ordersAPI } from "../api/orders";
+import { useAuth } from "../../context/AuthContext";
+import { ordersAPI } from "../../api/orders";
 
 export default function ProfilePage() {
   const {

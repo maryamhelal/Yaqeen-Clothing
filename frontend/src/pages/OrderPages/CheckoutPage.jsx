@@ -1,11 +1,10 @@
 import { useContext, useState, useEffect } from "react";
-import { CartContext } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
-import { ordersAPI } from "../api/orders";
-import { authAPI } from "../api/auth";
+import { CartContext } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
+import { ordersAPI } from "../../api/orders";
+import { authAPI } from "../../api/auth";
 import { useLocation, useNavigate } from "react-router-dom";
-import { promocodesAPI } from "../api/promocodes";
-// import CitySelectTable from "../components/CitySelectTable";
+import { promocodesAPI } from "../../api/promocodes";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useContext(CartContext);
@@ -21,7 +20,7 @@ export default function CheckoutPage() {
 
   // Fetch cities on mount
   useEffect(() => {
-    import("../api/cities").then(({ citiesAPI }) => {
+    import("../../api/cities").then(({ citiesAPI }) => {
       citiesAPI.getCities().then((data) => {
         setCities(data);
         if (data.length > 0) {
@@ -35,7 +34,7 @@ export default function CheckoutPage() {
   // Fetch areas when selectedCity changes
   useEffect(() => {
     if (selectedCity) {
-      import("../api/cities").then(({ citiesAPI }) => {
+      import("../../api/cities").then(({ citiesAPI }) => {
         citiesAPI.getCityAreas(selectedCity).then((data) => {
           setAreas(data);
           setSelectedArea(data[0] || "");

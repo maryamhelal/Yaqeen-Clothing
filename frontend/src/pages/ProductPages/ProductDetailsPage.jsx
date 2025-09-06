@@ -1,7 +1,7 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { productsAPI } from "../api/products";
-import { CartContext } from "../context/CartContext";
+import { productsAPI } from "../../api/products";
+import { CartContext } from "../../context/CartContext";
 
 export default function ProductDetailsPage() {
   const { productName } = useParams();
