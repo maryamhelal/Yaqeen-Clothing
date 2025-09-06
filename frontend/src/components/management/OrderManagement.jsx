@@ -218,7 +218,10 @@ export default function OrderManagement() {
                       )}
                       {order.shippingAddress?.residenceType && (
                         <div className="text-sm text-gray-500">
-                          {order.shippingAddress?.residenceType}
+                          {order.shippingAddress?.residenceType.replace(
+                            /_/g,
+                            " "
+                          )}
                         </div>
                       )}
                       {order.shippingAddress?.floor && (

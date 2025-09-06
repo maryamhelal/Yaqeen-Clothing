@@ -48,32 +48,43 @@ export default function UserManagement() {
                   {user.address && typeof user.address === "object" ? (
                     <>
                       {user.address.city && (
-                        <span>
+                        <p>
+                          City:{" "}
                           {user.address.city
                             .replace(/_/g, " ")
                             .replace(/\b\w/g, (l) => l.toUpperCase())}
-                          ,{" "}
-                        </span>
+                        </p>
                       )}
-                      {user.address.area && <span>{user.address.area}, </span>}
+                      {user.address.area && <p>Area: {user.address.area}</p>}
                       {user.address.street && (
-                        <span>{user.address.street}, </span>
+                        <p>Street: {user.address.street}</p>
                       )}
                       {user.address.landmarks && (
-                        <span>{user.address.landmarks}, </span>
+                        <p>Landmarks/Notes: {user.address.landmarks}</p>
+                      )}
+                      {user.address.building && (
+                        <p>Building Number: {user.address.building}</p>
                       )}
                       {user.address.residenceType && (
-                        <span>
+                        <p>
+                          Residence Type:{" "}
                           {user.address.residenceType.replace(/_/g, " ")}
-                        </span>
+                        </p>
                       )}
                       {user.address.residenceType === "apartment" && (
                         <>
                           {user.address.floor && (
-                            <span>, Floor: {user.address.floor}</span>
+                            <p>Floor: {user.address.floor}</p>
                           )}
                           {user.address.apartment && (
-                            <span>, Apt: {user.address.apartment}</span>
+                            <p>Apartment: {user.address.apartment}</p>
+                          )}
+                        </>
+                      )}
+                      {user.address.residenceType === "work" && (
+                        <>
+                          {user.address.companyName && (
+                            <p>Company: {user.address.companyName}</p>
                           )}
                         </>
                       )}
