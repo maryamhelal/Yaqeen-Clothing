@@ -66,6 +66,11 @@ export default function AdminManagement() {
       .then(setAdmins);
   };
 
+  const handleCancelEdit = () => {
+    setEditing(null);
+    setForm({ name: "", email: "", password: "" });
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Admin Management</h2>
@@ -100,13 +105,21 @@ export default function AdminManagement() {
           className="border p-2 rounded w-full"
           required={!editing}
         />
-        {/* Add address field if needed in the form here */}
         <button
           type="submit"
           className="bg-primary-dark text-white px-6 py-2 rounded font-bold"
         >
           {editing ? "Update" : "Add"} Admin
         </button>
+        {editing && (
+          <button
+            type="button"
+            onClick={handleCancelEdit}
+            className="bg-gray-300 text-gray-800 px-4 py-2 ml-2 rounded"
+          >
+            Cancel
+          </button>
+        )}
       </form>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {admins.map((admin) => (

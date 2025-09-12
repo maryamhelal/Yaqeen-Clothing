@@ -238,9 +238,29 @@ export default function ProductManagement() {
     setForm({
       ...product,
       salePercentage: product.salePercentage || 0,
-      image: product.image || "", // <-- changed from images: []
+      image: product.image || "",
       colors: product.colors || [],
     });
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(null);
+    setForm({
+      name: "",
+      description: "",
+      price: "",
+      salePercentage: 0,
+      colors: [],
+      category: "",
+      collection: "",
+      sizes: [],
+      image: "",
+    });
+    setImageFile(null);
+    setColorInput({ name: "", hex: "#000000", image: null, sizes: [] });
+    setSizeInput({ size: "", quantity: 0 });
+    setError("");
+    setSuccess("");
   };
 
   const handleDelete = async (id) => {
@@ -579,6 +599,15 @@ export default function ProductManagement() {
         >
           {editing ? "Update Product" : "Add Product"}
         </button>
+        {editing && (
+          <button
+            type="button"
+            onClick={handleCancelEdit}
+            className="bg-gray-300 text-gray-800 px-4 py-2 ml-2 rounded"
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {/* Sale Management Section */}
