@@ -90,14 +90,6 @@ export default function OrderManagement() {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
-  if (loading && orders.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-gray-600">Loading orders...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -168,7 +160,7 @@ export default function OrderManagement() {
               {orders.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="9"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     {loading ? "Loading orders..." : "No orders found"}

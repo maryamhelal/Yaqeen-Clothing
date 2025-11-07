@@ -30,9 +30,11 @@ export default function ProductManagement() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchProductsWithTags = async () => {
+      setLoading(true);
       try {
         const result = await productsAPI.getAllProducts();
         let productsData = result.products || [];
@@ -67,6 +69,8 @@ export default function ProductManagement() {
         setProducts(enrichedProducts);
       } catch (err) {
         console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -139,6 +143,7 @@ export default function ProductManagement() {
 
   // --- Form Submission ---
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -223,6 +228,8 @@ export default function ProductManagement() {
     } catch (error) {
       console.error("Error processing images:", error);
       setError("Error processing images. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -345,90 +352,98 @@ export default function ProductManagement() {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product._id} className="border-b">
-                  <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(product._id)}
-                      onChange={() => toggleProductSelection(product._id)}
-                    />
-                  </td>
-                  <td className="p-2">{product.name}</td>
-                  <td className="p-2">
-                    <div>
-                      <span
-                        className={
-                          product.salePercentage > 0
-                            ? "line-through text-gray-500"
-                            : ""
-                        }
-                      >
-                        {product.price} EGP
-                      </span>
-                      {product.salePercentage > 0 && (
-                        <div className="text-red-600 font-bold">
-                          {getEffectiveSalePrice(product)} EGP
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    {product.salePercentage > 0 ? (
-                      <p className="font-bold bg-red-100 text-red-800 px-2 py-1 rounded text-xs w-fit">
-                        {product.salePercentage}% OFF
-                      </p>
-                    ) : (
-                      <p>{0}</p>
-                    )}
-                  </td>
-                  <td className="p-2">{product.categoryName}</td>
-                  <td className="p-2">{product.collectionName}</td>
-                  <td className="p-2">
-                    {product.archived ? "Archived" : "Active"}
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="text-blue-500 mr-2"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        const confirmArchive = window.confirm(
-                          product.archived
-                            ? "Are you sure you want to archive this product?"
-                            : "Are you sure you want to activate this product?"
-                        );
-                        if (confirmArchive) {
-                          handleArchive(product._id, !product.archived);
-                        }
-                      }}
-                      className={`text-${
-                        product.archived ? "green" : "yellow"
-                      }-500 mr-2`}
-                    >
-                      {product.archived ? "Activate" : "Archive"}
-                    </button>
-                    {isSuperAdmin() && (
-                      <button
-                        onClick={() => {
-                          const confirmDelete = window.confirm(
-                            "Are you sure you want to delete this product?"
-                          );
-                          if (confirmDelete) {
-                            handleDelete(product._id);
-                          }
-                        }}
-                        className="text-red-500"
-                      >
-                        Delete
-                      </button>
-                    )}
+              {products.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-12 text-center text-gray-500">
+                    {loading ? "Loading products..." : "No products found"}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                products.map((product) => (
+                  <tr key={product._id} className="border-b">
+                    <td className="p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product._id)}
+                        onChange={() => toggleProductSelection(product._id)}
+                      />
+                    </td>
+                    <td className="p-2">{product.name}</td>
+                    <td className="p-2">
+                      <div>
+                        <span
+                          className={
+                            product.salePercentage > 0
+                              ? "line-through text-gray-500"
+                              : ""
+                          }
+                        >
+                          {product.price} EGP
+                        </span>
+                        {product.salePercentage > 0 && (
+                          <div className="text-red-600 font-bold">
+                            {getEffectiveSalePrice(product)} EGP
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-2">
+                      {product.salePercentage > 0 ? (
+                        <p className="font-bold bg-red-100 text-red-800 px-2 py-1 rounded text-xs w-fit">
+                          {product.salePercentage}% OFF
+                        </p>
+                      ) : (
+                        <p>{0}</p>
+                      )}
+                    </td>
+                    <td className="p-2">{product.categoryName}</td>
+                    <td className="p-2">{product.collectionName}</td>
+                    <td className="p-2">
+                      {product.archived ? "Archived" : "Active"}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-blue-500 mr-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          const confirmArchive = window.confirm(
+                            product.archived
+                              ? "Are you sure you want to archive this product?"
+                              : "Are you sure you want to activate this product?"
+                          );
+                          if (confirmArchive) {
+                            handleArchive(product._id, !product.archived);
+                          }
+                        }}
+                        className={`text-${
+                          product.archived ? "green" : "yellow"
+                        }-500 mr-2`}
+                      >
+                        {product.archived ? "Activate" : "Archive"}
+                      </button>
+                      {isSuperAdmin() && (
+                        <button
+                          onClick={() => {
+                            const confirmDelete = window.confirm(
+                              "Are you sure you want to delete this product?"
+                            );
+                            if (confirmDelete) {
+                              handleDelete(product._id);
+                            }
+                          }}
+                          className="text-red-500"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
