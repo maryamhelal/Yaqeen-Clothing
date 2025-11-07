@@ -128,11 +128,13 @@ export default function ProductCard(props) {
         <div className="mb-4">
           {hasSale ? (
             <div className="space-y-1">
-              <div className="text-lg line-through text-gray-500">
-                {price?.toLocaleString()} EGP
-              </div>
-              <div className="text-2xl font-bold text-red-600">
-                {effectivePrice?.toLocaleString()} EGP
+              <div className="flex space-x-2">
+                <div className="text-lg line-through text-gray-500">
+                  {price?.toLocaleString()} EGP
+                </div>
+                <div className="text-lg font-bold text-red-600">
+                  {effectivePrice?.toLocaleString()} EGP
+                </div>
               </div>
               <div className="text-sm text-black-600 font-medium">
                 Save {Math.round(price - effectivePrice)?.toLocaleString()} EGP
