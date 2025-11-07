@@ -202,4 +202,68 @@ export const productsAPI = {
       throw error;
     }
   },
+
+  // Get all active products
+  getActiveProducts: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/active`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch active products");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching active products:", error);
+      throw error;
+    }
+  },
+
+  // Get all archived products
+  getArchivedProducts: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/archived`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch archived products");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching archived products:", error);
+      throw error;
+    }
+  },
+
+  // Archive product (admin)
+  archiveProduct: async (id, archived, token) => {
+    try {
+      let response;
+      if (archived) {
+        response = await fetch(`${API_BASE_URL}/products/unarchive/${id}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to unarchive product");
+        }
+      } else {
+        response = await fetch(`${API_BASE_URL}/products/archive/${id}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to archive product");
+        }
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error archiving product:", error);
+      throw error;
+    }
+  },
 };

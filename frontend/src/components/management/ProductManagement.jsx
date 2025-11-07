@@ -3,8 +3,6 @@ import { productsAPI } from "../../api/products";
 import { AuthContext } from "../../context/AuthContext";
 import { tagsAPI } from "../../api/tags";
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
-
 export default function ProductManagement() {
   const { token, isSuperAdmin } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
@@ -32,13 +30,6 @@ export default function ProductManagement() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [bulkSalePercentage, setBulkSalePercentage] = useState(0);
-  const [showSaleEmailModal, setShowSaleEmailModal] = useState(false);
-  const [saleEmailData, setSaleEmailData] = useState({
-    productIds: [],
-    salePercentage: 0,
-    saleType: "product",
-  });
 
   useEffect(() => {
     const fetchProductsWithTags = async () => {
@@ -82,27 +73,27 @@ export default function ProductManagement() {
     fetchProductsWithTags();
   }, []);
 
+  const fetchCategories = async () => {
+    try {
+      const categoriesData = await tagsAPI.getCategories();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    }
+  };
+
+  const fetchCollections = async () => {
+    try {
+      const categoriesData = await tagsAPI.getCollections();
+      setCollections(categoriesData);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
+      setCollections([]);
+    }
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const categoriesData = await tagsAPI.getCategories();
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setCategories([]);
-      }
-    };
-
-    const fetchCollections = async () => {
-      try {
-        const categoriesData = await tagsAPI.getCollections();
-        setCollections(categoriesData);
-      } catch (error) {
-        console.error("Error fetching collections:", error);
-        setCollections([]);
-      }
-    };
-
     fetchCategories();
     fetchCollections();
   }, []);
@@ -226,6 +217,8 @@ export default function ProductManagement() {
       setImageFile(null);
       productsAPI.getAllProducts().then((result) => {
         setProducts(result.products || []);
+        fetchCategories();
+        fetchCollections();
       });
     } catch (error) {
       console.error("Error processing images:", error);
@@ -267,93 +260,9 @@ export default function ProductManagement() {
     await productsAPI.deleteProduct(id, token);
     productsAPI.getAllProducts().then((result) => {
       setProducts(result.products || []);
+      fetchCategories();
+      fetchCollections();
     });
-  };
-
-  const handleBulkSaleUpdate = async () => {
-    if (selectedProducts.length === 0) {
-      setError("Please select products to update");
-      return;
-    }
-
-    if (bulkSalePercentage < 0 || bulkSalePercentage > 100) {
-      setError("Sale percentage must be between 0 and 100");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/sales/bulk`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productIds: selectedProducts,
-          salePercentage: bulkSalePercentage,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccess(result.message);
-        setSelectedProducts([]);
-        setBulkSalePercentage(0);
-        // Refresh products
-        productsAPI.getAllProducts().then((result) => {
-          setProducts(result.products || []);
-        });
-      } else {
-        setError(result.error || "Failed to update bulk sale");
-      }
-    } catch (err) {
-      setError("Failed to update bulk sale");
-      console.error(err);
-    }
-  };
-
-  const handleSendSaleEmail = async () => {
-    if (saleEmailData.productIds.length === 0) {
-      setError("Please select products for the sale email");
-      return;
-    }
-
-    if (
-      saleEmailData.salePercentage < 0 ||
-      saleEmailData.salePercentage > 100
-    ) {
-      setError("Sale percentage must be between 0 and 100");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/sales/email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(saleEmailData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccess(result.message);
-        setShowSaleEmailModal(false);
-        setSaleEmailData({
-          productIds: [],
-          salePercentage: 0,
-          saleType: "product",
-        });
-      } else {
-        setError(result.error || "Failed to send sale email");
-      }
-    } catch (err) {
-      setError("Failed to send sale email");
-      console.error(err);
-    }
   };
 
   const toggleProductSelection = (productId) => {
@@ -372,6 +281,22 @@ export default function ProductManagement() {
     return product.price;
   };
 
+  const handleArchive = async (id, archived) => {
+    try {
+      await productsAPI.archiveProduct(id, archived, token);
+      setSuccess(`Product ${archived ? "archived" : "activated"} successfully`);
+      // Refresh products
+      productsAPI.getAllProducts().then((result) => {
+        setProducts(result.products || []);
+        fetchCategories();
+        fetchCollections();
+      });
+    } catch (error) {
+      setError("Failed to update product status");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="px-2 sm:px-4">
       <h2 className="text-2xl font-bold mb-4">Product Management</h2>
@@ -386,6 +311,128 @@ export default function ProductManagement() {
           {success}
         </div>
       )}
+
+      {/* Products List */}
+      <div className="bg-white p-4 my-6 rounded-xl shadow">
+        <h3 className="text-lg font-semibold mb-4">Products</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr>
+                <th className="p-2 text-left">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedProducts.length === products.length &&
+                      products.length > 0
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedProducts(products.map((p) => p._id));
+                      } else {
+                        setSelectedProducts([]);
+                      }
+                    }}
+                  />
+                </th>
+                <th className="p-2 text-left">Name</th>
+                <th className="p-2 text-left">Price</th>
+                <th className="p-2 text-left">Sale</th>
+                <th className="p-2 text-left">Category</th>
+                <th className="p-2 text-left">Collection</th>
+                <th className="p-2 text-left">Status</th>
+                <th className="p-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product._id} className="border-b">
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.includes(product._id)}
+                      onChange={() => toggleProductSelection(product._id)}
+                    />
+                  </td>
+                  <td className="p-2">{product.name}</td>
+                  <td className="p-2">
+                    <div>
+                      <span
+                        className={
+                          product.salePercentage > 0
+                            ? "line-through text-gray-500"
+                            : ""
+                        }
+                      >
+                        {product.price} EGP
+                      </span>
+                      {product.salePercentage > 0 && (
+                        <div className="text-red-600 font-bold">
+                          {getEffectiveSalePrice(product)} EGP
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-2">
+                    {product.salePercentage > 0 ? (
+                      <p className="font-bold bg-red-100 text-red-800 px-2 py-1 rounded text-xs w-fit">
+                        {product.salePercentage}% OFF
+                      </p>
+                    ) : (
+                      <p>{0}</p>
+                    )}
+                  </td>
+                  <td className="p-2">{product.categoryName}</td>
+                  <td className="p-2">{product.collectionName}</td>
+                  <td className="p-2">
+                    {product.archived ? "Archived" : "Active"}
+                  </td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="text-blue-500 mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        const confirmArchive = window.confirm(
+                          product.archived
+                            ? "Are you sure you want to archive this product?"
+                            : "Are you sure you want to activate this product?"
+                        );
+                        if (confirmArchive) {
+                          handleArchive(product._id, !product.archived);
+                        }
+                      }}
+                      className={`text-${
+                        product.archived ? "green" : "yellow"
+                      }-500 mr-2`}
+                    >
+                      {product.archived ? "Activate" : "Archive"}
+                    </button>
+                    {isSuperAdmin() && (
+                      <button
+                        onClick={() => {
+                          const confirmDelete = window.confirm(
+                            "Are you sure you want to delete this product?"
+                          );
+                          if (confirmDelete) {
+                            handleDelete(product._id);
+                          }
+                        }}
+                        className="text-red-500"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Product Form */}
       <form
@@ -609,210 +656,6 @@ export default function ProductManagement() {
           </button>
         )}
       </form>
-
-      {/* Sale Management Section */}
-      <div className="bg-white p-4 rounded-xl shadow mb-8">
-        <h3 className="text-lg font-semibold mb-4">Sale Management</h3>
-
-        {/* Bulk Sale Update */}
-        <div className="mb-6 p-4 border rounded-lg">
-          <h4 className="font-medium mb-3">Bulk Sale Update</h4>
-          <div className="flex items-center space-x-4 mb-3">
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={bulkSalePercentage}
-              onChange={(e) =>
-                setBulkSalePercentage(parseInt(e.target.value) || 0)
-              }
-              placeholder="Sale %"
-              className="border p-2 rounded w-24"
-            />
-            <button
-              onClick={handleBulkSaleUpdate}
-              disabled={selectedProducts.length === 0}
-              className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-            >
-              Update {selectedProducts.length} Products
-            </button>
-            <button
-              onClick={() => setShowSaleEmailModal(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Send Email
-            </button>
-          </div>
-          <p className="text-sm text-gray-600">
-            Select products below to apply bulk sale or send promotional email
-          </p>
-        </div>
-      </div>
-
-      {/* Products List */}
-      <div className="bg-white p-4 rounded-xl shadow">
-        <h3 className="text-lg font-semibold mb-4">Products</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr>
-                <th className="p-2 text-left">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedProducts.length === products.length &&
-                      products.length > 0
-                    }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedProducts(products.map((p) => p._id));
-                      } else {
-                        setSelectedProducts([]);
-                      }
-                    }}
-                  />
-                </th>
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-left">Price</th>
-                <th className="p-2 text-left">Sale</th>
-                <th className="p-2 text-left">Category</th>
-                <th className="p-2 text-left">Collection</th>
-                <th className="p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product._id} className="border-b">
-                  <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(product._id)}
-                      onChange={() => toggleProductSelection(product._id)}
-                    />
-                  </td>
-                  <td className="p-2">{product.name}</td>
-                  <td className="p-2">
-                    <div>
-                      <span
-                        className={
-                          product.salePercentage > 0
-                            ? "line-through text-gray-500"
-                            : ""
-                        }
-                      >
-                        {product.price} EGP
-                      </span>
-                      {product.salePercentage > 0 && (
-                        <div className="text-red-600 font-bold">
-                          {getEffectiveSalePrice(product)} EGP
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    {product.salePercentage > 0 ? (
-                      <p className="font-bold bg-red-100 text-red-800 px-2 py-1 rounded text-xs w-fit">
-                        {product.salePercentage}% OFF
-                      </p>
-                    ) : (
-                      <p>{0}</p>
-                    )}
-                  </td>
-                  <td className="p-2">{product.categoryName}</td>
-                  <td className="p-2">{product.collectionName}</td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="text-blue-500 mr-2"
-                    >
-                      Edit
-                    </button>
-                    {isSuperAdmin() && (
-                      <button
-                        onClick={() => handleDelete(product._id)}
-                        className="text-red-500"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Sale Email Modal */}
-      {showSaleEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Send Sale Email</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Sale Percentage
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={saleEmailData.salePercentage}
-                  onChange={(e) =>
-                    setSaleEmailData({
-                      ...saleEmailData,
-                      salePercentage: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className="border p-2 rounded w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Sale Type
-                </label>
-                <select
-                  value={saleEmailData.saleType}
-                  onChange={(e) =>
-                    setSaleEmailData({
-                      ...saleEmailData,
-                      saleType: e.target.value,
-                    })
-                  }
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="product">Product Sale</option>
-                  <option value="category">Category Sale</option>
-                  <option value="collection">Collection Sale</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Selected Products ({selectedProducts.length})
-                </label>
-                <p className="text-sm text-gray-600">
-                  {selectedProducts.length} products will be included in the
-                  sale email
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleSendSaleEmail}
-                  className="bg-green-500 text-white px-4 py-2 rounded flex-1"
-                >
-                  Send Email
-                </button>
-                <button
-                  onClick={() => setShowSaleEmailModal(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded flex-1"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

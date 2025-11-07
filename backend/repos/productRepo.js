@@ -55,7 +55,10 @@ exports.findByCategory = async (categoryName) => {
   if (!tag) return [];
 
   // Then find products by the tag's ObjectId
-  return Product.find({ category: tag._id }).sort({ createdAt: -1 });
+  // Only return non-archived (active) products for public views
+  return Product.find({ category: tag._id, archived: false }).sort({
+    createdAt: -1,
+  });
 };
 
 exports.findByCategoryWithPagination = async (
@@ -78,11 +81,12 @@ exports.findByCategoryWithPagination = async (
 
   // Then find products by the tag's ObjectId
   const [products, total] = await Promise.all([
-    Product.find({ category: tag._id })
+    // Only return non-archived (active) products for public views
+    Product.find({ category: tag._id, archived: false })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
-    Product.countDocuments({ category: tag._id }),
+    Product.countDocuments({ category: tag._id, archived: false }),
   ]);
 
   return {
@@ -99,7 +103,10 @@ exports.findByCollection = async (collectionName) => {
   if (!tag) return [];
 
   // Then find products by the tag's ObjectId
-  return Product.find({ collection: tag._id }).sort({ createdAt: -1 });
+  // Only return non-archived (active) products for public views
+  return Product.find({ collection: tag._id, archived: false }).sort({
+    createdAt: -1,
+  });
 };
 
 exports.findByCollectionWithPagination = async (
@@ -122,11 +129,12 @@ exports.findByCollectionWithPagination = async (
 
   // Then find products by the tag's ObjectId
   const [products, total] = await Promise.all([
-    Product.find({ collection: tag._id })
+    // Only return non-archived (active) products for public views
+    Product.find({ collection: tag._id, archived: false })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
-    Product.countDocuments({ collection: tag._id }),
+    Product.countDocuments({ collection: tag._id, archived: false }),
   ]);
 
   return {

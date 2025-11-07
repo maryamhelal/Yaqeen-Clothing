@@ -374,4 +374,152 @@ router.get(
   productController.getProductsByCollection
 );
 
+/**
+ * @swagger
+ * /api/products/active:
+ *   get:
+ *     summary: Get all active (non-archived) products
+ *     description: Retrieve a paginated list of active products
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of products per page
+ *     responses:
+ *       200:
+ *         description: Active products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/active", productController.getActiveProducts);
+
+/**
+ * @swagger
+ * /api/products/archived:
+ *   get:
+ *     summary: Get archived products
+ *     description: Retrieve a paginated list of archived products
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of products per page
+ *     responses:
+ *       200:
+ *         description: Archived products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/archived", productController.getArchivedProducts);
+
+/**
+ * @swagger
+ * /api/products/archive/{id}:
+ *   put:
+ *     summary: Archive a product
+ *     description: Mark a product as archived (Admin/Superadmin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product archived successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Product not found
+ */
+router.put(
+  "/archive/:id",
+  auth,
+  requireRole(["admin", "superadmin"]),
+  productController.archiveProduct
+);
+
+/**
+ * @swagger
+ * /api/products/unarchive/{id}:
+ *   put:
+ *     summary: Unarchive a product
+ *     description: Restore an archived product (Admin/Superadmin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product unarchived successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Product not found
+ */
+router.put(
+  "/unarchive/:id",
+  auth,
+  requireRole(["admin", "superadmin"]),
+  productController.unarchiveProduct
+);
+
 module.exports = router;

@@ -10,6 +10,7 @@ export default function CityManagement() {
   const [areaInput, setAreaInput] = useState("");
   const [editingAreaIdx, setEditingAreaIdx] = useState(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchCities = async () => {
@@ -17,10 +18,12 @@ export default function CityManagement() {
     try {
       const res = await citiesAPI.getCities();
       setCities(res);
+      setError("");
     } catch (err) {
       setError("Failed to fetch cities");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -44,16 +47,19 @@ export default function CityManagement() {
     try {
       await citiesAPI.deleteCity(cityId, token);
       await fetchCities();
-    } catch (err) {
+      setSuccess("City deleted successfully.");
+    } catch {
       setError("Failed to delete city");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
     const payload = {
       name: form.name,
       price: Number(form.price),
@@ -62,25 +68,27 @@ export default function CityManagement() {
     try {
       if (editingCity) {
         await citiesAPI.updateCity(editingCity, payload, token);
+        setSuccess("City updated successfully.");
       } else {
         await citiesAPI.createCity(payload, token);
+        setSuccess("City added successfully.");
       }
       setEditingCity(null);
       setForm({ name: "", price: "", areas: [] });
       setAreaInput("");
       setEditingAreaIdx(null);
       await fetchCities();
-    } catch (err) {
+    } catch {
       setError("Failed to save city");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Area management
+  // ----- Area management -----
   const handleAddArea = () => {
     const name = areaInput.trim();
-    if (!name) return;
-    if (form.areas.includes(name)) return;
+    if (!name || form.areas.includes(name)) return;
     setForm({ ...form, areas: [...form.areas, name] });
     setAreaInput("");
     setEditingAreaIdx(null);
@@ -96,9 +104,9 @@ export default function CityManagement() {
     if (!name) return;
     if (form.areas.includes(name) && form.areas[editingAreaIdx] !== name)
       return;
-    const newAreas = [...form.areas];
-    newAreas[editingAreaIdx] = name;
-    setForm({ ...form, areas: newAreas });
+    const updated = [...form.areas];
+    updated[editingAreaIdx] = name;
+    setForm({ ...form, areas: updated });
     setAreaInput("");
     setEditingAreaIdx(null);
   };
@@ -110,41 +118,65 @@ export default function CityManagement() {
   };
 
   const handleMoveArea = (idx, dir) => {
-    const newAreas = [...form.areas];
-    const targetIdx = dir === "up" ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= newAreas.length) return;
-    [newAreas[idx], newAreas[targetIdx]] = [newAreas[targetIdx], newAreas[idx]];
-    setForm({ ...form, areas: newAreas });
+    const updated = [...form.areas];
+    const target = dir === "up" ? idx - 1 : idx + 1;
+    if (target < 0 || target >= updated.length) return;
+    [updated[idx], updated[target]] = [updated[target], updated[idx]];
+    setForm({ ...form, areas: updated });
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
-      <h2 className="text-2xl font-bold mb-4">City & Area Management</h2>
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-        <div>
-          <label className="block font-medium mb-1">City Name</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-            className="border rounded px-3 py-2 w-full"
-          />
+    <div className="px-2 sm:px-4 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6">City & Area Management</h2>
+
+      {/* Alerts */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
         </div>
-        <div>
-          <label className="block font-medium mb-1">Shipping Price (EGP)</label>
-          <input
-            type="number"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            required
-            className="border rounded px-3 py-2 w-full"
-          />
+      )}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {success}
         </div>
+      )}
+
+      {/* Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow p-4 sm:p-6 space-y-4 mb-8"
+      >
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium mb-1">City Name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+              className="border rounded px-3 py-2 w-full"
+              placeholder="Enter city name"
+            />
+          </div>
+          <div>
+            <label className="block font-medium mb-1">
+              Shipping Price (EGP)
+            </label>
+            <input
+              type="number"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              required
+              className="border rounded px-3 py-2 w-full"
+              placeholder="Enter price"
+            />
+          </div>
+        </div>
+
+        {/* Areas */}
         <div>
           <label className="block font-medium mb-1">Areas</label>
-          <div className="flex gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row gap-2 mb-2">
             <input
               type="text"
               value={areaInput}
@@ -155,54 +187,57 @@ export default function CityManagement() {
             {editingAreaIdx !== null ? (
               <button
                 type="button"
-                className="bg-blue-600 text-white px-3 py-2 rounded"
                 onClick={handleSaveAreaEdit}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
               >
                 Save
               </button>
             ) : (
               <button
                 type="button"
-                className="bg-primary-dark text-white px-3 py-2 rounded"
                 onClick={handleAddArea}
+                className="bg-primary-dark text-white px-4 py-2 rounded"
               >
                 Add Area
               </button>
             )}
           </div>
-          <div className="space-y-1">
+
+          {/* Area list */}
+          <div className="flex flex-wrap gap-2">
             {form.areas.map((area, idx) => (
-              <div key={area} className="flex items-center gap-2">
-                <span className="px-2 py-1 rounded bg-gray-100 border font-mono">
-                  {area}
-                </span>
+              <div
+                key={area}
+                className="flex items-center gap-2 border px-2 py-1 rounded bg-gray-100 text-sm"
+              >
+                <span>{area}</span>
                 <button
                   type="button"
-                  className="text-blue-600 underline"
                   onClick={() => handleEditArea(idx)}
+                  className="text-blue-600 hover:underline"
                 >
                   Edit
                 </button>
                 <button
                   type="button"
-                  className="text-red-600 underline"
                   onClick={() => handleDeleteArea(idx)}
+                  className="text-red-600 hover:underline"
                 >
                   Delete
                 </button>
                 <button
                   type="button"
-                  className="text-gray-600"
-                  disabled={idx === 0}
                   onClick={() => handleMoveArea(idx, "up")}
+                  disabled={idx === 0}
+                  className="text-gray-600 disabled:opacity-30"
                 >
                   ↑
                 </button>
                 <button
                   type="button"
-                  className="text-gray-600"
-                  disabled={idx === form.areas.length - 1}
                   onClick={() => handleMoveArea(idx, "down")}
+                  disabled={idx === form.areas.length - 1}
+                  className="text-gray-600 disabled:opacity-30"
                 >
                   ↓
                 </button>
@@ -210,73 +245,119 @@ export default function CityManagement() {
             ))}
           </div>
         </div>
-        <button
-          type="submit"
-          className="bg-primary-dark text-white px-4 py-2 rounded"
-          disabled={loading}
-        >
-          {editingCity ? "Update City" : "Add City"}
-        </button>
-        {editingCity && (
+
+        <div className="flex items-center gap-4 pt-2">
           <button
-            type="button"
-            className="ml-4 text-gray-600 underline"
-            onClick={() => {
-              setEditingCity(null);
-              setForm({ name: "", price: "", areas: [] });
-              setAreaInput("");
-              setEditingAreaIdx(null);
-            }}
+            type="submit"
+            disabled={loading}
+            className="bg-primary-dark text-white px-4 py-2 rounded disabled:opacity-50"
           >
-            Cancel
+            {editingCity ? "Update City" : "Add City"}
           </button>
-        )}
+          {editingCity && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCity(null);
+                setForm({ name: "", price: "", areas: [] });
+                setAreaInput("");
+                setEditingAreaIdx(null);
+              }}
+              className="text-gray-600 underline"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
-      <table className="w-full border">
-        <thead>
-          <tr>
-            <th className="border p-2">City</th>
-            <th className="border p-2">Price</th>
-            <th className="border p-2">Areas</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cities.map((city) => (
-            <tr key={city._id}>
-              <td className="border p-2 font-semibold">{city.name}</td>
-              <td className="border p-2">{city.price} EGP</td>
-              <td className="border p-2">
-                {Array.isArray(city.areas)
-                  ? city.areas.map((area) => (
-                      <span
-                        key={area}
-                        className="px-2 py-1 rounded bg-gray-100 border font-mono"
-                      >
-                        {area}
-                      </span>
-                    ))
-                  : null}
-              </td>
-              <td className="border p-2">
-                <button
-                  className="text-blue-600 underline mr-2"
-                  onClick={() => handleEdit(city)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="text-red-600 underline"
-                  onClick={() => handleDelete(city._id)}
-                  disabled={loading}
-                >
-                  Delete
-                </button>
-              </td>
+
+      {/* Table for large screens */}
+      <div className="hidden sm:block bg-white rounded-xl shadow overflow-x-auto">
+        <table className="min-w-full text-sm sm:text-base border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 text-left border">City</th>
+              <th className="p-2 text-left border">Price</th>
+              <th className="p-2 text-left border">Areas</th>
+              <th className="p-2 text-left border">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cities.map((city) => (
+              <tr key={city._id} className="hover:bg-gray-50 border-b">
+                <td className="p-2 border font-semibold">{city.name}</td>
+                <td className="p-2 border">{city.price} EGP</td>
+                <td className="p-2 border space-x-1">
+                  {Array.isArray(city.areas)
+                    ? city.areas.map((a) => (
+                        <span
+                          key={a}
+                          className="inline-block bg-gray-100 px-2 py-1 rounded text-xs"
+                        >
+                          {a}
+                        </span>
+                      ))
+                    : "-"}
+                </td>
+                <td className="p-2 border">
+                  <button
+                    onClick={() => handleEdit(city)}
+                    className="text-blue-600 hover:underline mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(city._id)}
+                    className="text-red-600 hover:underline"
+                    disabled={loading}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="sm:hidden space-y-4 mt-4">
+        {cities.map((city) => (
+          <div
+            key={city._id}
+            className="border rounded-lg bg-white shadow-sm p-4"
+          >
+            <p className="font-semibold text-lg">{city.name}</p>
+            <p className="text-sm text-gray-600 mb-2">{city.price} EGP</p>
+            <div className="flex flex-wrap gap-1 mb-2">
+              {Array.isArray(city.areas)
+                ? city.areas.map((a) => (
+                    <span
+                      key={a}
+                      className="bg-gray-100 border text-xs px-2 py-1 rounded"
+                    >
+                      {a}
+                    </span>
+                  ))
+                : "-"}
+            </div>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => handleEdit(city)}
+                className="text-blue-600 hover:underline text-sm"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(city._id)}
+                className="text-red-600 hover:underline text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

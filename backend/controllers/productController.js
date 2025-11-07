@@ -119,6 +119,9 @@ exports.getProductById = async (req, res) => {
   try {
     const product = await productService.getProductById(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
+    // Do not expose archived products to public users
+    if (product.archived)
+      return res.status(404).json({ error: "Product not found" });
     res.json(product);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -129,6 +132,9 @@ exports.getProductByName = async (req, res) => {
   try {
     const product = await productService.getProductByName(req.params.name);
     if (!product) return res.status(404).json({ error: "Product not found" });
+    // Hide archived products from public access
+    if (product.archived)
+      return res.status(404).json({ error: "Product not found" });
     res.json(product);
   } catch (err) {
     res.status(400).json({ error: err.message });
