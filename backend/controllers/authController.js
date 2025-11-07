@@ -15,6 +15,10 @@ const registerUser = async (req, res) => {
     if (existing)
       return res.status(400).json({ error: "Email already exists" });
 
+    const existingPhoneNumber = await User.findOne({ phone });
+    if (existingPhoneNumber)
+      return res.status(400).json({ error: "Phone number already exists" });
+
     if (password.length < 5) {
       return res
         .status(400)

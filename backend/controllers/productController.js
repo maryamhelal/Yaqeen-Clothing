@@ -186,3 +186,41 @@ exports.getProductsBySearch = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+exports.getActiveProducts = async (req, res) => {
+  try {
+    const products = await productService.getActiveProducts();
+    res.json(products);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.getArchivedProducts = async (req, res) => {
+  try {
+    const products = await productService.getArchivedProducts();
+    res.json(products);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.archiveProduct = async (req, res) => {
+  try {
+    const product = await productService.archiveProduct(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json({ message: "Product archived successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.unarchiveProduct = async (req, res) => {
+  try {
+    const product = await productService.unarchiveProduct(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json({ message: "Product unarchived successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};

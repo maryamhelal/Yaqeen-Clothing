@@ -50,3 +50,19 @@ exports.getProductsByCollection = async (collection, page = 1, limit = 10) => {
     limit
   );
 };
+
+exports.getActiveProducts = async (page = 1, limit = 10) => {
+  return await productRepo.findActiveWithPagination(page, limit);
+};
+
+exports.getArchivedProducts = async (page = 1, limit = 10) => {
+  return await productRepo.findArchivedWithPagination(page, limit);
+};
+
+exports.archiveProduct = async (id) => {
+  return await productRepo.setArchiveStatus(id, true);
+};
+
+exports.unarchiveProduct = async (id) => {
+  return await productRepo.setArchiveStatus(id, false);
+};

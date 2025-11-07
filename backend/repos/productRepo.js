@@ -136,3 +136,41 @@ exports.findByCollectionWithPagination = async (
     total,
   };
 };
+
+exports.findActiveWithPagination = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const filter = { archived: false };
+
+  const [products, total] = await Promise.all([
+    Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Product.countDocuments(filter),
+  ]);
+
+  return {
+    products,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
+    total,
+  };
+};
+
+exports.findArchivedWithPagination = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const filter = { archived: true };
+
+  const [products, total] = await Promise.all([
+    Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Product.countDocuments(filter),
+  ]);
+
+  return {
+    products,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
+    total,
+  };
+};
+
+exports.setArchiveStatus = async (id, status) => {
+  return Product.findByIdAndUpdate(id, { archived: status }, { new: true });
+};

@@ -29,6 +29,7 @@ const productSchema = new mongoose.Schema(
     colors: [colorSchema],
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
     collection: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
+    archived: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
