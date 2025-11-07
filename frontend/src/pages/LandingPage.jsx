@@ -37,9 +37,9 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-pink-50 to-purple-50 pt-20 pb-6">
+      <div className="bg-gradient-to-r from-pink-50 to-purple-50 pt-24 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
             Discover Your Style
