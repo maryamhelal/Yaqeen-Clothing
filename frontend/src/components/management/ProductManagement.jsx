@@ -454,6 +454,7 @@ export default function ProductManagement() {
         onSubmit={handleSubmit}
         className="bg-white p-4 rounded-xl shadow mb-8 space-y-4"
       >
+        <h3 className="text-lg font-semibold mb-4">Add Product</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             name="name"

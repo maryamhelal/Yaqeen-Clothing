@@ -127,7 +127,7 @@ export default function CityManagement() {
 
   return (
     <div className="px-2 sm:px-4 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">City & Area Management</h2>
+      <h2 className="text-2xl font-bold mb-4">City & Area Management</h2>
 
       {/* Alerts */}
       {error && (
@@ -283,39 +283,47 @@ export default function CityManagement() {
             </tr>
           </thead>
           <tbody>
-            {cities.map((city) => (
-              <tr key={city._id} className="hover:bg-gray-50 border-b">
-                <td className="p-2 border font-semibold">{city.name}</td>
-                <td className="p-2 border">{city.price} EGP</td>
-                <td className="p-2 border space-x-1">
-                  {Array.isArray(city.areas)
-                    ? city.areas.map((a) => (
-                        <span
-                          key={a}
-                          className="inline-block bg-gray-100 px-2 py-1 rounded text-xs"
-                        >
-                          {a}
-                        </span>
-                      ))
-                    : "-"}
-                </td>
-                <td className="p-2 border">
-                  <button
-                    onClick={() => handleEdit(city)}
-                    className="text-blue-600 hover:underline mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(city._id)}
-                    className="text-red-600 hover:underline"
-                    disabled={loading}
-                  >
-                    Delete
-                  </button>
+            {cities.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-6 text-center text-gray-500">
+                  No cities found
                 </td>
               </tr>
-            ))}
+            ) : (
+              cities.map((city) => (
+                <tr key={city._id} className="hover:bg-gray-50 border-b">
+                  <td className="p-2 border font-semibold">{city.name}</td>
+                  <td className="p-2 border">{city.price} EGP</td>
+                  <td className="p-2 border space-x-1">
+                    {Array.isArray(city.areas)
+                      ? city.areas.map((a) => (
+                          <span
+                            key={a}
+                            className="inline-block bg-gray-100 px-2 py-1 rounded text-xs"
+                          >
+                            {a}
+                          </span>
+                        ))
+                      : "-"}
+                  </td>
+                  <td className="p-2 border">
+                    <button
+                      onClick={() => handleEdit(city)}
+                      className="text-blue-600 hover:underline mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(city._id)}
+                      className="text-red-600 hover:underline"
+                      disabled={loading}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -149,6 +149,7 @@ export default function TagsManagement() {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-bold mb-4">Tag Management</h2>
       <div className="flex space-x-4 border-b border-gray-200">
         <button
           onClick={() => setActiveTab("category")}

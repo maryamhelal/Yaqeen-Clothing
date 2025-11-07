@@ -91,10 +91,9 @@ export default function OrderManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Order Management</h2>
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-
         {/* Status Filter */}
         <div className="flex items-center space-x-4">
           <label className="text-sm font-medium text-gray-700">
