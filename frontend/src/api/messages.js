@@ -1,31 +1,33 @@
-const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
+const API_BASE_URL = `${
+  process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"
+}/api`;
 
 export const messagesAPI = {
   // Create new message
   createMessage: async (messageData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/messages`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(messageData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create message');
+        throw new Error(errorData.error || "Failed to create message");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error creating message:', error);
+      console.error("Error creating message:", error);
       throw error;
     }
   },
 
   // Get all messages (Admin only)
-  getAllMessages: async (token, page = 1, limit = 10, status = '') => {
+  getAllMessages: async (token, page = 1, limit = 10, status = "") => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -34,20 +36,20 @@ export const messagesAPI = {
       });
 
       const response = await fetch(`${API_BASE_URL}/messages?${params}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch messages');
+        throw new Error(errorData.error || "Failed to fetch messages");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
       throw error;
     }
   },
@@ -60,62 +62,55 @@ export const messagesAPI = {
         limit: limit.toString(),
       });
 
-      const response = await fetch(`${API_BASE_URL}/messages/${encodeURIComponent(userEmail)}?${params}`);
-      
+      const response = await fetch(
+        `${API_BASE_URL}/messages/${encodeURIComponent(userEmail)}?${params}`
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch user messages');
+        throw new Error(errorData.error || "Failed to fetch user messages");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching user messages:', error);
+      console.error("Error fetching user messages:", error);
       throw error;
     }
   },
 
-  // Mark message as read (Admin only)
-  markMessageAsRead: async (messageId, token) => {
+  // Resolve a message (Admin only)
+  resolveMessage: async (messageId, token) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/messages/${messageId}/read`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
+      const response = await fetch(
+        `${API_BASE_URL}/messages/resolve/${messageId}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to mark message as read');
+        // Try to parse JSON error body, but fall back to text if HTML/other
+        let errorText;
+        try {
+          const errorData = await response.json();
+          errorText = errorData.error || JSON.stringify(errorData);
+        } catch (e) {
+          errorText = await response.text();
+        }
+        throw new Error(errorText || "Failed to resolve message");
       }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error marking message as read:', error);
-      throw error;
-    }
-  },
 
-  // Reply to message (Admin only)
-  replyToMessage: async (messageId, replyData, token) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/messages/${messageId}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(replyData),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to reply to message');
+      // Parse success body safely
+      try {
+        return await response.json();
+      } catch (e) {
+        const text = await response.text();
+        return { success: true, data: text };
       }
-      
-      return await response.json();
     } catch (error) {
-      console.error('Error replying to message:', error);
+      console.error("Error resolving message:", error);
       throw error;
     }
   },
