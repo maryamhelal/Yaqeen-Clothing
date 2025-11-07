@@ -134,4 +134,33 @@ router.get("/", /* authMiddleware, */ messageController.getAllMessages);
  */
 router.get("/:userEmail", messageController.getUserMessages);
 
+/**
+ * @swagger
+ * /api/messages/resolve/{id}:
+ *   patch:
+ *     summary: Resolve a message
+ *     description: Mark a message as resolved
+ *     tags: [Messages]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Message ID
+ *     responses:
+ *       200:
+ *         description: Message resolved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Message'
+ *       404:
+ *         description: Message not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/resolve/:id", messageController.resolveMessage);
+
 module.exports = router;

@@ -31,3 +31,7 @@ exports.getAllMessages = async () => {
 exports.getUserMessages = async (userEmail) => {
   return await messageRepo.getUserMessages(userEmail);
 };
+
+exports.resolveMessage = async (id) => {
+  return await messageRepo.resolveMessage(id);
+};

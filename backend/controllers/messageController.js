@@ -30,3 +30,16 @@ exports.getUserMessages = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+exports.resolveMessage = async (req, res) => {
+  try {
+    const message = await messageService.resolveMessage(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "Message resolved successfully.",
+      data: message,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
