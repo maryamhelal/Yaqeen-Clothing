@@ -20,24 +20,54 @@ function App() {
   return (
     <>
       <Helmet>
-        <title>Yaqeen Clothing</title>
+        {/* Primary SEO Tags */}
+        <title>Yaqeen Clothing | Modest Fashion, Abayas & Dresses</title>
         <meta
           name="description"
-          content="Shop Yaqeen Clothing for modern, modest dresses, abayas, and fashion for women. Fast delivery, secure payment, and unique collections."
+          content="Discover Yaqeen Clothing's collection of modern, modest dresses and abayas for women. Shop stylish and comfortable outfits with fast delivery across Egypt."
         />
+
+        {/* Optional (Google ignores keywords, but safe to keep) */}
         <meta
           name="keywords"
-          content="modest fashion, dresses, abayas, hijab, clothing, women, Yaqeen, online shop, Egypt, modern, winter collection, long dress, short dress"
+          content="modest fashion, modest clothing, long dress, dresses, abaya, abayas, hijab, clothing, women, yaqeen, yaqeen modest, online shop, Egypt, modern, winter collection, عبايات, عباية, فساتين طويلة, فساتين محجبات, ملابس محتشمة, حجاب, ازياء محجبات, تسوق اونلاين"
         />
+
         <meta name="author" content="Yaqeen Clothing" />
-        <meta property="og:title" content="Yaqeen Clothing" />
+
+        {/* Open Graph (for Facebook, Instagram, WhatsApp) */}
+        <meta
+          property="og:title"
+          content="Yaqeen Clothing | Modest Fashion, Abayas & Dresses"
+        />
         <meta
           property="og:description"
-          content="Discover modern modest fashion at Yaqeen Clothing."
+          content="Shop modern, modest dresses and abayas with fast delivery across Egypt."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://yaqeenclothing.com" />
-        <meta property="og:image" content="/logo512.png" />
+        <meta
+          property="og:image"
+          content="https://protoinfrastack.ivondy.com/media/XjM642wlbGinVtEapwWpTAKGJyfQq6p27KnN"
+        />
+
+        {/* Twitter Cards (Important for X / Twitter sharing) */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Yaqeen Clothing | Modest Fashion & Abayas"
+        />
+        <meta
+          name="twitter:description"
+          content="Shop modern, modest dresses and abayas with fast delivery across Egypt."
+        />
+        <meta
+          name="twitter:image"
+          content="https://yaqeenclothing.com/images/og-image.jpg"
+        />
+
+        {/* Basic SEO essentials */}
+        <link rel="canonical" href="https://yaqeenclothing.com" />
       </Helmet>
       <Router>
         <div className="flex flex-col min-h-screen">
