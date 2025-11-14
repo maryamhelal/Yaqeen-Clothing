@@ -58,8 +58,10 @@ export default function LandingPage() {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {loading ? (
-            <p>Loading categories...</p>
-          ) : empty ? (
+            <div className="col-span-full text-center text-gray-500">
+              <p>Loading categories...</p>
+            </div>
+          ) : categories.length === 0 || empty ? (
             <div className="col-span-full text-center text-gray-500">
               <p className="text-lg">No categories available at the moment.</p>
             </div>
@@ -85,7 +87,7 @@ export default function LandingPage() {
             <div className="text-center text-gray-500">
               <p>Loading collections...</p>
             </div>
-          ) : collections.length === 0 ? (
+          ) : collections.length === 0 || empty ? (
             <div className="text-center text-gray-500">
               <p className="text-lg">No collections available at the moment.</p>
             </div>
